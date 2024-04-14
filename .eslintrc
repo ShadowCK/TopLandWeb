@@ -5,7 +5,7 @@
     "no-plusplus": "off",
     "import/extensions": "off",
     "no-param-reassign": ["error", { "props": false }],
-    "no-unused-vars": "warn",
+    "no-unused-vars": ["error", { "argsIgnorePattern": "^_" }],
     "curly": ["error", "all"],
     "class-methods-use-this": "warn"
   },
