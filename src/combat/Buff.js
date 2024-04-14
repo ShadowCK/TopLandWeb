@@ -6,7 +6,10 @@ class Buff {
   // Buff的名字/ID
   key = '';
 
-  // Buff影响的数值
+  /**
+   * Buff影响的属性，可以是个路径，如'伤害抗性.物理'。
+   * 不会像getStat和updateStats那样自动解析路径，而是直接使用路径作为key。
+   */
   statType = statTypes.攻击力;
 
   // Buff的数值
@@ -34,7 +37,6 @@ class Buff {
   // Buff的持续时间计时器
   timer = 0;
 
-  // TODO
   constructor(options) {
     Object.assign(this, options);
   }

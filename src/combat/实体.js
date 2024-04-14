@@ -67,23 +67,12 @@ class 实体 {
 
   /**
    * 获取属性的数值，支持多级属性，如"抗性穿透.物理"
-   * @param {string} statType
+   * @param {string} statType can be a path
    */
   getStat(statType, calcBuffs = true, range = { min: -Infinity, max: Infinity }) {
-    const nodes = statType.split('.');
-    let base = this.stats;
-    // TODO: 改为用lodash的get方法
-    for (let i = 0; i < nodes.length; i++) {
-      const prop = nodes[i];
-      if (base[prop] == null) {
-        console.error(`Stat "${statType}" not found`);
-        return 0;
-      }
-      base = base[nodes[i]];
-    }
-    base = Number(base);
-    if (Number.isNaN(base)) {
-      console.error(`Stat "${statType}" is not a number`);
+    const base = _.get(this.stats, statType);
+    if (base == null) {
+      console.error(`Stat "${statType}" not found`);
       return 0;
     }
     const result = calcBuffs ? getBuffedStat(this, { value: base, type: statType }) : base;
