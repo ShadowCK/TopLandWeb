@@ -1,8 +1,10 @@
 import defaultStats from '../combat/战斗属性.js';
-import { getRequiredExp } from '../settings.js';
+import { getRequiredExp, config } from '../settings.js';
 
 class 职业 {
   /** @type {import('../combat/实体.js').default} */
+  requirements = {};
+
   parent = null;
 
   name = '无名氏';
@@ -17,14 +19,16 @@ class 职业 {
 
   expertiseLevel = 1;
 
+  statGrowth = JSON.parse(JSON.stringify(defaultStats));
+
   // 必杀技/大招
   ultimate = null;
 
-  statGrowth = JSON.parse(JSON.stringify(defaultStats));
-
-  constructor(classData) {
-    Object.assign(this, classData);
+  constructor(classConfig) {
+    Object.assign(this, classConfig);
   }
+
+  getMaxLevel = () => this.maxLevel + this.expertiseLevel * config.extraLevelsPerExpertiseLevel;
 
   addExp(exp) {
     this.exp += exp;
@@ -34,7 +38,7 @@ class 职业 {
   }
 
   addLevel(value) {
-    const newLevel = Math.min(this.level + value, this.maxLevel);
+    const newLevel = Math.min(this.level + value, this.getMaxLevel());
     if (newLevel === this.level) {
       return;
     }
@@ -42,9 +46,10 @@ class 职业 {
   }
 
   setLevel(level, ignoreMaxLevel = false) {
-    if (level > this.maxLevel && !ignoreMaxLevel) {
+    const maxLevel = this.getMaxLevel();
+    if (level > maxLevel && !ignoreMaxLevel) {
       console.error('等级不能超过最大等级');
-      this.level = this.maxLevel;
+      this.level = maxLevel;
     } else if (level < 1) {
       console.error('等级不能小于1');
       this.level = 1;

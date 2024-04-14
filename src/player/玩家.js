@@ -1,6 +1,6 @@
 import _ from 'lodash';
-import 实体 from './实体.js';
-import { defaultStats, statTypes } from './战斗属性.js';
+import 实体 from '../combat/实体.js';
+import { defaultStats, statTypes } from '../combat/战斗属性.js';
 
 class 玩家 extends 实体 {
   最高专精等级 = 0;

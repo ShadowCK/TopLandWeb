@@ -20,4 +20,15 @@ const getRequiredExp = (level) => {
   return total;
 };
 
-export { 默认优先级, getRequiredExp };
+const config = {
+  extraLevelsPerExpertiseLevel: 5,
+  statLimits: {
+    攻击间隔: { min: 0.1, max: Infinity },
+    闪避率: { min: 0, max: 80 },
+    格挡率: { min: 0, max: 100 },
+    格挡伤害: { min: 0, max: 95 },
+    生命偷取: { min: 0, max: Infinity },
+  },
+};
+
+export { 默认优先级, getRequiredExp, config };
