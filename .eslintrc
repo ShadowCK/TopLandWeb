@@ -7,7 +7,8 @@
     "no-param-reassign": ["error", { "props": false }],
     "no-unused-vars": ["error", { "argsIgnorePattern": "^_" }],
     "curly": ["error", "all"],
-    "class-methods-use-this": "warn"
+    "class-methods-use-this": "warn",
+    "import/no-cycle": "warn"
   },
   "env": {
     "browser": true,
