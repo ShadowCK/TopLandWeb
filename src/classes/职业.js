@@ -15,17 +15,15 @@ class 职业 {
 
   maxLevel = 1;
 
-  skills = [];
+  expertiseLevel = 1;
+
+  // 必杀技/大招
+  ultimate = null;
 
   statGrowth = JSON.parse(JSON.stringify(defaultStats));
 
-  最大魔典数 = 1;
-
-  已装备魔典 = [];
-
   constructor(classData) {
-    // TODO with classData
-    this.parent.updateStats();
+    Object.assign(this, classData);
   }
 
   addExp(exp) {
@@ -35,12 +33,26 @@ class 职业 {
     }
   }
 
-  addLevel(levels) {
-    const newLevel = Math.min(this.level + levels, this.maxLevel);
-    // 玩家已经达到最大等级
+  addLevel(value) {
+    const newLevel = Math.min(this.level + value, this.maxLevel);
     if (newLevel === this.level) {
       return;
     }
     this.parent.updateStats(this.statGrowth);
   }
+
+  setLevel(level, ignoreMaxLevel = false) {
+    if (level > this.maxLevel && !ignoreMaxLevel) {
+      console.error('等级不能超过最大等级');
+      this.level = this.maxLevel;
+    } else if (level < 1) {
+      console.error('等级不能小于1');
+      this.level = 1;
+    } else {
+      this.level = level;
+    }
+    this.parent.updateStats();
+  }
 }
+
+export default 职业;

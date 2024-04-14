@@ -19,6 +19,7 @@ const statTypes = {
   生命偷取: '生命偷取',
   技能急速: '技能急速',
   幸运值: '幸运值',
+  最大魔典数: '最大魔典数',
 };
 
 const damageSources = {
@@ -62,6 +63,7 @@ const defaultStats = {
   生命偷取: [0, 0],
   技能急速: [0, 0],
   幸运值: [0, 0],
+  最大魔典数: [1, 0],
 };
 
 export { statTypes, damageSources, damageTypes, defaultStats };

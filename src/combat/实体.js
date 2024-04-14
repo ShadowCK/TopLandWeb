@@ -6,6 +6,14 @@ class 实体 {
 
   buffs = {};
 
+  skills = [];
+
+  职业 = null;
+
+  魔典 = [];
+
+  装备 = [];
+
   生命值 = 100;
 
   魔法值 = 100;
@@ -101,14 +109,27 @@ class 实体 {
 
   update(dt) {
     // Lodash的forEach方法可以遍历对象
-    _.forEach(this.buffs, (typeBuffs) => {
-      _.forEach(typeBuffs, (buff) => {
+    _.forEach(this.buffs, (typeBuffs, _statType) => {
+      typeBuffs.forEach((buff) => {
         buff.update(dt);
         if (buff.isExpired()) {
           this.removeBuff(buff);
         }
       });
     });
+  }
+
+  /**
+   * @param {import('../classes/职业.js').default} 职业
+   * @param {Number} level
+   */
+  设置职业(职业, level) {
+    职业.setLevel(level);
+    职业.parent = this;
+    this.职业 = 职业;
+    this.updateStats();
+    this.this.生命值 = this.getStat('生命值', false);
+    this.魔法值 = this.getStat('魔法值', false);
   }
 }
 
