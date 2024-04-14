@@ -72,7 +72,8 @@ class 实体 {
   getStat(statType, calcBuffs = true, range = { min: -Infinity, max: Infinity }) {
     const nodes = statType.split('.');
     let base = this.stats;
-    for (let i = 0; i < nodes.length - 1; i++) {
+    // TODO: 改为用lodash的get方法
+    for (let i = 0; i < nodes.length; i++) {
       const prop = nodes[i];
       if (base[prop] == null) {
         console.error(`Stat "${statType}" not found`);
@@ -184,13 +185,12 @@ class 实体 {
    * @param {import('../classes/职业.js').default} 职业
    * @param {Number} level
    */
-  设置职业(职业, level) {
-    职业.setLevel(level);
+  设置职业(职业, level = 1) {
     职业.parent = this;
     this.职业 = 职业;
-    this.updateStats();
-    this.this.生命值 = this.getStat(statTypes.最大生命值, false);
-    this.魔法值 = this.getStat(statTypes.最大生命值, false);
+    职业.setLevel(level); // Stats will be updated here
+    this.生命值 = this.getStat(statTypes.最大生命值, false);
+    this.魔法值 = this.getStat(statTypes.最大魔法值, false);
   }
 }
 

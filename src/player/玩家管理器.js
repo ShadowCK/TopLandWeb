@@ -6,6 +6,9 @@ const init = () => {
   player = new 玩家();
 };
 
+/**
+ * @returns {玩家}
+ */
 const getPlayer = () => player;
 
 export { init, getPlayer };

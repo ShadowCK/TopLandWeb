@@ -1,4 +1,5 @@
-import defaultStats from '../combat/战斗属性.js';
+import _ from 'lodash';
+import { defaultStats } from '../combat/战斗属性.js';
 import { getRequiredExp, config } from '../settings.js';
 
 class 职业 {
@@ -25,7 +26,8 @@ class 职业 {
   ultimate = null;
 
   constructor(classConfig) {
-    Object.assign(this, classConfig);
+    const copy = JSON.parse(JSON.stringify(classConfig));
+    Object.assign(this, copy);
   }
 
   getMaxLevel = () => this.maxLevel + this.expertiseLevel * config.extraLevelsPerExpertiseLevel;
@@ -56,7 +58,9 @@ class 职业 {
     } else {
       this.level = level;
     }
-    this.parent.updateStats();
+    if (this.parent) {
+      this.parent.updateStats();
+    }
   }
 }
 

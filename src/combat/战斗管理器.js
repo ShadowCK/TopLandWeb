@@ -25,7 +25,12 @@ const isInCombat = (实体) => {
   return 战局信息.敌人.includes(实体);
 };
 
-const getTarget = () => {};
+const getTarget = (实体) => {
+  if (实体 === getPlayer()) {
+    return 战局信息.敌人[0];
+  }
+  return 战局信息.玩家;
+};
 
 /**
  * @param {{damager, damaged, damageType, damageDistribution}} params

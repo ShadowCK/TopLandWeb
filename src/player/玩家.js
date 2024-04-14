@@ -14,18 +14,27 @@ class 玩家 extends 实体 {
   }
 
   updateStats() {
-    const { level } = this.职业;
-    // 职业本身的属性
-    _.forEach(statTypes, (type) => {
-      const statGrowth = this.职业.statGrowth[type] || defaultStats[type];
-      if (!statGrowth) {
-        this.stats[type] = 0;
-        return;
-      }
-      this.stats[type] = statGrowth[0] + statGrowth[1] * (level - 1);
-    });
+    const { statGrowth, level } = this.职业;
+    // 递归函数来处理stats
+    const processStats = (stats, path = []) => {
+      _.forEach(stats, (value, key) => {
+        const currentPath = path.concat(key);
+        if (Array.isArray(value)) {
+          // 如果是数组，计算值并设置
+          const [base, increment] = value;
+          _.set(this.stats, currentPath, base + increment * (level - 1));
+        } else if (_.isObject(value)) {
+          // 如果是对象，递归处理
+          processStats(value, currentPath);
+        }
+      });
+    };
+
+    // 调用递归函数处理所有stats
+    processStats(statGrowth);
 
     // TODO: 装备的属性加成
+    // 也可以用processStats函数处理
   }
 
   转生() {
