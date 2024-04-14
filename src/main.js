@@ -14,7 +14,18 @@ const update = () => {
   updateHTML();
 };
 
+const setupHTML = () => {
+  $('.ui.menu .item')
+    .not('.header.item')
+    .on('click', function _() {
+      // 添加 'active' 类到被点击的菜单项
+      $(this).addClass('active').siblings().removeClass('active');
+    });
+};
+
 window.onload = () => {
+  setupHTML();
+
   const player = new 玩家();
   玩家管理器.init(player);
   战斗管理器.init();

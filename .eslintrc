@@ -18,7 +18,8 @@
     "ecmaVersion": "latest"
   },
   "globals": {
-    "WEBPACK_MODE": "readonly" // Our webpack "macro"
+    "WEBPACK_MODE": "readonly", // Our webpack "macro"
+    "$": "readonly" // jQuery
   },
   "ignorePatterns": ["test/**/*.js", "dist/**/*.js"]
 }
