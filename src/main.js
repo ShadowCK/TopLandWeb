@@ -2,6 +2,7 @@ import { clearInterval, clearTimeout, setInterval, setTimeout } from 'worker-tim
 
 import * as settings from './settings.js';
 import * as debug from './debug.js';
+import 玩家 from './player/玩家.js';
 import * as 玩家管理器 from './player/玩家管理器.js';
 import * as 战斗管理器 from './combat/战斗管理器.js';
 import classConfigs from './classes/职业信息.js';
@@ -14,10 +15,10 @@ const update = () => {
 };
 
 window.onload = () => {
-  玩家管理器.init();
+  const player = new 玩家();
+  玩家管理器.init(player);
   战斗管理器.init();
 
-  const player = 玩家管理器.getPlayer();
   player.设置职业(new 职业(classConfigs.初心者));
 
   // 200 ticks per second

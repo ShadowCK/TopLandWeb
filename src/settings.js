@@ -1,5 +1,6 @@
 import * as math from 'mathjs';
 
+// 计算实际属性时，基础值、Buff等加成的应用顺序
 const 默认优先级 = {
   基础值: 100,
   强乘算: 200,
