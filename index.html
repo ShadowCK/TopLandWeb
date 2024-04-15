@@ -29,5 +29,40 @@
       <a class="item disabled">魔典</a>
       <a class="item disabled">天赋</a>
     </div>
+    <div class="ui segment" id="角色面板">
+      <!-- list不是必须的，但能增加视觉效果 -->
+      <div class="ui relaxed list">
+        <div class="item">
+          <div class="ui red horizontal label">职业</div>
+          <span id="角色面板-职业名称">狂战士</span>
+        </div>
+        <div class="item">
+          <div class="ui horizontal label">介绍</div>
+          <span id="角色面板-职业描述">狂战士是你爹。</span>
+        </div>
+        <div class="item">
+          <div class="ui horizontal label">等级</div>
+          <span id="角色面板-职业等级">{{等级}}</span>
+        </div>
+        <div class="item">
+          <div class="ui green horizontal label">经验值</div>
+          <span id="角色面板-职业经验值">{{经验值}}</span>
+        </div>
+        <div class="ui three column grid">
+          <div class="column">
+            <div class="ui segment">
+              <h5>当前属性</h5>
+              <div class="ui relax list" id="角色面板-当前属性"></div>
+            </div>
+          </div>
+          <div class="column">
+            <div class="ui segment">
+              <h5>属性成长</h5>
+              <div class="ui relax list" id="角色面板-属性成长"></div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
   </body>
 </html>

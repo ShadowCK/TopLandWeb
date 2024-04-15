@@ -10,6 +10,7 @@ class 实体 {
 
   skills = [];
 
+  /** @type {import('../classes/职业.js').default} */
   职业 = null;
 
   魔典 = [];

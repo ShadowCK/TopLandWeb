@@ -32,9 +32,11 @@ class 职业 {
 
   getMaxLevel = () => this.maxLevel + this.expertiseLevel * config.extraLevelsPerExpertiseLevel;
 
+  getExpToNextLevel = () => getRequiredExp(this.level);
+
   addExp(exp) {
     this.exp += exp;
-    while (this.exp >= getRequiredExp(this.level)) {
+    while (this.exp >= this.getExpToNextLevel()) {
       this.addLevel(1);
     }
   }

@@ -21,8 +21,8 @@ class 玩家 extends 实体 {
         const currentPath = path.concat(key);
         if (Array.isArray(value)) {
           // 如果是数组，计算值并设置
-          const [base, increment] = value;
-          _.set(this.stats, currentPath, base + increment * (level - 1));
+          const [base, scale] = value;
+          _.set(this.stats, currentPath, base + scale * (level - 1));
         } else if (_.isObject(value)) {
           // 如果是对象，递归处理
           processStats(value, currentPath);
