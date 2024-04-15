@@ -1,5 +1,5 @@
 import * as LZString from 'lz-string';
-import * as _ from 'lodash';
+import _ from 'lodash';
 import { getPlayer } from './玩家管理器.js';
 import 职业 from '../classes/职业.js';
 

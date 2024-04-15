@@ -3,6 +3,7 @@ import 实体 from '../combat/实体.js';
 import 玩家存档 from './玩家存档.js';
 
 class 玩家 extends 实体 {
+  /** @type {玩家存档} */
   玩家存档 = null;
 
   constructor(params) {

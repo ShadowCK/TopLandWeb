@@ -1,4 +1,4 @@
-import * as _ from 'lodash';
+import _ from 'lodash';
 import * as 玩家管理器 from './player/玩家管理器.js';
 
 const genProgressBar = (id, parent, color = '', label = '', value = 0, maxValue = 1) => {

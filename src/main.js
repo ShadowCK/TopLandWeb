@@ -10,11 +10,45 @@ import classConfigs from './classes/职业信息.js';
 import 职业 from './classes/职业.js';
 import { genElementForStats, genProgressBar, updateProgressBar } from './htmlHelper.js';
 import { statTypes } from './combat/战斗属性.js';
+import { 可以提升专精等级, 可以转生 } from './reincarnate/转生.js';
+import { template } from './utils.js';
 
 const setupHTML = () => {
-  // 启用 Semantic UI 的标签页功能
-  $('.menu .item').tab();
+  const onVisible = (tabPath) => {
+    if (tabPath === '转生面板') {
+      const player = 玩家管理器.getPlayer();
+      const element = $('#转生面板-无法提升专精');
+      if (可以提升专精等级(player)) {
+        element.hide();
+      } else {
+        const header = element.find('.header:first');
+        const { 职业: playerClass } = player;
+        header.text(
+          template(header.text(), {
+            等级: playerClass.level,
+            最大等级: playerClass.getMaxLevel(),
+          }),
+        );
+        element.show();
+      }
+      const 可转生职业 = $('#转生面板-可转生职业');
+      可转生职业.empty();
+      _.forEach(classConfigs, (classConfig) => {
+        if (!可以转生(player, classConfig.name)) {
+          return;
+        }
+        可转生职业.append($(`<div class="ui button">${classConfig.name}</div>`));
+        // TODO： 生成一个帅气的Modal，显示职业信息
+      });
+    }
+  };
 
+  // 启用 Semantic UI 的标签页功能
+  $('.menu .item').tab({
+    onVisible,
+  });
+
+  // 角色面板
   const 角色面板进度条 = $('#角色面板-进度条');
   genProgressBar('角色面板-生命值进度条', 角色面板进度条, 'red', '生命值').wrap(
     $('<div class="column"></div>'),
@@ -39,6 +73,8 @@ const updateHTML = (params) => {
   职业名称.text(玩家职业.name);
   const 职业描述 = $('#角色面板-职业描述');
   职业描述.text(玩家职业.description);
+  const 职业专精等级 = $('#角色面板-职业专精等级');
+  职业专精等级.text(玩家职业.expertiseLevel);
   const 职业等级 = $('#角色面板-职业等级');
   职业等级.text(`${玩家职业.level}/${玩家职业.getMaxLevel()}`);
   const 职业经验值 = $('#角色面板-职业经验值');

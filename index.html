@@ -42,6 +42,10 @@
           <span id="角色面板-职业描述">狂战士是你爹。</span>
         </div>
         <div class="item">
+          <div class="ui horizontal label">专精等级</div>
+          <span id="角色面板-职业专精等级">{{专精等级}}</span>
+        </div>
+        <div class="item">
           <div class="ui horizontal label">等级</div>
           <span id="角色面板-职业等级">{{等级}}</span>
         </div>
@@ -66,6 +70,15 @@
         </div>
       </div>
     </div>
-    <div class="ui bottom attached segment tab" id="转生面板" data-tab="转生面板"></div>
+    <div class="ui bottom attached segment tab chinese" id="转生面板" data-tab="转生面板">
+      <div class="ui message" id="转生面板-无法提升专精">
+        <div class="header">你确定要转生吗？ {{等级}}/{{最大等级}}</div>
+        <p>现在转生，还无法提升专精等级。达到最大等级后转生可以提升专精等级。</p>
+      </div>
+      <div class="ui attached segment">
+        <h3 class="header">可转生职业</h3>
+        <div class="ui vertical buttons" id="转生面板-可转生职业"></div>
+      </div>
+    </div>
   </body>
 </html>
