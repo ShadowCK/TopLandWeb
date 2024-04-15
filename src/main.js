@@ -16,9 +16,15 @@ const setupHTML = () => {
   $('.menu .item').tab();
 
   const 角色面板进度条 = $('#角色面板-进度条');
-  genProgressBar('角色面板-生命值进度条', 角色面板进度条, 'red', '生命值');
-  genProgressBar('角色面板-魔法值进度条', 角色面板进度条, 'blue', '魔法值');
-  genProgressBar('角色面板-经验值进度条', 角色面板进度条, 'green', '经验值');
+  genProgressBar('角色面板-生命值进度条', 角色面板进度条, 'red', '生命值').wrap(
+    $('<div class="column"></div>'),
+  );
+  genProgressBar('角色面板-魔法值进度条', 角色面板进度条, 'blue', '魔法值').wrap(
+    $('<div class="column"></div>'),
+  );
+  genProgressBar('角色面板-经验值进度条', 角色面板进度条, 'green', '经验值').wrap(
+    '<div class="column"></div>',
+  );
 };
 
 /**
@@ -102,18 +108,19 @@ window.onload = () => {
 
   战斗管理器.init();
 
-  // 200 ticks per second
-  setInterval(update, 5);
-
-  // 20 ticks per second
-  setHTMLInterval(50);
-
   console.log('游戏加载完成');
   console.log('玩家信息：', 玩家管理器.getPlayer());
   window.player = player;
 
   // 在所有数据都加载完毕后，设置HTML
   setupHTML();
+
+  // 设置update loop
+  // 200 ticks per second
+  setInterval(update, 5);
+
+  // 20 ticks per second
+  setHTMLInterval(50);
 };
 
 window.clearLocalStorage = () => {
