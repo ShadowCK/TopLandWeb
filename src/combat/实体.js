@@ -51,8 +51,33 @@ class 实体 {
     }
   }
 
+  /**
+   * 获取职业的属性成长配置中给定属性的数值
+   * @param {string | string[]} path 属性的路径，如"最大生命值"，"抗性穿透.物理
+   * @returns
+   */
+  getStatGrowth(path) {
+    return _.get(this.职业.statGrowth, path) || [0, 0];
+  }
+
   updateStats() {
-    throw new Error('Method "updateStats()" must be implemented by subclass');
+    const { statGrowth, level } = this.职业;
+    // 递归函数来处理stats
+    const processStats = (stats, path = []) => {
+      _.forEach(stats, (value, key) => {
+        const currentPath = path.concat(key);
+        if (Array.isArray(value)) {
+          // 如果是数组（statGrowth），计算值并设置。
+          const [base, scale] = value;
+          _.set(this.stats, currentPath, base + scale * (level - 1));
+        } else if (_.isObject(value)) {
+          // 如果是对象，递归处理
+          processStats(value, currentPath);
+        }
+      });
+    };
+    // 调用递归函数处理所有stats
+    processStats(statGrowth);
   }
 
   heal(value) {

@@ -1,5 +1,6 @@
 import _ from 'lodash';
 import * as 玩家管理器 from './player/玩家管理器.js';
+import { getDecimalPrecision } from './utils.js';
 
 const genLabel = (title, content, color = '') => {
   const label = $(`
@@ -59,7 +60,13 @@ const genElementForStats = (parent, value, key, labelColor = '', path = [key]) =
   } else {
     const player = 玩家管理器.getPlayer();
     const isStat = _.get(player.stats, path) !== undefined;
-    formatted = _.round(isStat ? player.getStat2(path) : value, 0);
+    // 如果是玩家属性，不要用原始数值。显示buff加成后的数值
+    // FIXME: 这里会浪费一些性能，因为已经有base了。getBuffedStat会更好。
+    // TODO: 还有，要把getStat的clamp放到getBuffedStat里面，让getBuffStat也接受range参数。
+    const valueToUse = isStat ? player.getStat2(path) : value;
+    // 如果是玩家属性，精确到成长的小数位数
+    const precision = isStat ? getDecimalPrecision(player.getStatGrowth(path)[1]) : 2;
+    formatted = _.round(valueToUse, precision);
   }
   const html = `
     <div class="item">

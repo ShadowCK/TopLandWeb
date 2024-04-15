@@ -1,6 +1,19 @@
 import _ from 'lodash';
 import { config } from './settings.js';
 
+const getDecimalPrecision = (num) => {
+  if (!_.isFinite(num)) {
+    return 0; // 如果数字不是有限的，返回0
+  }
+  let e = 1;
+  let p = 0;
+  while (Math.round(num * e) / e !== num) {
+    e *= 10;
+    p += 1;
+  }
+  return p;
+};
+
 /**
  * 获取职业的有效最大等级
  * @param {number} baseMaxLevel 基础最大等级
@@ -29,4 +42,4 @@ const templateFromElement = (element, data, apply = true) => {
   return result;
 };
 
-export { getMaxLevel, template, templateFromElement };
+export { getDecimalPrecision, getMaxLevel, template, templateFromElement };
