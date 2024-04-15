@@ -1,3 +1,5 @@
-import { getRequiredExp } from './settings.js';
+const addToWindow = (key, value) => {
+  window[key] = value;
+};
 
-window.getRequiredExp = getRequiredExp;
+export default addToWindow;

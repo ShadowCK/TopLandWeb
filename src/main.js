@@ -1,19 +1,76 @@
 import _ from 'lodash';
-import { clearInterval, clearTimeout, setInterval, setTimeout } from 'worker-timers';
+import { clearInterval, setInterval } from 'worker-timers';
 
 import 玩家存档 from './player/玩家存档.js';
-import * as debug from './debug.js';
 import 玩家 from './player/玩家.js';
 import * as 玩家管理器 from './player/玩家管理器.js';
 import * as 战斗管理器 from './combat/战斗管理器.js';
 import classConfigs from './classes/职业信息.js';
 import 职业 from './classes/职业.js';
-import { genElementForStats, genProgressBar, updateProgressBar } from './htmlHelper.js';
+import { genLabel, genElementForStats, genProgressBar, updateProgressBar } from './htmlHelper.js';
 import { statTypes } from './combat/战斗属性.js';
-import { 可以提升专精等级, 可以转生 } from './reincarnate/转生.js';
-import { template } from './utils.js';
+import { 可以提升专精等级, 可以转生, 转生 } from './reincarnate/转生.js';
+import { getMaxLevel, templateFromElement } from './utils.js';
 
 const setupHTML = () => {
+  $.fn.modal.settings.templates.确认转生 = function f(classConfig) {
+    const player = 玩家管理器.getPlayer();
+    const 当前职业名 = player.职业.name;
+    const 新职业名称 = classConfig.name;
+    const canLevelUpExpertise = 可以提升专精等级(player);
+    let 新职业专精等级 = player.玩家存档.专精等级[新职业名称] || 0;
+    if (新职业名称 === 当前职业名 && canLevelUpExpertise) {
+      新职业专精等级 += 1;
+    }
+    const 新职业最大等级 = getMaxLevel(classConfig.maxLevel, 新职业专精等级);
+
+    return {
+      class: 'chinese',
+      title: `转生成为${classConfig.name}`,
+      closeIcon: true,
+      content: `
+      ${canLevelUpExpertise ? genLabel('专精等级UP！', '', 'green').wrap('div').html() : ''}
+      <div>原职业：${当前职业名}</div>
+      <div>新职业：${classConfig.name} 1/${新职业最大等级}/${新职业专精等级}</div>
+      `,
+      actions: [
+        {
+          text: '确认',
+          class: 'green',
+          click: () => {
+            // 再次检测是否可以转生，防止在等待确认时，玩家的状态发生变化
+            // 这里没有复用player，也是为了防止玩家引用变化（尽管这不可能，但我觉得是好的实践）
+            const result = 转生(玩家管理器.getPlayer(), classConfig.name);
+            if (result) {
+              $.toast({
+                displayTime: 5000,
+                class: 'green center aligned chinese',
+                showProgress: 'bottom',
+                position: 'top attached',
+                title: '转生成功',
+                message: `你现在是一名${classConfig.name}了`,
+              });
+              return true;
+            }
+            $.toast({
+              displayTime: 5000,
+              class: 'red chinese',
+              showProgress: 'bottom',
+              title: '转生失败！',
+              message: `发生了一个意外错误`,
+            });
+            // 发生错误时不自动关闭，允许不信邪的玩家多点几次
+            return false;
+          },
+        },
+        {
+          text: '取消',
+          class: 'red',
+        },
+      ],
+    };
+  };
+
   const onVisible = (tabPath) => {
     if (tabPath === '转生面板') {
       const player = 玩家管理器.getPlayer();
@@ -23,12 +80,10 @@ const setupHTML = () => {
       } else {
         const header = element.find('.header:first');
         const { 职业: playerClass } = player;
-        header.text(
-          template(header.text(), {
-            等级: playerClass.level,
-            最大等级: playerClass.getMaxLevel(),
-          }),
-        );
+        templateFromElement(header, {
+          等级: playerClass.level,
+          最大等级: playerClass.getMaxLevel(),
+        });
         element.show();
       }
       const 可转生职业 = $('#转生面板-可转生职业');
@@ -37,8 +92,11 @@ const setupHTML = () => {
         if (!可以转生(player, classConfig.name)) {
           return;
         }
-        可转生职业.append($(`<div class="ui button">${classConfig.name}</div>`));
-        // TODO： 生成一个帅气的Modal，显示职业信息
+        const button = $(`<div class="ui button">${classConfig.name}</div>`);
+        可转生职业.append(button);
+        button.on('click', () => {
+          $.modal('确认转生', classConfig);
+        });
       });
     }
   };
@@ -74,7 +132,7 @@ const updateHTML = (params) => {
   const 职业描述 = $('#角色面板-职业描述');
   职业描述.text(玩家职业.description);
   const 职业专精等级 = $('#角色面板-职业专精等级');
-  职业专精等级.text(玩家职业.expertiseLevel);
+  职业专精等级.text(`${玩家职业.expertiseLevel}（最高${player.玩家存档.最高专精等级}）`);
   const 职业等级 = $('#角色面板-职业等级');
   职业等级.text(`${玩家职业.level}/${玩家职业.getMaxLevel()}`);
   const 职业经验值 = $('#角色面板-职业经验值');

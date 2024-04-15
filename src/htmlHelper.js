@@ -1,14 +1,24 @@
 import _ from 'lodash';
 import * as 玩家管理器 from './player/玩家管理器.js';
 
+const genLabel = (title, content, color = '') => {
+  const label = $(`
+  <div>
+    <div class="ui ${color} horizontal label">${title}</div>
+    ${content || ''}
+  </div>
+  `);
+  return label;
+};
+
 const genProgressBar = (id, parent, color = '', label = '', value = 0, maxValue = 1) => {
   const html = `
-    <div id="${id}" class="ui ${color} progress active" data-percent="${(value / maxValue) * 100}">
-      <div class="bar">
-        <div class="progress"></div>
-      </div>
-      <div class="label">${label}</div>
-    </div>`;
+  <div id="${id}" class="ui ${color} progress active" data-percent="${(value / maxValue) * 100}">
+    <div class="bar">
+      <div class="progress"></div>
+    </div>
+    <div class="label">${label}</div>
+  </div>`;
   const bar = $(html);
   // 初始化进度条
   bar.progress();
@@ -59,4 +69,4 @@ const genElementForStats = (parent, value, key, labelColor = '', path = [key]) =
   parent.append(html);
 };
 
-export { genProgressBar, updateProgressBar, genElementForStats };
+export { genLabel, genProgressBar, updateProgressBar, genElementForStats };

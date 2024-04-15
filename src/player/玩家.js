@@ -1,9 +1,8 @@
 import _ from 'lodash';
 import 实体 from '../combat/实体.js';
-import 玩家存档 from './玩家存档.js';
 
 class 玩家 extends 实体 {
-  /** @type {玩家存档} */
+  /** @type {import('../player/玩家存档.js').default} */
   玩家存档 = null;
 
   constructor(params) {
@@ -36,10 +35,6 @@ class 玩家 extends 实体 {
 
     // TODO: 装备的属性加成
     // 也可以用processStats函数处理
-  }
-
-  转生() {
-    // TODO
   }
 }
 
