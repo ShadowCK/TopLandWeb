@@ -1,7 +1,7 @@
 import _ from 'lodash';
 import { clearInterval, clearTimeout, setInterval, setTimeout } from 'worker-timers';
 
-import * as settings from './settings.js';
+import 玩家存档 from './player/玩家存档.js';
 import * as debug from './debug.js';
 import 玩家 from './player/玩家.js';
 import * as 玩家管理器 from './player/玩家管理器.js';
@@ -24,7 +24,9 @@ const updateHTML = (params) => {
       return;
     }
     // 属性成长作为数组存储
-    const formatted = Array.isArray(value) ? value.join('+') : value;
+    const formatted = Array.isArray(value)
+      ? value.map((v) => _.round(v, 2)).join('+')
+      : _.round(value, 0);
     const html = `
     <div class="item">
       <div class="ui horizontal label">${key}</div>${formatted}
@@ -40,10 +42,15 @@ const updateHTML = (params) => {
   const 职业描述 = $('#角色面板-职业描述');
   职业描述.text(玩家职业.description);
   const 职业等级 = $('#角色面板-职业等级');
-  职业等级.text(`${玩家职业.level}/${玩家职业.maxLevel}`);
+  职业等级.text(`${玩家职业.level}/${玩家职业.getMaxLevel()}`);
   const 职业经验值 = $('#角色面板-职业经验值');
   const requiredExp = 玩家职业.getExpToNextLevel();
-  职业经验值.text(`${玩家职业.exp}/${requiredExp} (${(玩家职业.exp / requiredExp) * 100}%)`);
+  职业经验值.text(
+    `${_.floor(玩家职业.exp)}/${_.floor(requiredExp)} (${_.round(
+      (玩家职业.exp / requiredExp) * 100,
+      2,
+    )}%)`,
+  );
 
   const 当前属性 = $('#角色面板-当前属性');
   当前属性.empty();
@@ -70,9 +77,13 @@ window.onload = () => {
 
   const player = new 玩家();
   玩家管理器.init(player);
-  战斗管理器.init();
 
-  player.设置职业(new 职业(classConfigs.初心者));
+  const defaultSaveData = new 玩家存档(null);
+  defaultSaveData.职业 = new 职业(classConfigs.初心者);
+  const playerSave = 玩家存档.读档(defaultSaveData);
+  playerSave.应用存档();
+
+  战斗管理器.init();
 
   // 200 ticks per second
   setInterval(update, 5);
@@ -85,4 +96,16 @@ window.onload = () => {
   window.player = player;
 };
 
-// TODO: save/load game
+window.clearLocalStorage = () => {
+  localStorage.clear();
+  window.disableSave = true;
+};
+
+window.onbeforeunload = () => {
+  if (window.disableSave) {
+    return;
+  }
+  // 保存玩家存档
+  玩家管理器.getPlayer().玩家存档.存档();
+  // 保存其他游戏信息
+};

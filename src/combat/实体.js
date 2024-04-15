@@ -175,10 +175,10 @@ class 实体 {
    * @param {import('../classes/职业.js').default} 职业
    * @param {Number} level
    */
-  设置职业(职业, level = 1) {
+  设置职业(职业) {
     职业.parent = this;
     this.职业 = 职业;
-    职业.setLevel(level); // Stats will be updated here
+    职业.setLevel(职业.level); // Stats will be updated here
     this.生命值 = this.getStat(statTypes.最大生命值, false);
     this.魔法值 = this.getStat(statTypes.最大魔法值, false);
   }
