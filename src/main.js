@@ -61,12 +61,8 @@ const updateHTML = (params) => {
 const update = () => {};
 
 const setupHTML = () => {
-  $('.ui.menu .item')
-    .not('.header.item')
-    .on('click', function anon() {
-      // 添加 'active' 类到被点击的菜单项
-      $(this).addClass('active').siblings().removeClass('active');
-    });
+  // 启用 Semantic UI 的标签页功能
+  $('.menu .item').tab();
 };
 
 window.onload = () => {

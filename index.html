@@ -18,18 +18,19 @@
     <script src="./dist/bundle.js"></script>
   </head>
   <body>
-    <div class="ui tabular pointing menu chinese">
+    <div class="ui top attached tabular pointing menu chinese">
       <div class="header item">巅峰神域</div>
-      <a class="item active">角色</a>
-      <a class="item">转生</a>
-      <a class="item">区域</a>
-      <a class="item">战斗</a>
-      <a class="item disabled">背包</a>
-      <a class="item disabled">商店</a>
-      <a class="item disabled">魔典</a>
-      <a class="item disabled">天赋</a>
+      <a class="item active" data-tab="角色面板">角色</a>
+      <a class="item" data-tab="转生面板">转生</a>
+      <a class="item" data-tab="区域面板">区域</a>
+      <a class="item" data-tab="战斗面板">战斗</a>
+      <a class="item disabled" data-tab="背包面板">背包</a>
+      <a class="item disabled" data-tab="商店面板">商店</a>
+      <a class="item disabled" data-tab="魔典面板">魔典</a>
+      <a class="item disabled" data-tab="天赋面板">天赋</a>
     </div>
-    <div class="ui segment" id="角色面板">
+
+    <div class="ui bottom attached segment tab active" id="角色面板" data-tab="角色面板">
       <!-- list不是必须的，但能增加视觉效果 -->
       <div class="ui relaxed list">
         <div class="item">
@@ -64,5 +65,6 @@
         </div>
       </div>
     </div>
+    <div class="ui bottom attached segment tab" id="转生面板" data-tab="转生面板"></div>
   </body>
 </html>
