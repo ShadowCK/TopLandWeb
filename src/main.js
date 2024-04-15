@@ -8,35 +8,27 @@ import * as 玩家管理器 from './player/玩家管理器.js';
 import * as 战斗管理器 from './combat/战斗管理器.js';
 import classConfigs from './classes/职业信息.js';
 import 职业 from './classes/职业.js';
+import { genElementForStats, genProgressBar, updateProgressBar } from './htmlHelper.js';
+import { statTypes } from './combat/战斗属性.js';
+
+const setupHTML = () => {
+  // 启用 Semantic UI 的标签页功能
+  $('.menu .item').tab();
+
+  const 角色面板进度条 = $('#角色面板-进度条');
+  genProgressBar('角色面板-生命值进度条', 角色面板进度条, 'red', '生命值');
+  genProgressBar('角色面板-魔法值进度条', 角色面板进度条, 'blue', '魔法值');
+  genProgressBar('角色面板-经验值进度条', 角色面板进度条, 'green', '经验值');
+};
 
 /**
  * @param {{player:玩家}} params
  */
 const updateHTML = (params) => {
-  const genElementForStats = (parent, value, key) => {
-    if (_.isObject(value) && !Array.isArray(value)) {
-      const label = $(`<div class="ui blue horizontal label">${key}</div>`);
-      const child = $(`<div class="ui relax list"></div>`);
-      parent.append(label, child);
-      _.forEach(value, (v, k) => {
-        genElementForStats(child, v, k);
-      });
-      return;
-    }
-    // 属性成长作为数组存储
-    const formatted = Array.isArray(value)
-      ? value.map((v) => _.round(v, 2)).join('+')
-      : _.round(value, 0);
-    const html = `
-    <div class="item">
-      <div class="ui horizontal label">${key}</div>${formatted}
-    </div>
-    `;
-    parent.append(html);
-  };
-
   const { player } = params;
   const { 职业: 玩家职业 } = player;
+
+  // 更新角色面板
   const 职业名称 = $('#角色面板-职业名称');
   职业名称.text(玩家职业.name);
   const 职业描述 = $('#角色面板-职业描述');
@@ -52,8 +44,30 @@ const updateHTML = (params) => {
     )}%)`,
   );
 
+  updateProgressBar(
+    $('#角色面板-生命值进度条'),
+    player.生命值,
+    player.getStat2(statTypes.最大生命值),
+    '生命值: {value} / {total}',
+  );
+  updateProgressBar(
+    $('#角色面板-魔法值进度条'),
+    player.魔法值,
+    player.getStat2(statTypes.最大魔法值),
+    '魔法值: {value} / {total}',
+  );
+  updateProgressBar(
+    $('#角色面板-经验值进度条'),
+    玩家职业.exp,
+    requiredExp,
+    '经验值: {value} / {total}',
+  );
+
   const 当前属性 = $('#角色面板-当前属性');
   当前属性.empty();
+  // FIXME: 最好是事先创建这些元素，然后更新值，而不是每次都重新创建
+  genElementForStats(当前属性, player.生命值, '生命值', 'red');
+  genElementForStats(当前属性, player.魔法值, '魔法值', 'blue');
   _.forEach(player.stats, (value, key) => {
     genElementForStats(当前属性, value, key);
   });
@@ -67,14 +81,17 @@ const updateHTML = (params) => {
 
 const update = () => {};
 
-const setupHTML = () => {
-  // 启用 Semantic UI 的标签页功能
-  $('.menu .item').tab();
+let htmlWorkerId = null;
+const setHTMLInterval = (delay) => {
+  if (htmlWorkerId != null) {
+    clearInterval(htmlWorkerId);
+  }
+  htmlWorkerId = setInterval(() => updateHTML({ player: 玩家管理器.getPlayer() }), delay);
 };
 
-window.onload = () => {
-  setupHTML();
+window.setHTMLInterval = setHTMLInterval;
 
+window.onload = () => {
   const player = new 玩家();
   玩家管理器.init(player);
 
@@ -89,11 +106,14 @@ window.onload = () => {
   setInterval(update, 5);
 
   // 20 ticks per second
-  setInterval(() => updateHTML({ player: 玩家管理器.getPlayer() }), 50);
+  setHTMLInterval(50);
 
   console.log('游戏加载完成');
   console.log('玩家信息：', 玩家管理器.getPlayer());
   window.player = player;
+
+  // 在所有数据都加载完毕后，设置HTML
+  setupHTML();
 };
 
 window.clearLocalStorage = () => {

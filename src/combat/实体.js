@@ -2,6 +2,7 @@ import _ from 'lodash';
 import { getBuffedStat } from './buff管理器.js';
 import * as 战斗管理器 from './战斗管理器.js';
 import { statTypes } from './战斗属性.js';
+import * as settings from '../settings.js';
 
 class 实体 {
   stats = {};
@@ -66,8 +67,15 @@ class 实体 {
     this.魔法值 = Math.min(最大魔法值, this.魔法值 + value * 魔法回复效率);
   }
 
+  getStat2(statType, calcBuffs = true) {
+    const range = settings.config.statLimits[statType];
+    return this.getStat(statType, calcBuffs, range);
+  }
+
   /**
    * 获取属性的数值，支持多级属性，如"抗性穿透.物理"
+   * @note 通常情况下，请用getStat2来应用属性的默认上下限。
+   * @note 自定义range是用于技能效果的。比如某技能受暴击率加成，但有效的暴击率范围是0~20%。
    * @param {string} statType can be a path
    */
   getStat(statType, calcBuffs = true, range = { min: -Infinity, max: Infinity }) {

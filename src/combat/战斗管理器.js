@@ -93,7 +93,7 @@ combatEvents.on('实体攻击实体', (params) => {
   const { damager, damaged, damage, damageDistribution } = params;
 
   // 攻击被闪避就不造成伤害
-  const 闪避率 = damaged.getStat(statTypes.闪避率, true, settings.config.statLimits.闪避率);
+  const 闪避率 = damaged.getStat2(statTypes.闪避率, true);
   if (Math.random() < 闪避率 / 100) {
     return;
   }
@@ -105,10 +105,9 @@ combatEvents.on('实体攻击实体', (params) => {
   const 暴击倍率 = (damager.getStat(statTypes.暴击伤害) + Math.min(0, 暴击率 - 100)) / 100;
 
   // 计算格挡（格挡不分开计算）
-  const 格挡率 = damaged.getStat(statTypes.格挡率, true, settings.config.statLimits.格挡率);
+  const 格挡率 = damaged.getStat2(statTypes.格挡率, true);
   const 触发格挡 = Math.random() < 格挡率 / 100;
-  const 格挡倍率 =
-    1 - damaged.getStat(statTypes.格挡伤害, true, settings.config.statLimits.格挡伤害) / 100;
+  const 格挡倍率 = 1 - damaged.getStat2(statTypes.格挡伤害, true) / 100;
 
   // 遍历伤害分布，根据不同的伤害类型计算总伤害
   let totalDamage = 0;
@@ -150,9 +149,7 @@ combatEvents.on('实体攻击实体', (params) => {
   // 对受击者造成伤害
   damaged.takeDamage(totalDamage);
   // 生命偷取
-  const 生命偷取 =
-    (damager.getStat(statTypes.生命偷取, true, settings.config.statLimits.生命偷取) / 100) *
-    totalDamage;
+  const 生命偷取 = (damager.getStat2(statTypes.生命偷取, true) / 100) * totalDamage;
   damager.heal(生命偷取);
 });
 
