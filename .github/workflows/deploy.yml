@@ -3,10 +3,10 @@ name: Build and Deploy to GitHub Pages
 on:
   push:
     branches:
-      - main # 你的默认分支名，可能是 main 或 master
+      - main
 
 jobs:
-  build:
+  build-and-deploy:
     runs-on: ubuntu-latest
 
     steps:
@@ -15,16 +15,19 @@ jobs:
       - name: Set up Node.js
         uses: actions/setup-node@v4
         with:
-          node-version: '20.12.2' # 根据你的项目需求选择版本
+          node-version: '20.12.2'
 
       - name: Install dependencies
         run: npm install
 
       - name: Build project
-        run: npm run build # 确保你有一个 "build" 脚本在你的 package.json
+        run: npm run build # 构建生成 dist 目录
+
+      - name: Modify .gitignore to not ignore dist
+        run: sed -i '/dist/d' .gitignore # 将 dist 从 .gitignore 中移除
 
       - name: Deploy to GitHub Pages
         uses: peaceiris/actions-gh-pages@v4
         with:
           github_token: ${{ secrets.GITHUB_TOKEN }}
-          publish_dir: ./dist # 根据你的构建输出目录调整
+          publish_dir: ./ # 将整个根目录推送到 gh-pages 分支
