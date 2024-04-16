@@ -23,6 +23,7 @@ const getEntitiesInCombat = () => {
   return [getPlayer(), ...当前战斗区域.敌人];
 };
 
+/** @type {Object<string, 战斗区域>} */
 const 所有战斗区域 = {};
 
 // 可以放到init? 虽然放这里也能用
@@ -92,13 +93,16 @@ const skillDamage = (params) => {
   });
 };
 
+const 退出战斗区域 = () => {
+  当前战斗区域 = null;
+};
+
 const 切换战斗区域 = (新区域) => {
   if (新区域) {
     当前战斗区域 = 新区域;
     return;
   }
-  // 退出战斗区域
-  当前战斗区域 = null;
+  退出战斗区域();
 };
 
 const update = (dt) => {
@@ -210,6 +214,8 @@ combatEvents.on('实体攻击实体', (params) => {
 });
 
 export {
+  所有战斗区域,
+  退出战斗区域,
   切换战斗区域,
   get战斗区域,
   update,
@@ -223,3 +229,5 @@ export {
   getTarget,
   combatEvents,
 };
+
+window.a = () => 当前战斗区域;

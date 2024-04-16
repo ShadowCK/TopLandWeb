@@ -34,6 +34,7 @@ const config = {
   刷怪间隔: 5000, // ms
   无敌人刷怪倍速: 10,
   必定刷新BOSS刷怪数量: 20,
+  最大区域等级: 100,
 };
 
 export { 默认优先级, getRequiredExp, config };

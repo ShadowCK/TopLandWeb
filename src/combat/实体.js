@@ -167,7 +167,7 @@ class 实体 {
 
     // 回复生命值和魔法值
     this.回复计时器 += dt;
-    if (this.回复计时器 >= 1) {
+    if (this.回复计时器 >= 1000) {
       this.回复计时器 = 0;
       this.heal(this.getStat(statTypes.生命回复, true));
       this.restoreMana(this.getStat(statTypes.魔法回复, true));

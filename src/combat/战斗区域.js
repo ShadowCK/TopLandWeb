@@ -31,11 +31,11 @@ class 战斗区域 {
   // 配置数据
   name = '下水道';
 
+  description = '下水道里面有很多老鼠。';
+
   level = 1;
 
   maxLevel = 1;
-
-  levelCap = 100;
 
   enemies = {
     老鼠: {
@@ -45,6 +45,8 @@ class 战斗区域 {
   };
 
   // 非配置数据
+  levelCap = settings.config.最大区域等级;
+
   敌人 = [];
 
   最大敌人数 = settings.config.最大敌人数;

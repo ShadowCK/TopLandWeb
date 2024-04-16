@@ -18,7 +18,6 @@ import { statTypes } from './combat/战斗属性.js';
 import { 可以提升专精等级, 可以转生, 转生 } from './reincarnate/转生.js';
 import { getMaxLevel, templateFromElement } from './utils.js';
 import addToWindow from './debug.js';
-import { configs as 战斗区域配置 } from './combat/战斗区域.js';
 
 const setupHTML = () => {
   const onVisible = (tabPath) => {
@@ -133,8 +132,8 @@ const setupHTML = () => {
 
   // 区域面板
   const 区域面板 = $('#区域面板');
-  _.forEach(战斗区域配置, (config) => {
-    const enemyConfigs = _.map(config.enemies, (literal) => literal.config);
+  _.forEach(战斗管理器.所有战斗区域, (战斗区域) => {
+    const enemyConfigs = _.map(战斗区域.enemies, (literal) => literal.config);
     const 敌人信息 = enemyConfigs
       .map(
         (enemyConfig) => `
@@ -151,8 +150,8 @@ const setupHTML = () => {
     const element = $(`
       <div class="ui segment">
         <h3 class="ui header">
-          ${config.name}
-          <div class="sub header">${config.description}</div>
+          ${战斗区域.name}
+          <div class="sub header">${战斗区域.description}</div>
         </h3>
         <div class="ui three column grid">
           ${敌人信息}
@@ -167,7 +166,7 @@ const setupHTML = () => {
     // 前往按钮
     element.find('button').on('click', () => {
       changeTab('战斗面板');
-      战斗管理器.切换战斗区域(战斗管理器.get战斗区域(config.name));
+      战斗管理器.切换战斗区域(战斗区域);
     });
     区域面板.append(element);
   });
@@ -234,13 +233,15 @@ const updateHTML = (params) => {
 };
 
 const update = (dt) => {
-  战斗管理器.update();
-
-  // 已经包含了玩家
-  战斗管理器.getEntitiesInCombat().forEach((entity) => {
-    entity.update();
-    战斗管理器.updateCombat(entity, dt);
-  });
+  战斗管理器.update(dt);
+  const player = 玩家管理器.getPlayer();
+  const enemies = 战斗管理器.getEnemiesInCombat();
+  // 先回复生命值，血量（玩家在战斗外也能回复，怪物没有脱战一说）
+  player.update(dt);
+  enemies.forEach((enemy) => enemy.update(dt));
+  // 再进行战斗动作
+  战斗管理器.updateCombat(player, dt);
+  enemies.forEach((enemy) => 战斗管理器.updateCombat(enemy, dt));
 };
 
 let htmlWorkerId = null;
@@ -273,7 +274,7 @@ window.onload = () => {
 
   // 设置update loop
   // 200 ticks per second
-  setInterval(update, 5);
+  setInterval(() => update(5), 5);
 
   // 20 ticks per second
   setHTMLInterval(50);
