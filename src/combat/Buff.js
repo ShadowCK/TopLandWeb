@@ -1,6 +1,6 @@
 import { 默认优先级 } from '../settings.js';
 import buffTypes from './buffTypes.js';
-import { statTypes } from './战斗属性.js';
+import { StatType } from './战斗属性.js';
 
 class Buff {
   // Buff的名字/ID
@@ -10,7 +10,7 @@ class Buff {
    * Buff影响的属性，可以是个路径，如'伤害抗性.物理'。
    * 不会像getStat和updateStats那样自动解析路径，而是直接使用路径作为key。
    */
-  statType = statTypes.攻击力;
+  statType = StatType.攻击力;
 
   // Buff的数值
   value = 1;
