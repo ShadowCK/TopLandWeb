@@ -8,6 +8,7 @@ let player = null;
 /**
  * 为了防止循环依赖，这里不直接引入玩家类并创建玩家
  * 而是在主类实例化玩家，初始化时传入玩家实例
+ * TODO: 在一番代码优化后，耦合消失了！可以import玩家创建玩家实例了！
  * @param {import('./玩家.js').default} p
  */
 const init = (p) => {

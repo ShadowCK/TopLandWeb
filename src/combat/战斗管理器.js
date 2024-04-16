@@ -94,7 +94,6 @@ const skillDamage = (params) => {
 
 const 退出战斗区域 = () => {
   if (!当前战斗区域) {
-    console.warn('玩家不在战斗中，但是死了？');
     return;
   }
   // 移除敌人

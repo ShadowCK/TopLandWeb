@@ -7,11 +7,20 @@ import { EventType, combatEvents } from '../events/事件管理器.js';
 const configs = {
   下水道: {
     name: '下水道',
-    description: '下水道里面有很多老鼠。',
+    description: '下水道里面有很多老鼠，还有一些其他的东西。',
     enemies: {
       老鼠: {
         config: 敌人信息.老鼠,
-        weight: 1,
+        weight: 100,
+      },
+      幸运鼠: {
+        config: 敌人信息.幸运鼠,
+        weight: 5,
+      },
+      老鼠国王: {
+        config: 敌人信息.老鼠国王,
+        weight: 0.1,
+        isBoss: true,
       },
     },
   },
@@ -131,10 +140,11 @@ class 战斗区域 {
     const enemies = Object.values(this.enemies);
     this.刷怪数量 += 1;
     let enemyLiteral;
-    if (this.刷怪数量 > settings.config.必定刷新BOSS刷怪数量) {
+    const boss = enemies.find((enemy) => enemy.isBoss);
+    if (boss && this.刷怪数量 > settings.config.必定刷新BOSS刷怪数量) {
       this.刷怪数量 = 0;
       this.clearEnemies();
-      enemyLiteral = enemies.find((enemy) => enemy.config.isBoss);
+      enemyLiteral = boss;
     } else {
       const totalWeight = enemies.reduce((acc, enemy) => acc + enemy.weight, 0);
       const rand = Math.random() * totalWeight;
