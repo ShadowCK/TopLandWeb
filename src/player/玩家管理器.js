@@ -1,3 +1,7 @@
+import 玩家存档 from './玩家存档.js';
+import 职业 from '../classes/职业.js';
+import classConfigs from '../classes/职业信息.js';
+
 /** @type {import('./玩家.js').default} */
 let player = null;
 
@@ -13,7 +17,17 @@ const init = (p) => {
 const getPlayer = () => player;
 
 const 存档 = () => {
+  if (!player.玩家存档) {
+    console.error('玩家存档不存在');
+  }
   player.玩家存档.存档();
 };
 
-export { init, getPlayer, 存档 };
+const 读档 = () => {
+  const defaultSaveData = new 玩家存档(null);
+  defaultSaveData.职业 = new 职业(classConfigs.初心者);
+  const playerSave = 玩家存档.读档(defaultSaveData);
+  playerSave.应用存档(player);
+};
+
+export { init, getPlayer, 存档, 读档 };

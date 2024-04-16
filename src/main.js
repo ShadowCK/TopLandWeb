@@ -1,12 +1,10 @@
 import _ from 'lodash';
 import { clearInterval, setInterval } from 'worker-timers';
 
-import 玩家存档 from './player/玩家存档.js';
 import 玩家 from './player/玩家.js';
 import * as 玩家管理器 from './player/玩家管理器.js';
 import * as 战斗管理器 from './combat/战斗管理器.js';
 import classConfigs from './classes/职业信息.js';
-import 职业 from './classes/职业.js';
 import {
   genLabel,
   genElementForStats,
@@ -300,10 +298,7 @@ window.onload = () => {
   const player = new 玩家();
   玩家管理器.init(player);
 
-  const defaultSaveData = new 玩家存档(null);
-  defaultSaveData.职业 = new 职业(classConfigs.初心者);
-  const playerSave = 玩家存档.读档(defaultSaveData);
-  playerSave.应用存档();
+  玩家管理器.读档();
 
   战斗管理器.init();
 
