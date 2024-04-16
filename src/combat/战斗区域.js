@@ -106,6 +106,7 @@ class 战斗区域 {
     let enemyLiteral;
     if (this.刷怪数量 > settings.config.必定刷新BOSS刷怪数量) {
       this.刷怪数量 = 0;
+      this.敌人.length = 0;
       enemyLiteral = enemies.find((enemy) => enemy.config.isBoss);
     } else {
       const totalWeight = enemies.reduce((acc, enemy) => acc + enemy.weight, 0);

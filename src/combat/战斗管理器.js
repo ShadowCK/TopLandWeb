@@ -133,7 +133,7 @@ const updateCombat = (entity, dt) => {
     return;
   }
   // 填充攻击计时器
-  const 攻击速度 = Math.max(0, entity.getStat2(statTypes.攻击速度) / 100);
+  const 攻击速度 = Math.max(0, entity.getStat2(statTypes.攻击速度));
   entity.攻击计时器 += dt * 攻击速度;
   if (entity.攻击计时器 >= entity.getStat2(statTypes.攻击间隔, true)) {
     entity.攻击计时器 = 0;
@@ -226,7 +226,8 @@ combatEvents.on('实体攻击实体', (params) => {
 
 // 监听实体死亡事件
 combatEvents.on('实体死亡', ({ entity }) => {
-  if (entity === getPlayer()) {
+  const player = getPlayer();
+  if (entity === player) {
     退出战斗区域();
     $.toast({
       displayTime: 2000,
@@ -242,6 +243,11 @@ combatEvents.on('实体死亡', ({ entity }) => {
     entity.复活();
     return;
   }
+  // 给予金钱和经验
+  /** @type {import('./敌人.js').default} */
+  const 敌人 = entity;
+  player.职业.addExp(敌人.经验值);
+  player.金钱 += 敌人.金钱;
   当前战斗区域.removeEnemy(entity);
 });
 
