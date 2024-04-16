@@ -2,7 +2,6 @@ import _ from 'lodash';
 import { getBuffedStat } from './buff管理器.js';
 import { statTypes } from './战斗属性.js';
 import * as settings from '../settings.js';
-import { updateCombat } from './战斗管理器.js';
 
 class 实体 {
   stats = {};
@@ -173,8 +172,6 @@ class 实体 {
       this.heal(this.getStat(statTypes.生命回复, true));
       this.restoreMana(this.getStat(statTypes.魔法回复, true));
     }
-
-    updateCombat(this, dt);
   }
 
   /**

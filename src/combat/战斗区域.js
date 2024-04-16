@@ -20,6 +20,7 @@ const configs = {
       装逼的骑士: {
         config: 敌人信息.装逼的骑士,
         weight: 1,
+        isBoss: true,
       },
     },
   },
@@ -52,10 +53,18 @@ class 战斗区域 {
   刷怪计时器 = 0;
 
   // 达到一定次数，必定刷新BOSS
-  battles = 0;
+  刷怪数量 = 0;
+
+  statMultiplier = 1;
 
   constructor(config) {
     Object.assign(this, config);
+    this.reset();
+  }
+
+  reset() {
+    this.刷怪数量 = 0;
+    this.statMultiplier = this.calcStatMultiplier();
   }
 
   update(dt) {
@@ -85,19 +94,29 @@ class 战斗区域 {
     }
   }
 
+  /**
+   * 强制生成敌人。调用该方法前请手动判断是否可以生成敌人
+   */
   genEnemy() {
     const enemies = Object.values(this.enemies);
-    const totalWeight = enemies.reduce((acc, enemy) => acc + enemy.weight, 0);
-    const rand = Math.random() * totalWeight;
-    let sum = 0;
-    const enemyConfig = enemies.find((enemy) => {
-      sum += enemy.weight;
-      return rand < sum;
-    });
-    return new 敌人(enemyConfig.config, this.level, this.maxLevel);
+    this.刷怪数量 += 1;
+    let enemyLiteral;
+    if (this.刷怪数量 > settings.config.必定刷新BOSS刷怪数量) {
+      this.刷怪数量 = 0;
+      enemyLiteral = enemies.find((enemy) => enemy.config.isBoss);
+    } else {
+      const totalWeight = enemies.reduce((acc, enemy) => acc + enemy.weight, 0);
+      const rand = Math.random() * totalWeight;
+      let sum = 0;
+      enemyLiteral = enemies.find((enemy) => {
+        sum += enemy.weight;
+        return rand < sum;
+      });
+    }
+    return new 敌人(enemyLiteral.config, this.statMultiplier);
   }
 
-  get难度加成 = () =>
+  calcStatMultiplier = () =>
     math.evaluate('(maxLevel - level)^1.5', { level: this.level, maxLevel: this.maxLevel });
 }
 

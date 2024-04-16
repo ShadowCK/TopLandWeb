@@ -2,25 +2,36 @@ import _ from 'lodash';
 import EventEmitter from 'eventemitter3';
 import { damageSources, damageTypes, statTypes } from './战斗属性.js';
 import { getPlayer } from '../player/玩家管理器.js';
+import { 战斗区域, configs } from './战斗区域.js';
 
 const combatEvents = new EventEmitter();
 
 /** @type {import('./战斗区域.js').战斗区域} */
-let 战斗区域 = null;
+let 当前战斗区域 = null;
 
-const isPlayerInCombat = () => 战斗区域 !== null;
+const isPlayerInCombat = () => 当前战斗区域 !== null;
 
 /**
- * @returns {import('./敌人.js'.default)[]} 战斗区域中敌人的array的copy
+ * @returns {import('./敌人.js').default[]} 战斗区域中敌人的array的copy
  */
-const getEnemiesInCombat = () => (isPlayerInCombat() ? [...战斗区域.敌人] : []);
+const getEnemiesInCombat = () => (isPlayerInCombat() ? [...当前战斗区域.敌人] : []);
 
 const getEntitiesInCombat = () => {
   if (!isPlayerInCombat()) {
     return [];
   }
-  return [getPlayer(), ...战斗区域.敌人];
+  return [getPlayer(), ...当前战斗区域.敌人];
 };
+
+const 所有战斗区域 = {};
+
+// 可以放到init? 虽然放这里也能用
+_.forEach(configs, (config) => {
+  所有战斗区域[config.name] = new 战斗区域(config);
+});
+
+const get战斗区域 = (name) => 所有战斗区域[name];
+console.log(所有战斗区域);
 
 const init = () => {
   // Do nothing for now
@@ -32,7 +43,7 @@ const isInCombat = (实体) => getEntitiesInCombat().includes(实体);
 const getTarget = (实体) => {
   const player = getPlayer();
   if (实体 === player) {
-    return 战斗区域.敌人[0];
+    return 当前战斗区域.敌人[0];
   }
   return player;
 };
@@ -84,11 +95,11 @@ const skillDamage = (params) => {
 
 const 切换战斗区域 = (新区域) => {
   if (新区域) {
-    战斗区域 = 新区域;
+    当前战斗区域 = 新区域;
     return;
   }
   // 退出战斗区域
-  战斗区域 = null;
+  当前战斗区域 = null;
 };
 
 const update = (dt) => {
@@ -96,7 +107,7 @@ const update = (dt) => {
     return;
   }
   // 玩家在战斗中，断言有战斗区域
-  战斗区域.update(dt);
+  当前战斗区域.update(dt);
 };
 
 const updateCombat = (entity, dt) => {
@@ -201,6 +212,7 @@ combatEvents.on('实体攻击实体', (params) => {
 
 export {
   切换战斗区域,
+  get战斗区域,
   update,
   getEnemiesInCombat,
   getEntitiesInCombat,

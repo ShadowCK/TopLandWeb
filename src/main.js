@@ -185,12 +185,13 @@ const updateHTML = (params) => {
   });
 };
 
-const update = () => {
+const update = (dt) => {
   战斗管理器.update();
 
-  玩家管理器.getPlayer().update();
-  战斗管理器.getEnemiesInCombat().forEach((enemy) => {
-    enemy.update();
+  // 已经包含了玩家
+  战斗管理器.getEntitiesInCombat().forEach((entity) => {
+    entity.update();
+    战斗管理器.updateCombat(entity, dt);
   });
 };
 
