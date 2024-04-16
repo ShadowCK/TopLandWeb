@@ -1,35 +1,35 @@
 import _ from 'lodash';
 import EventEmitter from 'eventemitter3';
 import { damageSources, damageTypes, statTypes } from './战斗属性.js';
-import * as settings from '../settings.js';
 import { getPlayer } from '../player/玩家管理器.js';
 
 const combatEvents = new EventEmitter();
 
-const 战局信息 = {
-  玩家: null,
-  区域: null,
-  敌人: [],
+/** @type {import('./战斗区域.js').战斗区域} */
+let 战斗区域 = null;
+
+const isPlayerInCombat = () => 战斗区域 !== null;
+
+const getEntitiesInCombat = () => {
+  if (!isPlayerInCombat()) {
+    return [];
+  }
+  return [getPlayer(), ...战斗区域.敌人];
 };
 
 const init = () => {
-  战局信息.玩家 = getPlayer();
+  // Do nothing for now
+  // TODO: is this necessary?
 };
 
-const isInCombat = (实体) => {
-  // 玩家在战斗中
-  if (实体 === getPlayer()) {
-    return 实体 === 战局信息.玩家 && 战局信息.敌人.length > 0;
-  }
-  // 敌人在战斗中
-  return 战局信息.敌人.includes(实体);
-};
+const isInCombat = (实体) => getEntitiesInCombat().includes(实体);
 
 const getTarget = (实体) => {
-  if (实体 === getPlayer()) {
-    return 战局信息.敌人[0];
+  const player = getPlayer();
+  if (实体 === player) {
+    return 战斗区域.敌人[0];
   }
-  return 战局信息.玩家;
+  return player;
 };
 
 /**
@@ -75,6 +75,47 @@ const skillDamage = (params) => {
     damageSource: damageSources.技能,
     damageDistribution: damageDistribution || { [damageType]: 1 },
   });
+};
+
+const 切换战斗区域 = (新区域) => {
+  if (新区域) {
+    战斗区域 = 新区域;
+    return;
+  }
+  // 退出战斗区域
+  战斗区域 = null;
+};
+
+const update = (dt) => {
+  if (!isPlayerInCombat()) {
+    return;
+  }
+  // 玩家在战斗中，断言有战斗区域
+  战斗区域.update(dt);
+};
+
+const updateCombat = (entity, dt) => {
+  if (!isInCombat(entity)) {
+    return;
+  }
+  const target = getTarget(entity);
+  if (!target) {
+    return;
+  }
+  // 填充攻击计时器
+  const 攻击速度 = Math.max(0, entity.getStat(statTypes.攻击速度) / 100);
+  entity.攻击计时器 += dt * 攻击速度;
+  if (entity.攻击计时器 >= entity.getStat(statTypes.攻击间隔, true)) {
+    entity.攻击计时器 = 0;
+    basicAttack({
+      damager: entity,
+      damaged: target,
+      damageType: '物理', // TODO: 以后会给实体加入伤害类型（伤害分布）
+    });
+  }
+
+  // TODO: 更新技能CD
+  // TODO: 如果自动施法打开，并且有技能可用，自动使用技能
 };
 
 // 计算伤害
@@ -153,4 +194,14 @@ combatEvents.on('实体攻击实体', (params) => {
   damager.heal(生命偷取);
 });
 
-export { init, basicAttack, skillDamage, isInCombat, getTarget, combatEvents };
+export {
+  切换战斗区域,
+  update,
+  updateCombat,
+  init,
+  basicAttack,
+  skillDamage,
+  isInCombat,
+  getTarget,
+  combatEvents,
+};

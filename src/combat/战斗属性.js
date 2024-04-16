@@ -41,6 +41,7 @@ const damageTypes = {
   真实: '真实',
 };
 
+// Or defaultStatGrowth
 const defaultStats = {
   最大生命值: [100, 5],
   最大魔法值: [100, 5],

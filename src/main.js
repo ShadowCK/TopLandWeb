@@ -232,6 +232,6 @@ window.onbeforeunload = () => {
     return;
   }
   // 保存玩家存档
-  玩家管理器.getPlayer().玩家存档.存档();
+  玩家管理器.存档();
   // 保存其他游戏信息
 };

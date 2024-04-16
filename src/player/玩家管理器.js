@@ -12,4 +12,8 @@ const init = (p) => {
 
 const getPlayer = () => player;
 
-export { init, getPlayer };
+const 存档 = () => {
+  player.玩家存档.存档();
+};
+
+export { init, getPlayer, 存档 };

@@ -1,8 +1,8 @@
 import _ from 'lodash';
 import { getBuffedStat } from './buff管理器.js';
-import * as 战斗管理器 from './战斗管理器.js';
 import { statTypes } from './战斗属性.js';
 import * as settings from '../settings.js';
+import { updateCombat } from './战斗管理器.js';
 
 class 实体 {
   stats = {};
@@ -155,28 +155,6 @@ class 实体 {
   }
 
   update(dt) {
-    const updateCombat = () => {
-      if (!战斗管理器.isInCombat(this)) {
-        return;
-      }
-      const target = 战斗管理器.getTarget(this);
-      if (!target) {
-        return;
-      }
-      const 攻击速度 = Math.max(0, this.getStat(statTypes.攻击速度) / 100);
-      this.攻击计时器 += dt * 攻击速度;
-      if (this.攻击计时器 >= this.getStat(statTypes.攻击间隔, true)) {
-        this.攻击计时器 = 0;
-        战斗管理器.basicAttack({
-          damager: this,
-          damaged: target,
-          damageType: '物理', // TODO: 以后会给实体加入伤害类型（伤害分布）
-        });
-      }
-
-      // TODO: 如果自动施法打开，并且有技能可用，自动使用技能
-    };
-
     // 更新Buff
     // Lodash的forEach方法可以遍历对象
     _.forEach(this.buffs, (typeBuffs, _statType) => {
@@ -196,12 +174,7 @@ class 实体 {
       this.restoreMana(this.getStat(statTypes.魔法回复, true));
     }
 
-    // 如果在战斗中，造成伤害，自动使用主动技能
-    updateCombat();
-
-    // 填充攻击计时器
-
-    // TODO: 更新技能CD
+    updateCombat(this, dt);
   }
 
   /**
@@ -211,7 +184,9 @@ class 实体 {
   设置职业(职业) {
     职业.parent = this;
     this.职业 = 职业;
-    职业.setLevel(职业.level); // Stats will be updated here
+    // 属性在setLevel中被更新
+    // 使用setLevel是为了保证职业的等级在有效范围内
+    职业.setLevel(职业.level);
     this.生命值 = this.getStat(statTypes.最大生命值, false);
     this.魔法值 = this.getStat(statTypes.最大魔法值, false);
   }

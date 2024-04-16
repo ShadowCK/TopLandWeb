@@ -30,6 +30,9 @@ const config = {
     格挡伤害: { min: 0, max: 95 },
     生命偷取: { min: 0, max: Infinity },
   },
+  最大敌人数: 1,
+  刷怪间隔: 5000, // ms
+  无敌人刷怪倍速: 10,
 };
 
 export { 默认优先级, getRequiredExp, config };
