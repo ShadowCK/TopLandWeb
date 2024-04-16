@@ -10,12 +10,12 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-      - uses: actions/checkout@v2
+      - uses: actions/checkout@v4
 
       - name: Set up Node.js
-        uses: actions/setup-node@v2
+        uses: actions/setup-node@v4
         with:
-          node-version: '14' # 根据你的项目需求选择版本
+          node-version: '20.12.2' # 根据你的项目需求选择版本
 
       - name: Install dependencies
         run: npm install
@@ -24,7 +24,7 @@ jobs:
         run: npm run build # 确保你有一个 "build" 脚本在你的 package.json
 
       - name: Deploy to GitHub Pages
-        uses: peaceiris/actions-gh-pages@v3
+        uses: peaceiris/actions-gh-pages@v4
         with:
           github_token: ${{ secrets.GITHUB_TOKEN }}
           publish_dir: ./dist # 根据你的构建输出目录调整
