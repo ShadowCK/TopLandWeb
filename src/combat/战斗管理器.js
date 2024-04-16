@@ -31,7 +31,6 @@ _.forEach(configs, (config) => {
 });
 
 const get战斗区域 = (name) => 所有战斗区域[name];
-console.log(所有战斗区域);
 
 const init = () => {
   // Do nothing for now

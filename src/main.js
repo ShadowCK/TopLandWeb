@@ -7,13 +7,51 @@ import * as 玩家管理器 from './player/玩家管理器.js';
 import * as 战斗管理器 from './combat/战斗管理器.js';
 import classConfigs from './classes/职业信息.js';
 import 职业 from './classes/职业.js';
-import { genLabel, genElementForStats, genProgressBar, updateProgressBar } from './htmlHelper.js';
+import {
+  genLabel,
+  genElementForStats,
+  genProgressBar,
+  updateProgressBar,
+  changeTab,
+} from './htmlHelper.js';
 import { statTypes } from './combat/战斗属性.js';
 import { 可以提升专精等级, 可以转生, 转生 } from './reincarnate/转生.js';
 import { getMaxLevel, templateFromElement } from './utils.js';
 import addToWindow from './debug.js';
+import { configs as 战斗区域配置 } from './combat/战斗区域.js';
 
 const setupHTML = () => {
+  const onVisible = (tabPath) => {
+    if (tabPath === '转生面板') {
+      const player = 玩家管理器.getPlayer();
+      const element = $('#转生面板-无法提升专精');
+      if (可以提升专精等级(player)) {
+        element.hide();
+      } else {
+        const header = element.find('.header:first');
+        const { 职业: playerClass } = player;
+        templateFromElement(header, {
+          等级: playerClass.level,
+          最大等级: playerClass.getMaxLevel(),
+        });
+        element.show();
+      }
+      const 可转生职业 = $('#转生面板-可转生职业');
+      可转生职业.empty();
+      _.forEach(classConfigs, (classConfig) => {
+        if (!可以转生(player, classConfig.name)) {
+          return;
+        }
+        const 专精等级 = player.玩家存档.专精等级[classConfig.name] || 0;
+        const button = $(`<div class="ui button">${classConfig.name} +${专精等级}</div>`);
+        可转生职业.append(button);
+        button.on('click', () => {
+          $.modal('确认转生', classConfig);
+        });
+      });
+    }
+  };
+
   $.fn.modal.settings.templates.确认转生 = function f(classConfig) {
     const player = 玩家管理器.getPlayer();
     const 当前职业名 = player.职业.name;
@@ -54,7 +92,7 @@ const setupHTML = () => {
               // 虽然 return true 会自动关闭模态框，但是在这里切换标签页再关闭会导致BUG，
               // 让dimmer不会消失（永远阻止用户操作）。所以手动关闭。
               this.hide();
-              $.tab('change tab', '角色面板');
+              changeTab('角色面板');
               return true;
             }
             $.toast({
@@ -76,37 +114,6 @@ const setupHTML = () => {
     };
   };
 
-  const onVisible = (tabPath) => {
-    if (tabPath === '转生面板') {
-      const player = 玩家管理器.getPlayer();
-      const element = $('#转生面板-无法提升专精');
-      if (可以提升专精等级(player)) {
-        element.hide();
-      } else {
-        const header = element.find('.header:first');
-        const { 职业: playerClass } = player;
-        templateFromElement(header, {
-          等级: playerClass.level,
-          最大等级: playerClass.getMaxLevel(),
-        });
-        element.show();
-      }
-      const 可转生职业 = $('#转生面板-可转生职业');
-      可转生职业.empty();
-      _.forEach(classConfigs, (classConfig) => {
-        if (!可以转生(player, classConfig.name)) {
-          return;
-        }
-        const 专精等级 = player.玩家存档.专精等级[classConfig.name] || 0;
-        const button = $(`<div class="ui button">${classConfig.name} +${专精等级}</div>`);
-        可转生职业.append(button);
-        button.on('click', () => {
-          $.modal('确认转生', classConfig);
-        });
-      });
-    }
-  };
-
   // 启用 Semantic UI 的标签页功能
   $('.menu .item').tab({
     onVisible,
@@ -123,6 +130,47 @@ const setupHTML = () => {
   genProgressBar('角色面板-经验值进度条', 角色面板进度条, 'green', '经验值').wrap(
     '<div class="column"></div>',
   );
+
+  // 区域面板
+  const 区域面板 = $('#区域面板');
+  _.forEach(战斗区域配置, (config) => {
+    const enemyConfigs = _.map(config.enemies, (literal) => literal.config);
+    const 敌人信息 = enemyConfigs
+      .map(
+        (enemyConfig) => `
+        <div class="column">
+          <div class="ui segment">
+            <div>${enemyConfig.职业.name}</div>
+            <div>金钱: ${enemyConfig.金钱}</div>
+            <div>经验值: ${enemyConfig.经验值}</div>
+          </div>
+        </div>
+      `,
+      )
+      .join('');
+    const element = $(`
+      <div class="ui segment">
+        <h3 class="ui header">
+          ${config.name}
+          <div class="sub header">${config.description}</div>
+        </h3>
+        <div class="ui three column grid">
+          ${敌人信息}
+        </div>
+        <div class="ui divider"></div>
+        <button class="ui right labeled icon button">
+          <i class="right arrow icon"></i>
+          前往
+        </button>
+      </div>
+      `);
+    // 前往按钮
+    element.find('button').on('click', () => {
+      changeTab('战斗面板');
+      战斗管理器.切换战斗区域(战斗管理器.get战斗区域(config.name));
+    });
+    区域面板.append(element);
+  });
 };
 
 /**

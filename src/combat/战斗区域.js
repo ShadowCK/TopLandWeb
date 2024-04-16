@@ -6,6 +6,7 @@ import 敌人 from './敌人.js';
 const configs = {
   新大陆: {
     name: '新大陆',
+    description: '魔能大陆重建前魔能使们停留的地方。昔日的荣光已经不再，只剩下愚蠢的后世文明。',
     level: 1,
     maxLevel: 1,
     enemies: {

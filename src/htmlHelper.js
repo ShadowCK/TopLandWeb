@@ -2,6 +2,13 @@ import _ from 'lodash';
 import * as 玩家管理器 from './player/玩家管理器.js';
 import { getDecimalPrecision } from './utils.js';
 
+const changeTab = (tabPath) => {
+  $.tab('change tab', tabPath);
+  // 上面的函数不会更改tab的active状态，所以我们手动更改
+  $(`a[data-tab="${tabPath}"]`).addClass('active');
+  $(`a[data-tab="${tabPath}"]`).siblings().filter('[data-tab]').removeClass('active');
+};
+
 const genLabel = (title, content, color = '') => {
   const label = $(`
   <div>
@@ -76,4 +83,4 @@ const genElementForStats = (parent, value, key, labelColor = '', path = [key]) =
   parent.append(html);
 };
 
-export { genLabel, genProgressBar, updateProgressBar, genElementForStats };
+export { changeTab, genLabel, genProgressBar, updateProgressBar, genElementForStats };
