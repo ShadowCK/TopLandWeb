@@ -1,0 +1,25 @@
+{
+  "extends": ["airbnb/base", "prettier"],
+  "rules": {
+    "no-underscore-dangle": "off",
+    "no-plusplus": "off",
+    "import/extensions": "off",
+    "no-param-reassign": ["error", { "props": false }],
+    "no-unused-vars": ["error", { "argsIgnorePattern": "^_" }],
+    "curly": ["error", "all"],
+    "class-methods-use-this": "warn",
+    "import/no-cycle": "warn"
+  },
+  "env": {
+    "browser": true,
+    "node": true
+  },
+  "parserOptions": {
+    "ecmaVersion": "latest"
+  },
+  "globals": {
+    "WEBPACK_MODE": "readonly", // Our webpack "macro"
+    "$": "readonly" // jQuery
+  },
+  "ignorePatterns": ["test/**/*.js", "dist/**/*.js"]
+}
