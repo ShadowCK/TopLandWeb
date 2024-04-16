@@ -1,6 +1,5 @@
 import * as LZString from 'lz-string';
 import _ from 'lodash';
-import { getPlayer } from './玩家管理器.js';
 import 职业 from '../classes/职业.js';
 
 class 玩家存档 {
@@ -35,8 +34,7 @@ class 玩家存档 {
   /**
    * 通常情况下，每次读档后都要应用存档数据
    */
-  应用存档() {
-    const player = getPlayer();
+  应用存档(player) {
     player.玩家存档 = this;
     // this.职业可能是普通对象(classConfig)，不能直接player.职业=this.职业。
     // 需要使用this.职业作为模板创建新职业并更新this.职业的引用

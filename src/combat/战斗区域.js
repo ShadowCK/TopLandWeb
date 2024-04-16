@@ -5,11 +5,19 @@ import 敌人 from './敌人.js';
 import { EventType, combatEvents } from '../events/事件管理器.js';
 
 const configs = {
+  下水道: {
+    name: '下水道',
+    description: '下水道里面有很多老鼠。',
+    enemies: {
+      老鼠: {
+        config: 敌人信息.老鼠,
+        weight: 1,
+      },
+    },
+  },
   新大陆: {
     name: '新大陆',
     description: '魔能大陆重建前魔能使们停留的地方。昔日的荣光已经不再，只剩下愚蠢的后世文明。',
-    level: 1,
-    maxLevel: 1,
     enemies: {
       菜鸡魔能使: {
         config: 敌人信息.菜鸡魔能使,
@@ -34,10 +42,6 @@ class 战斗区域 {
 
   description = '下水道里面有很多老鼠。';
 
-  level = 1;
-
-  maxLevel = 1;
-
   enemies = {
     老鼠: {
       config: 敌人信息.老鼠,
@@ -46,6 +50,10 @@ class 战斗区域 {
   };
 
   // 非配置数据
+  level = 1;
+
+  maxLevel = 1;
+
   levelCap = settings.config.最大区域等级;
 
   敌人 = [];
