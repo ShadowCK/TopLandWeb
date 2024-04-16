@@ -274,7 +274,7 @@ window.onload = () => {
 
   // 设置update loop
   // 200 ticks per second
-  setInterval(() => update(5), 5);
+  setInterval(() => update(5 / 1000), 5);
 
   // 20 ticks per second
   setHTMLInterval(50);
