@@ -98,7 +98,7 @@ const 退出战斗区域 = () => {
     return;
   }
   // 移除敌人
-  当前战斗区域.敌人.length = 0;
+  当前战斗区域.clearEnemies();
   当前战斗区域 = null;
 };
 
