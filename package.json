@@ -5,6 +5,7 @@
   "main": "./src/main.js",
   "type": "module",
   "scripts": {
+    "build": "webpack --mode production",
     "webpack": "webpack",
     "webpackWatch": "webpack watch",
     "pretest": "eslint ./src --fix",

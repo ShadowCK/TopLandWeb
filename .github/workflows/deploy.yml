@@ -1,0 +1,30 @@
+name: Build and Deploy to GitHub Pages
+
+on:
+  push:
+    branches:
+      - main # 你的默认分支名，可能是 main 或 master
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v2
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v2
+        with:
+          node-version: '14' # 根据你的项目需求选择版本
+
+      - name: Install dependencies
+        run: npm install
+
+      - name: Build project
+        run: npm run build # 确保你有一个 "build" 脚本在你的 package.json
+
+      - name: Deploy to GitHub Pages
+        uses: peaceiris/actions-gh-pages@v3
+        with:
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+          publish_dir: ./dist # 根据你的构建输出目录调整
