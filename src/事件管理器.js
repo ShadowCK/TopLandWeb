@@ -1,5 +1,7 @@
 import EventEmitter from 'eventemitter3';
 
+const combatEvents = new EventEmitter();
+
 const generalEvents = new EventEmitter();
 
-export default generalEvents;
+export { combatEvents, generalEvents };

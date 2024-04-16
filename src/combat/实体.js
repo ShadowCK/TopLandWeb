@@ -2,6 +2,7 @@ import _ from 'lodash';
 import { getBuffedStat } from './buff管理器.js';
 import { statTypes } from './战斗属性.js';
 import * as settings from '../settings.js';
+import { combatEvents } from '../事件管理器.js';
 
 class 实体 {
   stats = {};
@@ -42,6 +43,12 @@ class 实体 {
 
   die() {
     this.isDead = true;
+    combatEvents.emit('实体死亡', { entity: this });
+  }
+
+  复活(生命值百分比 = 0.00001) {
+    this.isDead = false;
+    this.生命值 = this.getStat2(statTypes.最大生命值) * 生命值百分比;
   }
 
   constructor() {
@@ -60,6 +67,9 @@ class 实体 {
   }
 
   updateStats(multiplier = 1) {
+    const 原始最大生命值 = this.stats[statTypes.最大生命值];
+    const 原始最大魔法值 = this.stats[statTypes.最大生命值];
+
     const { statGrowth, level } = this.职业;
     // 递归函数来处理stats
     const processStats = (stats, path = []) => {
@@ -77,17 +87,23 @@ class 实体 {
     };
     // 调用递归函数处理所有stats
     processStats(statGrowth);
+
+    // 根据新的属性计算新的生命值和魔法值
+    const 最大生命值 = this.getStat2(statTypes.最大生命值);
+    const 最大魔法值 = this.getStat2(statTypes.最大魔法值);
+    this.生命值 = (this.生命值 / 原始最大生命值) * 最大生命值;
+    this.魔法值 = (this.魔法值 / 原始最大魔法值) * 最大魔法值;
   }
 
   heal(value) {
-    const 最大生命值 = this.getStat(statTypes.最大生命值);
-    const 生命回复效率 = this.getStat(statTypes.生命回复效率);
+    const 最大生命值 = this.getStat2(statTypes.最大生命值);
+    const 生命回复效率 = this.getStat2(statTypes.生命回复效率);
     this.生命值 = Math.min(最大生命值, this.生命值 + value * 生命回复效率);
   }
 
   restoreMana(value) {
-    const 最大魔法值 = this.getStat(statTypes.最大魔法值);
-    const 魔法回复效率 = this.getStat(statTypes.魔法回复效率);
+    const 最大魔法值 = this.getStat2(statTypes.最大魔法值);
+    const 魔法回复效率 = this.getStat2(statTypes.魔法回复效率);
     this.魔法值 = Math.min(最大魔法值, this.魔法值 + value * 魔法回复效率);
   }
 
@@ -113,7 +129,7 @@ class 实体 {
   }
 
   get最大魔典数() {
-    return Math.max(1, Math.floor(this.getStat(statTypes.最大魔典数)));
+    return Math.max(1, Math.floor(this.getStat2(statTypes.最大魔典数)));
   }
 
   calcStat(value, statType) {
@@ -154,6 +170,9 @@ class 实体 {
   }
 
   update(dt) {
+    if (this.isDead) {
+      return;
+    }
     // 更新Buff
     // Lodash的forEach方法可以遍历对象
     _.forEach(this.buffs, (typeBuffs, _statType) => {
@@ -169,8 +188,8 @@ class 实体 {
     this.回复计时器 += dt;
     if (this.回复计时器 >= 1) {
       this.回复计时器 = 0;
-      this.heal(this.getStat(statTypes.生命回复, true));
-      this.restoreMana(this.getStat(statTypes.魔法回复, true));
+      this.heal(this.getStat2(statTypes.生命回复, true));
+      this.restoreMana(this.getStat2(statTypes.魔法回复, true));
     }
   }
 
@@ -184,8 +203,8 @@ class 实体 {
     // 属性在setLevel中被更新
     // 使用setLevel是为了保证职业的等级在有效范围内
     职业.setLevel(职业.level);
-    this.生命值 = this.getStat(statTypes.最大生命值, false);
-    this.魔法值 = this.getStat(statTypes.最大魔法值, false);
+    this.生命值 = this.getStat2(statTypes.最大生命值, false);
+    this.魔法值 = this.getStat2(statTypes.最大魔法值, false);
   }
 }
 

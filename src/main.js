@@ -82,7 +82,7 @@ const setupHTML = () => {
             if (result) {
               $.toast({
                 displayTime: 2000,
-                class: 'green center aligned chinese',
+                class: 'success center aligned chinese',
                 showProgress: 'bottom',
                 position: 'top attached',
                 title: '转生成功',
@@ -96,7 +96,7 @@ const setupHTML = () => {
             }
             $.toast({
               displayTime: 5000,
-              class: 'red chinese',
+              class: 'error chinese',
               showProgress: 'bottom',
               title: '转生失败！',
               message: `发生了一个意外错误`,

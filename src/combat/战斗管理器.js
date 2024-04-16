@@ -1,10 +1,9 @@
 import _ from 'lodash';
-import EventEmitter from 'eventemitter3';
 import { damageSources, damageTypes, statTypes } from './战斗属性.js';
 import { getPlayer } from '../player/玩家管理器.js';
 import { 战斗区域, configs } from './战斗区域.js';
-
-const combatEvents = new EventEmitter();
+import { combatEvents } from '../事件管理器.js';
+import { changeTab } from '../htmlHelper.js';
 
 /** @type {import('./战斗区域.js').战斗区域} */
 let 当前战斗区域 = null;
@@ -60,7 +59,7 @@ const basicAttack = (params) => {
   combatEvents.emit('实体攻击实体', {
     damager,
     damaged,
-    damage: damager.getStat(statTypes.攻击力),
+    damage: damager.getStat2(statTypes.攻击力),
     damageSource: damageSources.普攻,
     damageDistribution:
       damageDistribution || damageType ? { [damageType]: 1 } : { [damageTypes.物理]: 1 },
@@ -94,6 +93,12 @@ const skillDamage = (params) => {
 };
 
 const 退出战斗区域 = () => {
+  if (!当前战斗区域) {
+    console.warn('玩家不在战斗中，但是死了？');
+    return;
+  }
+  // 移除敌人
+  当前战斗区域.敌人.length = 0;
   当前战斗区域 = null;
 };
 
@@ -113,7 +118,13 @@ const update = (dt) => {
   当前战斗区域.update(dt);
 };
 
+/**
+ * @param {import('./实体.js').default} entity
+ */
 const updateCombat = (entity, dt) => {
+  if (entity.isDead) {
+    return;
+  }
   if (!isInCombat(entity)) {
     return;
   }
@@ -122,9 +133,9 @@ const updateCombat = (entity, dt) => {
     return;
   }
   // 填充攻击计时器
-  const 攻击速度 = Math.max(0, entity.getStat(statTypes.攻击速度) / 100);
+  const 攻击速度 = Math.max(0, entity.getStat2(statTypes.攻击速度) / 100);
   entity.攻击计时器 += dt * 攻击速度;
-  if (entity.攻击计时器 >= entity.getStat(statTypes.攻击间隔, true)) {
+  if (entity.攻击计时器 >= entity.getStat2(statTypes.攻击间隔, true)) {
     entity.攻击计时器 = 0;
     basicAttack({
       damager: entity,
@@ -159,10 +170,10 @@ combatEvents.on('实体攻击实体', (params) => {
   }
 
   // 计算暴击（暴击不分开计算）
-  const 暴击率 = damager.getStat(statTypes.暴击率);
+  const 暴击率 = damager.getStat2(statTypes.暴击率);
   const 造成暴击 = Math.random() < 暴击率 / 100;
   // 超过100%的每点暴击率增加1%暴击伤害。
-  const 暴击倍率 = (damager.getStat(statTypes.暴击伤害) + Math.min(0, 暴击率 - 100)) / 100;
+  const 暴击倍率 = (damager.getStat2(statTypes.暴击伤害) + Math.min(0, 暴击率 - 100)) / 100;
 
   // 计算格挡（格挡不分开计算）
   const 格挡率 = damaged.getStat2(statTypes.格挡率, true);
@@ -179,8 +190,8 @@ combatEvents.on('实体攻击实体', (params) => {
       return;
     }
     // 先计算抗性对伤害的影响（先乘算）
-    let 伤害抗性 = damaged.getStat(`${statTypes.伤害抗性}.${type}`) || 0;
-    let 抗性穿透 = damager.getStat(`${statTypes.抗性穿透}.${type}`) || 0;
+    let 伤害抗性 = damaged.getStat2(`${statTypes.伤害抗性}.${type}`) || 0;
+    let 抗性穿透 = damager.getStat2(`${statTypes.抗性穿透}.${type}`) || 0;
     伤害抗性 /= 100;
     抗性穿透 /= 100;
     if (伤害抗性 > 1) {
@@ -203,7 +214,7 @@ combatEvents.on('实体攻击实体', (params) => {
       damagePartition *= 格挡倍率;
     }
     // 计算防御力对伤害的影响（后加算）
-    const defensePartition = damaged.getStat(statTypes.防御力) * mult;
+    const defensePartition = damaged.getStat2(statTypes.防御力) * mult;
     totalDamage += damagePartition - defensePartition;
   });
   // 对受击者造成伤害
@@ -211,6 +222,27 @@ combatEvents.on('实体攻击实体', (params) => {
   // 生命偷取
   const 生命偷取 = (damager.getStat2(statTypes.生命偷取, true) / 100) * totalDamage;
   damager.heal(生命偷取);
+});
+
+// 监听实体死亡事件
+combatEvents.on('实体死亡', ({ entity }) => {
+  if (entity === getPlayer()) {
+    退出战斗区域();
+    $.toast({
+      displayTime: 2000,
+      class: 'error chinese',
+      showProgress: 'bottom',
+      title: '你死了！',
+      message: `真是个菜鸡`,
+    });
+    changeTab('角色面板');
+    // 立刻复活玩家
+    // 目前没有死亡惩罚！
+    // TODO: 自动前往上次的战斗区域（就是不退出战斗区域）作为一个自动化功能！
+    entity.复活();
+    return;
+  }
+  当前战斗区域.removeEnemy(entity);
 });
 
 export {
@@ -227,7 +259,6 @@ export {
   skillDamage,
   isInCombat,
   getTarget,
-  combatEvents,
 };
 
 window.a = () => 当前战斗区域;
