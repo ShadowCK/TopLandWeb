@@ -31,7 +31,7 @@ const setupHTML = () => {
       content: `
       ${canLevelUpExpertise ? genLabel('专精等级UP！', '', 'green').html() : ''}
       <div>原职业：${当前职业名}</div>
-      <div>新职业：${classConfig.name} 1/${新职业最大等级}/${新职业专精等级}</div>
+      <div>新职业：${classConfig.name} 1/${新职业最大等级} +${新职业专精等级}</div>
       `,
       actions: [
         {
@@ -96,7 +96,8 @@ const setupHTML = () => {
         if (!可以转生(player, classConfig.name)) {
           return;
         }
-        const button = $(`<div class="ui button">${classConfig.name}</div>`);
+        const 专精等级 = player.玩家存档.专精等级[classConfig.name] || 0;
+        const button = $(`<div class="ui button">${classConfig.name} +${专精等级}</div>`);
         可转生职业.append(button);
         button.on('click', () => {
           $.modal('确认转生', classConfig);
