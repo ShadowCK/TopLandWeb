@@ -97,14 +97,21 @@ class 战斗区域 {
     return this.敌人.length < this.最大敌人数;
   }
 
-  removeEnemy(enemy) {
+  clearEnemies() {
+    this.敌人.forEach((enemy) => {
+      combatEvents.emit(EventType.移除实体, { entity: enemy });
+    });
+    this.敌人.length = 0;
+  }
+
+  removeEnemy(enemy, isForce = false) {
     const index = this.敌人.indexOf(enemy);
     if (index === -1) {
       return;
     }
     const eventData = { entity: enemy, isCancelled: false };
     combatEvents.emit(EventType.移除实体, eventData);
-    if (!eventData.isCancelled) {
+    if (isForce || !eventData.isCancelled) {
       this.敌人.splice(index, 1);
     }
   }
@@ -118,7 +125,7 @@ class 战斗区域 {
     let enemyLiteral;
     if (this.刷怪数量 > settings.config.必定刷新BOSS刷怪数量) {
       this.刷怪数量 = 0;
-      this.敌人.length = 0;
+      this.clearEnemies();
       enemyLiteral = enemies.find((enemy) => enemy.config.isBoss);
     } else {
       const totalWeight = enemies.reduce((acc, enemy) => acc + enemy.weight, 0);
