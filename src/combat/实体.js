@@ -60,7 +60,7 @@ class 实体 {
     return _.get(this.职业.statGrowth, path) || [0, 0];
   }
 
-  updateStats() {
+  updateStats(multiplier = 1) {
     const { statGrowth, level } = this.职业;
     // 递归函数来处理stats
     const processStats = (stats, path = []) => {
@@ -69,7 +69,7 @@ class 实体 {
         if (Array.isArray(value)) {
           // 如果是数组（statGrowth），计算值并设置。
           const [base, scale] = value;
-          _.set(this.stats, currentPath, base + scale * (level - 1));
+          _.set(this.stats, currentPath, base + scale * (level - 1) * multiplier);
         } else if (_.isObject(value)) {
           // 如果是对象，递归处理
           processStats(value, currentPath);

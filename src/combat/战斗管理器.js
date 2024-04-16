@@ -10,6 +10,11 @@ let 战斗区域 = null;
 
 const isPlayerInCombat = () => 战斗区域 !== null;
 
+/**
+ * @returns {import('./敌人.js'.default)[]} 战斗区域中敌人的array的copy
+ */
+const getEnemiesInCombat = () => (isPlayerInCombat() ? [...战斗区域.敌人] : []);
+
 const getEntitiesInCombat = () => {
   if (!isPlayerInCombat()) {
     return [];
@@ -197,6 +202,8 @@ combatEvents.on('实体攻击实体', (params) => {
 export {
   切换战斗区域,
   update,
+  getEnemiesInCombat,
+  getEntitiesInCombat,
   updateCombat,
   init,
   basicAttack,

@@ -11,6 +11,7 @@ import { genLabel, genElementForStats, genProgressBar, updateProgressBar } from 
 import { statTypes } from './combat/战斗属性.js';
 import { 可以提升专精等级, 可以转生, 转生 } from './reincarnate/转生.js';
 import { getMaxLevel, templateFromElement } from './utils.js';
+import addToWindow from './debug.js';
 
 const setupHTML = () => {
   $.fn.modal.settings.templates.确认转生 = function f(classConfig) {
@@ -184,7 +185,14 @@ const updateHTML = (params) => {
   });
 };
 
-const update = () => {};
+const update = () => {
+  战斗管理器.update();
+
+  玩家管理器.getPlayer().update();
+  战斗管理器.getEnemiesInCombat().forEach((enemy) => {
+    enemy.update();
+  });
+};
 
 let htmlWorkerId = null;
 const setHTMLInterval = (delay) => {
@@ -209,7 +217,7 @@ window.onload = () => {
 
   console.log('游戏加载完成');
   console.log('玩家信息：', 玩家管理器.getPlayer());
-  window.player = player;
+  addToWindow('player', player);
 
   // 在所有数据都加载完毕后，设置HTML
   setupHTML();

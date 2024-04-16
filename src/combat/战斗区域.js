@@ -1,6 +1,7 @@
 import * as math from 'mathjs';
 import 敌人信息 from './敌人信息.js';
 import * as settings from '../settings.js';
+import 敌人 from './敌人.js';
 
 const configs = {
   新大陆: {
@@ -77,16 +78,23 @@ class 战斗区域 {
     return this.敌人.length < this.最大敌人数;
   }
 
+  removeEnemy(enemy) {
+    const index = this.敌人.indexOf(enemy);
+    if (index !== -1) {
+      this.敌人.splice(index, 1);
+    }
+  }
+
   genEnemy() {
     const enemies = Object.values(this.enemies);
     const totalWeight = enemies.reduce((acc, enemy) => acc + enemy.weight, 0);
     const rand = Math.random() * totalWeight;
     let sum = 0;
-    const result = enemies.find((enemy) => {
+    const enemyConfig = enemies.find((enemy) => {
       sum += enemy.weight;
       return rand < sum;
     });
-    return result;
+    return new 敌人(enemyConfig.config, this.level, this.maxLevel);
   }
 
   get难度加成 = () =>
