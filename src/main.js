@@ -29,7 +29,7 @@ const setupHTML = () => {
       title: `转生成为${classConfig.name}`,
       closeIcon: true,
       content: `
-      ${canLevelUpExpertise ? genLabel('专精等级UP！', '', 'green').wrap('div').html() : ''}
+      ${canLevelUpExpertise ? genLabel('专精等级UP！', '', 'green').html() : ''}
       <div>原职业：${当前职业名}</div>
       <div>新职业：${classConfig.name} 1/${新职业最大等级}/${新职业专精等级}</div>
       `,
@@ -50,6 +50,10 @@ const setupHTML = () => {
                 title: '转生成功',
                 message: `你现在是一名${classConfig.name}了`,
               });
+              // 虽然 return true 会自动关闭模态框，但是在这里切换标签页再关闭会导致BUG，
+              // 让dimmer不会消失（永远阻止用户操作）。所以手动关闭。
+              this.hide();
+              $.tab('change tab', '角色面板');
               return true;
             }
             $.toast({
