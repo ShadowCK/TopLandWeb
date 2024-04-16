@@ -13,6 +13,7 @@ import {
   genProgressBar,
   updateProgressBar,
   changeTab,
+  genCombatLayout,
 } from './htmlHelper.js';
 import { statTypes } from './combat/战斗属性.js';
 import { 可以提升专精等级, 可以转生, 转生 } from './reincarnate/转生.js';
@@ -229,6 +230,14 @@ const updateHTML = (params) => {
   属性成长.empty();
   _.forEach(player.职业.statGrowth, (value, key) => {
     genElementForStats(属性成长, value, key);
+  });
+
+  // 战斗面板
+  const 战斗面板实体列表 = $('#战斗面板-实体列表');
+  战斗面板实体列表.empty();
+  genCombatLayout(player, 战斗面板实体列表, true);
+  战斗管理器.getEnemiesInCombat().forEach((enemy) => {
+    genCombatLayout(enemy, 战斗面板实体列表);
   });
 };
 

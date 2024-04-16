@@ -9,25 +9,33 @@ const changeTab = (tabPath) => {
   $(`a[data-tab="${tabPath}"]`).siblings().filter('[data-tab]').removeClass('active');
 };
 
-const genLabel = (title, content, color = '') => {
-  const label = $(`
+const labelHTML = (title, content, color = '') =>
+  `
   <div>
     <div class="ui ${color} horizontal label">${title}</div>
     ${content || ''}
   </div>
-  `);
+  `;
+
+const genLabel = (title, content, color = '') => {
+  const label = $(labelHTML(title, content, color));
   return label;
 };
 
-const genProgressBar = (id, parent, color = '', label = '', value = 0, maxValue = 1) => {
-  const html = `
-  <div id="${id}" class="ui ${color} progress active" data-percent="${(value / maxValue) * 100}">
+const progressBarHTML = (id, color = '', label = '', value = 0, maxValue = 1) =>
+  `
+  <div ${id ? `id="${id}"` : ''} class="ui ${color} progress active" data-percent="${
+    (value / maxValue) * 100
+  }">
     <div class="bar">
       <div class="progress"></div>
     </div>
     <div class="label">${label}</div>
-  </div>`;
-  const bar = $(html);
+  </div>
+  `;
+
+const genProgressBar = (id, parent, color = '', label = '', value = 0, maxValue = 1) => {
+  const bar = $(progressBarHTML(id, color, label, value, maxValue));
   // 初始化进度条
   bar.progress();
   parent.append(bar);
@@ -43,6 +51,33 @@ const updateProgressBar = (bar, value, maxValue, format = '{value} / {total}', p
       active: format,
     },
   });
+};
+
+/**
+ * @param {import('./combat/实体.js').default} entity
+ */
+const genCombatLayout = (entity, parent, isPlayer = false) => {
+  const html = `
+  <div class="column">
+    <div class="ui segment">
+    ${`<h3 class="ui header">${isPlayer ? '你' : entity.职业.name}</h3>`}
+    ${isPlayer ? labelHTML('职业', entity.职业.name, 'teal') : ''}
+    <div class="ui message">
+      <p>${entity.职业.description}</p>
+    </div>
+    <div class="ui divider"></div>
+    ${progressBarHTML('', 'red', '生命值', entity.生命值, entity.getStat2('最大生命值'))}
+    ${progressBarHTML('', 'blue', '魔法值', entity.魔法值, entity.getStat2('最大魔法值'))}
+    </div>
+  </div>
+  `;
+  const element = $(html);
+  element.find('.progress').progress({
+    text: {
+      active: '{value} / {total}',
+    },
+  });
+  $(parent).append(element);
 };
 
 /**
@@ -83,4 +118,11 @@ const genElementForStats = (parent, value, key, labelColor = '', path = [key]) =
   parent.append(html);
 };
 
-export { changeTab, genLabel, genProgressBar, updateProgressBar, genElementForStats };
+export {
+  changeTab,
+  genLabel,
+  genProgressBar,
+  updateProgressBar,
+  genElementForStats,
+  genCombatLayout,
+};
