@@ -43,7 +43,7 @@ const setupHTML = () => {
             const result = 转生(玩家管理器.getPlayer(), classConfig.name);
             if (result) {
               $.toast({
-                displayTime: 5000,
+                displayTime: 2000,
                 class: 'green center aligned chinese',
                 showProgress: 'bottom',
                 position: 'top attached',
