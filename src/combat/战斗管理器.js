@@ -171,7 +171,7 @@ combatEvents.on('实体攻击实体', (params) => {
 
   // 遍历伤害分布，根据不同的伤害类型计算总伤害
   let totalDamage = 0;
-  _.forEach(damageDistribution, (type, mult) => {
+  _.forEach(damageDistribution, (mult, type) => {
     let damagePartition = damage * mult;
     // 真实伤害不受抗性和防御力影响
     if (type === damageTypes.真实) {
