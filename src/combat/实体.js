@@ -1,10 +1,13 @@
 import _ from 'lodash';
+import { v4 as uuidv4 } from 'uuid';
 import { getBuffedStat } from './buff管理器.js';
-import { statTypes } from './战斗属性.js';
+import { StatType } from './战斗属性.js';
 import * as settings from '../settings.js';
-import { combatEvents } from '../事件管理器.js';
+import { EventType, combatEvents } from '../events/事件管理器.js';
 
 class 实体 {
+  uuid = uuidv4();
+
   stats = {};
 
   buffs = {};
@@ -43,12 +46,12 @@ class 实体 {
 
   die() {
     this.isDead = true;
-    combatEvents.emit('实体死亡', { entity: this });
+    combatEvents.emit(EventType.实体死亡, { entity: this });
   }
 
   复活(生命值百分比 = 0.00001) {
     this.isDead = false;
-    this.生命值 = this.getStat2(statTypes.最大生命值) * 生命值百分比;
+    this.生命值 = this.getStat2(StatType.最大生命值) * 生命值百分比;
   }
 
   constructor() {
@@ -67,8 +70,8 @@ class 实体 {
   }
 
   updateStats(multiplier = 1) {
-    const 原始最大生命值 = this.stats[statTypes.最大生命值];
-    const 原始最大魔法值 = this.stats[statTypes.最大生命值];
+    const 原始最大生命值 = this.stats[StatType.最大生命值];
+    const 原始最大魔法值 = this.stats[StatType.最大生命值];
 
     const { statGrowth, level } = this.职业;
     // 递归函数来处理stats
@@ -89,21 +92,21 @@ class 实体 {
     processStats(statGrowth);
 
     // 根据新的属性计算新的生命值和魔法值
-    const 最大生命值 = this.getStat2(statTypes.最大生命值);
-    const 最大魔法值 = this.getStat2(statTypes.最大魔法值);
+    const 最大生命值 = this.getStat2(StatType.最大生命值);
+    const 最大魔法值 = this.getStat2(StatType.最大魔法值);
     this.生命值 = (this.生命值 / 原始最大生命值) * 最大生命值;
     this.魔法值 = (this.魔法值 / 原始最大魔法值) * 最大魔法值;
   }
 
   heal(value) {
-    const 最大生命值 = this.getStat2(statTypes.最大生命值);
-    const 生命回复效率 = this.getStat2(statTypes.生命回复效率);
+    const 最大生命值 = this.getStat2(StatType.最大生命值);
+    const 生命回复效率 = this.getStat2(StatType.生命回复效率);
     this.生命值 = Math.min(最大生命值, this.生命值 + value * 生命回复效率);
   }
 
   restoreMana(value) {
-    const 最大魔法值 = this.getStat2(statTypes.最大魔法值);
-    const 魔法回复效率 = this.getStat2(statTypes.魔法回复效率);
+    const 最大魔法值 = this.getStat2(StatType.最大魔法值);
+    const 魔法回复效率 = this.getStat2(StatType.魔法回复效率);
     this.魔法值 = Math.min(最大魔法值, this.魔法值 + value * 魔法回复效率);
   }
 
@@ -120,8 +123,14 @@ class 实体 {
    */
   getStat(statType, calcBuffs = true, range = { min: -Infinity, max: Infinity }) {
     const base = _.get(this.stats, statType);
+    // 有可能是属性名写错了，也有可能是没有配置该属性（比如实体没有抗性穿透.物理）
+    // TODO: 可以细分该情况，通过比对一个默认的属性配置表（默认属性值，来判断是写错了还是略过配置
+    // 已经有defaultStats可以利用了，但是defaultStats不全。而且Object.assign给statGrowth不是递归赋值，只是简单地覆盖
+    // 也就是说，抗性穿透这种是一个object的属性，即使默认配置是全的，也会被职业配置里内容更少的完全覆盖，导致抗性穿透.XX还是空的。
+    // 所以，要么补全defaultStats并在这里检测defaultStats里是否有该属性（也就是不用考虑被更少的覆盖，反正defaultStats里有）；
+    // 要么让defaultStats给statGrowth时是递归赋值，保证配置不写全的情况下，所有属性也都有默认值（那样就不用检测defaultStats里是否有该属性了，
+    // this.stats/statGrowth没有就是肯定没有）。递归赋值可以参考updateStats里的processStats的结构。
     if (base == null) {
-      console.error(`Stat "${statType}" not found`);
       return 0;
     }
     const result = calcBuffs ? getBuffedStat(this, { value: base, type: statType }) : base;
@@ -129,7 +138,7 @@ class 实体 {
   }
 
   get最大魔典数() {
-    return Math.max(1, Math.floor(this.getStat2(statTypes.最大魔典数)));
+    return Math.max(1, Math.floor(this.getStat2(StatType.最大魔典数)));
   }
 
   calcStat(value, statType) {
@@ -188,8 +197,8 @@ class 实体 {
     this.回复计时器 += dt;
     if (this.回复计时器 >= 1) {
       this.回复计时器 = 0;
-      this.heal(this.getStat2(statTypes.生命回复, true));
-      this.restoreMana(this.getStat2(statTypes.魔法回复, true));
+      this.heal(this.getStat2(StatType.生命回复, true));
+      this.restoreMana(this.getStat2(StatType.魔法回复, true));
     }
   }
 
@@ -203,8 +212,8 @@ class 实体 {
     // 属性在setLevel中被更新
     // 使用setLevel是为了保证职业的等级在有效范围内
     职业.setLevel(职业.level);
-    this.生命值 = this.getStat2(statTypes.最大生命值, false);
-    this.魔法值 = this.getStat2(statTypes.最大魔法值, false);
+    this.生命值 = this.getStat2(StatType.最大生命值, false);
+    this.魔法值 = this.getStat2(StatType.最大魔法值, false);
   }
 }
 

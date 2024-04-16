@@ -1,7 +1,7 @@
 /**
  * 只包含可以被增幅的属性，不包括生命值，魔法值等属性
  */
-const statTypes = {
+const StatType = {
   最大生命值: '最大生命值',
   最大魔法值: '最大魔法值',
   生命回复: '生命回复',
@@ -25,12 +25,12 @@ const statTypes = {
   最大魔典数: '最大魔典数',
 };
 
-const damageSources = {
+const DamageSource = {
   普攻: '普攻', // Basic attack
   技能: '技能', // Skill
 };
 
-const damageTypes = {
+const DamageType = {
   物理: '物理',
   奥术: '奥术',
   冰霜: '冰霜',
@@ -70,4 +70,4 @@ const defaultStats = {
   最大魔典数: [1, 0],
 };
 
-export { statTypes, damageSources, damageTypes, defaultStats };
+export { StatType, DamageSource, DamageType, defaultStats };

@@ -14,11 +14,13 @@ import {
   updateProgressBar,
   changeTab,
   genCombatLayout,
+  config as htmlConfig,
 } from './htmlHelper.js';
-import { statTypes } from './combat/战斗属性.js';
+import { StatType } from './combat/战斗属性.js';
 import { 可以提升专精等级, 可以转生, 转生 } from './reincarnate/转生.js';
 import { getMaxLevel, templateFromElement } from './utils.js';
 import addToWindow from './debug.js';
+import registerHTMLEvents from './events/htmlHandler.js';
 
 const setupHTML = () => {
   const onVisible = (tabPath) => {
@@ -121,15 +123,24 @@ const setupHTML = () => {
 
   // 角色面板
   const 角色面板进度条 = $('#角色面板-进度条');
-  genProgressBar('角色面板-生命值进度条', 角色面板进度条, 'red', '生命值').wrap(
-    $('<div class="column"></div>'),
-  );
-  genProgressBar('角色面板-魔法值进度条', 角色面板进度条, 'blue', '魔法值').wrap(
-    $('<div class="column"></div>'),
-  );
-  genProgressBar('角色面板-经验值进度条', 角色面板进度条, 'green', '经验值').wrap(
-    '<div class="column"></div>',
-  );
+  genProgressBar({
+    id: '角色面板-生命值进度条',
+    parent: 角色面板进度条,
+    color: 'red',
+    format: htmlConfig.生命条格式,
+  }).wrap($('<div class="column"></div>'));
+  genProgressBar({
+    id: '角色面板-魔法值进度条',
+    parent: 角色面板进度条,
+    color: 'blue',
+    format: htmlConfig.魔法条格式,
+  }).wrap($('<div class="column"></div>'));
+  genProgressBar({
+    id: '角色面板-经验值进度条',
+    parent: 角色面板进度条,
+    color: 'green',
+    format: htmlConfig.经验条格式,
+  }).wrap('<div class="column"></div>');
 
   // 区域面板
   const 区域面板 = $('#区域面板');
@@ -171,6 +182,11 @@ const setupHTML = () => {
     });
     区域面板.append(element);
   });
+
+  // 战斗面板
+  const 战斗面板实体列表 = $('#战斗面板-实体列表');
+  const player = 玩家管理器.getPlayer();
+  genCombatLayout(player, 战斗面板实体列表, true);
 };
 
 /**
@@ -201,21 +217,16 @@ const updateHTML = (params) => {
   updateProgressBar(
     $('#角色面板-生命值进度条'),
     player.生命值,
-    player.getStat2(statTypes.最大生命值),
-    '生命值: {value} / {total}',
+    player.getStat2(StatType.最大生命值),
+    htmlConfig.生命条格式,
   );
   updateProgressBar(
     $('#角色面板-魔法值进度条'),
     player.魔法值,
-    player.getStat2(statTypes.最大魔法值),
-    '魔法值: {value} / {total}',
+    player.getStat2(StatType.最大魔法值),
+    htmlConfig.魔法条格式,
   );
-  updateProgressBar(
-    $('#角色面板-经验值进度条'),
-    玩家职业.exp,
-    requiredExp,
-    '经验值: {value} / {total}',
-  );
+  updateProgressBar($('#角色面板-经验值进度条'), 玩家职业.exp, requiredExp, htmlConfig.经验条格式);
 
   const 当前属性 = $('#角色面板-当前属性');
   当前属性.empty();
@@ -232,12 +243,23 @@ const updateHTML = (params) => {
     genElementForStats(属性成长, value, key);
   });
 
-  // 战斗面板
+  // 更新战斗面板
   const 战斗面板实体列表 = $('#战斗面板-实体列表');
-  战斗面板实体列表.empty();
-  genCombatLayout(player, 战斗面板实体列表, true);
-  战斗管理器.getEnemiesInCombat().forEach((enemy) => {
-    genCombatLayout(enemy, 战斗面板实体列表);
+  const entities = 战斗管理器.getEntitiesInCombat();
+  entities.forEach((entity) => {
+    const combatLayout = 战斗面板实体列表.find(`#${entity.uuid}`);
+    updateProgressBar(
+      combatLayout.find('.health-bar'),
+      entity.生命值,
+      entity.getStat2(StatType.最大生命值),
+      '生命值: {value} / {total}',
+    );
+    updateProgressBar(
+      combatLayout.find('.mana-bar'),
+      entity.魔法值,
+      entity.getStat2(StatType.最大魔法值),
+      '魔法值: {value} / {total}',
+    );
   });
 };
 
@@ -254,6 +276,7 @@ const update = (dt) => {
 };
 
 let htmlWorkerId = null;
+// 可以根据玩家的需求，重置UI更新频率
 const setHTMLInterval = (delay) => {
   if (htmlWorkerId != null) {
     clearInterval(htmlWorkerId);
@@ -280,6 +303,10 @@ window.onload = () => {
 
   // 在所有数据都加载完毕后，设置HTML
   setupHTML();
+
+  战斗管理器.registerEvents();
+
+  registerHTMLEvents();
 
   // 设置update loop
   // 200 ticks per second

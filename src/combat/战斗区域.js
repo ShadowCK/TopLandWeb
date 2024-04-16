@@ -2,6 +2,7 @@ import * as math from 'mathjs';
 import 敌人信息 from './敌人信息.js';
 import * as settings from '../settings.js';
 import 敌人 from './敌人.js';
+import { EventType, combatEvents } from '../events/事件管理器.js';
 
 const configs = {
   新大陆: {
@@ -78,12 +79,18 @@ class 战斗区域 {
     }
     // 无敌人时刷怪速度加快
     const 刷怪倍速 = this.敌人.length === 0 ? settings.config.无敌人刷怪倍速 : 1;
-    this.刷怪计时器 += dt * 刷怪倍速;
+    this.刷怪计时器 = Math.min(this.刷怪计时器 + dt * 刷怪倍速, this.刷怪间隔);
     if (this.刷怪计时器 < this.刷怪间隔) {
       return;
     }
+    const enemy = this.genEnemy();
+    const eventData = { entity: enemy, isCancelled: false };
+    combatEvents.emit(EventType.生成实体, eventData);
+    if (eventData.isCancelled) {
+      return;
+    }
     this.刷怪计时器 = 0;
-    this.敌人.push(this.genEnemy());
+    this.敌人.push(enemy);
   }
 
   canAddEnemy() {
@@ -92,7 +99,12 @@ class 战斗区域 {
 
   removeEnemy(enemy) {
     const index = this.敌人.indexOf(enemy);
-    if (index !== -1) {
+    if (index === -1) {
+      return;
+    }
+    const eventData = { entity: enemy, isCancelled: false };
+    combatEvents.emit(EventType.移除实体, eventData);
+    if (!eventData.isCancelled) {
       this.敌人.splice(index, 1);
     }
   }

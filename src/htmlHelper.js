@@ -1,6 +1,13 @@
 import _ from 'lodash';
 import * as 玩家管理器 from './player/玩家管理器.js';
 import { getDecimalPrecision } from './utils.js';
+import { StatType } from './combat/战斗属性.js';
+
+const config = {
+  生命条格式: '生命值: {value} / {total}',
+  魔法条格式: '魔法值: {value} / {total}',
+  经验条格式: '经验值: {value} / {total}',
+};
 
 const changeTab = (tabPath) => {
   $.tab('change tab', tabPath);
@@ -22,9 +29,9 @@ const genLabel = (title, content, color = '') => {
   return label;
 };
 
-const progressBarHTML = (id, color = '', label = '', value = 0, maxValue = 1) =>
+const progressBarHTML = ({ id, className = '', color = '', label = '', value = 0, maxValue = 1 }) =>
   `
-  <div ${id ? `id="${id}"` : ''} class="ui ${color} progress active" data-percent="${
+  <div ${id ? `id="${id}"` : ''} class="ui ${color} progress active ${className}" data-percent="${
     (value / maxValue) * 100
   }">
     <div class="bar">
@@ -34,10 +41,19 @@ const progressBarHTML = (id, color = '', label = '', value = 0, maxValue = 1) =>
   </div>
   `;
 
-const genProgressBar = (id, parent, color = '', label = '', value = 0, maxValue = 1) => {
-  const bar = $(progressBarHTML(id, color, label, value, maxValue));
+const genProgressBar = ({
+  id,
+  className = '',
+  parent,
+  color = '',
+  label = '', // 默认标签。可忽略。只在被更新前（或更新时没有format）有用。
+  value = 0,
+  maxValue = 1,
+  format,
+}) => {
+  const bar = $(progressBarHTML({ id, className, color, label, value, maxValue }));
   // 初始化进度条
-  bar.progress();
+  bar.progress(format ? { text: { active: format } } : {});
   parent.append(bar);
   return bar;
 };
@@ -58,7 +74,7 @@ const updateProgressBar = (bar, value, maxValue, format = '{value} / {total}', p
  */
 const genCombatLayout = (entity, parent, isPlayer = false) => {
   const html = `
-  <div class="column">
+  <div id="${entity.uuid}" class="column">
     <div class="ui segment">
     ${`<h3 class="ui header">${isPlayer ? '你' : entity.职业.name}</h3>`}
     ${isPlayer ? labelHTML('职业', entity.职业.name, 'teal') : ''}
@@ -66,17 +82,33 @@ const genCombatLayout = (entity, parent, isPlayer = false) => {
       <p>${entity.职业.description}</p>
     </div>
     <div class="ui divider"></div>
-    ${progressBarHTML('', 'red', '生命值', entity.生命值, entity.getStat2('最大生命值'))}
-    ${progressBarHTML('', 'blue', '魔法值', entity.魔法值, entity.getStat2('最大魔法值'))}
+    ${progressBarHTML({
+      className: 'health-bar',
+      color: 'red',
+      label: '生命值',
+    })}
+    ${progressBarHTML({
+      className: 'mana-bar',
+      color: 'blue',
+      label: '魔法值',
+    })}
     </div>
   </div>
   `;
   const element = $(html);
-  element.find('.progress').progress({
-    text: {
-      active: '{value} / {total}',
-    },
-  });
+  // 初始化进度条
+  updateProgressBar(
+    element.find('.health-bar'),
+    entity.生命值,
+    entity.getStat2(StatType.最大生命值),
+    config.生命条格式,
+  );
+  updateProgressBar(
+    element.find('.mana-bar'),
+    entity.魔法值,
+    entity.getStat2(StatType.最大魔法值),
+    config.魔法条格式,
+  );
   $(parent).append(element);
 };
 
@@ -119,6 +151,7 @@ const genElementForStats = (parent, value, key, labelColor = '', path = [key]) =
 };
 
 export {
+  config,
   changeTab,
   genLabel,
   genProgressBar,
