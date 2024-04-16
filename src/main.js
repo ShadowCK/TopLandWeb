@@ -244,10 +244,8 @@ const updateHTML = (params) => {
   });
 
   // 更新战斗面板
-  const 战斗面板实体列表 = $('#战斗面板-实体列表');
-  const entities = 战斗管理器.getEntitiesInCombat();
-  entities.forEach((entity) => {
-    const combatLayout = 战斗面板实体列表.find(`#${entity.uuid}`);
+  const updateCombatLayout = (parent, entity) => {
+    const combatLayout = parent.find(`#${entity.uuid}`);
     updateProgressBar(
       combatLayout.find('.health-bar'),
       entity.生命值,
@@ -260,7 +258,12 @@ const updateHTML = (params) => {
       entity.getStat2(StatType.最大魔法值),
       '魔法值: {value} / {total}',
     );
-  });
+  };
+  const 战斗面板实体列表 = $('#战斗面板-实体列表');
+  // 即使不在战斗，也更新玩家的生命条等信息。
+  updateCombatLayout(战斗面板实体列表, player);
+  const enemies = 战斗管理器.getEnemiesInCombat();
+  enemies.forEach((enemy) => updateCombatLayout(战斗面板实体列表, enemy));
 };
 
 const update = (dt) => {
