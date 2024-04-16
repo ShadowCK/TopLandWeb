@@ -7,6 +7,8 @@ const config = {
   生命条格式: '生命值: {value} / {total}',
   魔法条格式: '魔法值: {value} / {total}',
   经验条格式: '经验值: {value} / {total}',
+  攻击条格式: '下次攻击: {value} / {total}',
+  默认进度条格式: '{value} / {total}',
 };
 
 const changeTab = (tabPath) => {
@@ -76,22 +78,24 @@ const genCombatLayout = (entity, parent, isPlayer = false) => {
   const html = `
   <div id="${entity.uuid}" class="column">
     <div class="ui segment">
-    ${`<h3 class="ui header">${isPlayer ? '你' : entity.职业.name}</h3>`}
-    ${isPlayer ? labelHTML('职业', entity.职业.name, 'teal') : ''}
-    <div class="ui message">
-      <p>${entity.职业.description}</p>
-    </div>
-    <div class="ui divider"></div>
-    ${progressBarHTML({
-      className: 'health-bar',
-      color: 'red',
-      label: '生命值',
-    })}
-    ${progressBarHTML({
-      className: 'mana-bar',
-      color: 'blue',
-      label: '魔法值',
-    })}
+      ${`<h3 class="ui header">${isPlayer ? '你' : entity.职业.name}</h3>`}
+      ${isPlayer ? labelHTML('职业', entity.职业.name, 'teal') : ''}
+      <div class="ui message">
+        <p>${entity.职业.description}</p>
+      </div>
+      <div class="ui divider"></div>
+      ${progressBarHTML({
+        className: 'health-bar',
+        color: 'red',
+      })}
+      ${progressBarHTML({
+        className: 'mana-bar',
+        color: 'blue',
+      })}
+      ${progressBarHTML({
+        className: 'small attack-bar',
+        color: 'grey',
+      })}
     </div>
   </div>
   `;
@@ -108,6 +112,12 @@ const genCombatLayout = (entity, parent, isPlayer = false) => {
     entity.魔法值,
     entity.getStat2(StatType.最大魔法值),
     config.魔法条格式,
+  );
+  updateProgressBar(
+    element.find('.attack-bar'),
+    entity.攻击计时器,
+    entity.getStat2(StatType.攻击间隔),
+    config.攻击条格式,
   );
   $(parent).append(element);
 };

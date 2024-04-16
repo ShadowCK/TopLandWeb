@@ -104,14 +104,14 @@ class 战斗区域 {
     this.敌人.length = 0;
   }
 
-  removeEnemy(enemy, isForce = false) {
+  removeEnemy(enemy, isForced = false) {
     const index = this.敌人.indexOf(enemy);
     if (index === -1) {
       return;
     }
     const eventData = { entity: enemy, isCancelled: false };
     combatEvents.emit(EventType.移除实体, eventData);
-    if (isForce || !eventData.isCancelled) {
+    if (isForced || !eventData.isCancelled) {
       this.敌人.splice(index, 1);
     }
   }

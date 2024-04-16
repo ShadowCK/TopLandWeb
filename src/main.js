@@ -258,6 +258,13 @@ const updateHTML = (params) => {
       entity.getStat2(StatType.最大魔法值),
       '魔法值: {value} / {total}',
     );
+    updateProgressBar(
+      combatLayout.find('.attack-bar'),
+      entity.攻击计时器,
+      entity.getStat2(StatType.攻击间隔),
+      htmlConfig.攻击条格式,
+      2,
+    );
   };
   const 战斗面板实体列表 = $('#战斗面板-实体列表');
   // 即使不在战斗，也更新玩家的生命条等信息。
