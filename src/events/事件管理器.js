@@ -9,6 +9,8 @@ const EventType = {
   移除实体: '移除实体',
   获得物品: '获得物品',
   失去物品: '失去物品',
+  穿上装备: '穿上装备',
+  脱下装备: '脱下装备',
 };
 
 const combatEvents = new EventEmitter();

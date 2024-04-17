@@ -12,11 +12,14 @@ class 敌人 extends 实体 {
 
   statMultiplier = 1;
 
+  config = null;
+
   constructor(enemyConfig, statMultiplier = 1) {
     super();
     const copy = JSON.parse(JSON.stringify(enemyConfig));
     Object.assign(this, copy);
     this.statMultiplier = statMultiplier;
+    this.config = enemyConfig;
     this.设置职业(new 职业(enemyConfig.职业));
   }
 

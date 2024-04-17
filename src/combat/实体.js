@@ -248,6 +248,15 @@ class 实体 {
   实际攻击间隔() {
     return this.getStat2(StatType.攻击间隔) / this.getStat2(StatType.攻击速度);
   }
+
+  /**
+   * @param {import('../items/装备.js').default} equipment
+   */
+  拥有装备(equipment) {
+    const typeEquipments = this.装备[equipment.type];
+    // 如果实体已经装备了这个装备，就不再装备
+    return typeEquipments && typeEquipments.includes(equipment);
+  }
 }
 
 export default 实体;

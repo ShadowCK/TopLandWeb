@@ -30,10 +30,20 @@ class 背包 {
     generalEvents.emit(EventType.获得物品, item.config);
   }
 
+  removeItem(item) {
+    const index = this.items.indexOf(item);
+    if (index === -1) {
+      console.error('Trying to remove an item that is not in the bag');
+      return;
+    }
+    this.items.splice(index, 1);
+    generalEvents.emit(EventType.失去物品, item.config);
+  }
+
   /**
    * @param {import('./物品.js').default} item
    */
-  removeItem(itemName) {
+  removeByName(itemName) {
     const index = this.items.findIndex((other) => other.name === itemName);
     if (index === -1) {
       console.error('Trying to remove an item that is not in the bag');

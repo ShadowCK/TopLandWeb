@@ -242,11 +242,11 @@ const registerEvents = () => {
     player.金钱 += 敌人.金钱 || 0;
     const 幸运值 = player.getStat2(StatType.幸运值);
     const 掉落倍率 = 1 + (settingsConfig.每点幸运值增加掉落率百分比 * 幸运值) / 100;
-    敌人.掉落.forEach((dropConfig) => {
+    敌人.config.掉落.forEach((dropConfig) => {
       if (Math.random() * 100 >= dropConfig.chance * 掉落倍率) {
         return;
       }
-      player.背包.addItem(dropConfig.config, dropConfig.count);
+      player.背包.addItem(new dropConfig.Ctor(dropConfig.config), dropConfig.count);
     });
     当前战斗区域.removeEnemy(entity);
   });
