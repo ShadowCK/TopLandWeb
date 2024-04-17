@@ -62,18 +62,14 @@ const genProgressBar = ({
 
 const updateProgressBar = (bar, value, maxValue, format = '{value} / {total}', precision = 0) => {
   const element = _.isString(bar) ? $(bar) : bar;
+  const roundedValue = _.round(value, precision);
+  const roundedTotal = _.round(maxValue, precision);
+  const percent = (roundedValue / roundedTotal) * 100;
   element.progress({
-    value: _.round(value, precision),
-    total: _.round(maxValue, precision),
-    // 百分比的精度。其实存的还是实际百分比，影响的是UI显示的百分比的精度。
-    // 默认0，精确到整数，会导致进度条状态为success（百分比100%或接近100%）时
-    // 百分比变化太小，UI上的数值不更新。但是一旦退出success，数值必定更新。
-    // 简单来说，这个精度影响退出success的百分比阈值。精度越高，越快退出success，就不至于数值不更新。
-    // 他判断的百分比是四舍五入后的已损失百分比，所以精度为0时，退出success阈值为99.5%（0.5%≈1%)。
-    // 精度为1(十分位)时，退出success阈值为99.95%。精度为10（百分位）时，阈值为99.995%（掉0.01%/2=0.005%)。
-    precision: 100, // 100等同于'3'(logX+1)，精确到千分位。不知道为什么要这么设计
+    total: roundedTotal,
+    percent: percent >= 99.5 && percent < 100 ? 99.49 : percent,
     text: {
-      active: format,
+      active: format.replace(/{value}/g, roundedValue),
     },
   });
 };
@@ -132,6 +128,7 @@ const genCombatLayout = (
     entity.攻击计时器去掉攻速(),
     entity.实际攻击间隔(),
     config.攻击条格式,
+    2,
   );
   $(parent).append(element);
 };
