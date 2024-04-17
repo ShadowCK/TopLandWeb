@@ -219,7 +219,9 @@ class 实体 {
   // * 只是为了进度条显示，跟实际攻击间隔同比例增长。数值上没有实际意义
   // （因为攻速可以发生变化，所以不能代表实际消逝的时间，是*基于当前攻速*的实际时间流逝）
   攻击计时器去掉攻速() {
-    return this.攻击计时器 / this.getStat2(StatType.攻击速度);
+    const 攻击速度 = this.getStat2(StatType.攻击速度);
+    // 防止Not a number
+    return 攻击速度 === 0 ? 0 : this.攻击计时器 / this.getStat2(StatType.攻击速度);
   }
 
   // 这个数值上是有意义的
