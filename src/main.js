@@ -19,6 +19,8 @@ import { 可以提升专精等级, 可以转生, 转生 } from './reincarnate/�
 import { getMaxLevel, templateFromElement } from './utils.js';
 import addToWindow from './debug.js';
 import registerHTMLEvents from './events/htmlHandler.js';
+import 装备 from './items/装备.js';
+import { equipConfigs } from './items/装备信息.js';
 
 const setupHTML = () => {
   const onVisible = (tabPath) => {
@@ -322,6 +324,9 @@ window.onload = () => {
 
   console.log('游戏加载完成');
   console.log('玩家信息：', player);
+
+  const 测试装备 = new 装备(equipConfigs.新手木剑);
+  测试装备.穿上(player);
 };
 
 window.clearLocalStorage = () => {
