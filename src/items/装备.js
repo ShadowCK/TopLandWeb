@@ -1,20 +1,18 @@
+import 物品 from './物品.js';
 import { EquipType } from './装备信息.js';
 
-class 装备 {
+class 装备 extends 物品 {
+  // 改写继承自物品类的属性
+  stackable = false;
+
+  maxStack = 1;
+
+  // 装备自身的属性
   requirements = { level: 1, expertiseLevel: 0 };
 
   type = EquipType.胸甲;
 
-  name = '老鼠皮甲';
-
-  description = '用老鼠皮做成的胸甲。';
-
   stats = {};
-
-  constructor(itemConfig) {
-    const copy = JSON.parse(JSON.stringify(itemConfig));
-    Object.assign(this, copy);
-  }
 
   /**
    * @param {import('../combat/实体.js').default} entity

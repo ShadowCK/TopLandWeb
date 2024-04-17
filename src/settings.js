@@ -36,6 +36,7 @@ const config = {
   无敌人刷怪倍速: 10,
   必定刷新BOSS刷怪数量: 20,
   最大区域等级: 100,
+  每点幸运值增加掉落率百分比: 1,
 };
 
 export { 默认优先级, getRequiredExp, config };

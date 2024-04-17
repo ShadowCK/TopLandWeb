@@ -3,7 +3,7 @@ import { DamageSource, DamageType, StatType } from './战斗属性.js';
 import { getPlayer } from '../player/玩家管理器.js';
 import { 战斗区域, configs } from './战斗区域.js';
 import { EventType, combatEvents } from '../events/事件管理器.js';
-import { changeTab } from '../htmlHelper.js';
+import { config } from '../settings.js';
 
 /** @type {import('./战斗区域.js').战斗区域} */
 let 当前战斗区域 = null;
@@ -240,6 +240,14 @@ const registerEvents = () => {
     const 敌人 = entity;
     player.职业.addExp(敌人.经验值 || 0);
     player.金钱 += 敌人.金钱 || 0;
+    const 幸运值 = player.getStat2(StatType.幸运值);
+    const 掉落倍率 = 1 + (config.每点幸运值增加掉落率百分比 * 幸运值) / 100;
+    敌人.掉落.forEach((dropConfig) => {
+      if (Math.random() * 100 > dropConfig.chance * 掉落倍率) {
+        return;
+      }
+      player.背包.addItem(dropConfig.itemConfig);
+    });
     当前战斗区域.removeEnemy(entity);
   });
 };
