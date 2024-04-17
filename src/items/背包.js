@@ -1,3 +1,4 @@
+import { EventType, generalEvents } from '../events/事件管理器.js';
 import 物品 from './物品.js';
 
 class 背包 {
@@ -25,6 +26,7 @@ class 背包 {
       stackLeft -= newItem.stack;
       this.items.push(newItem);
     }
+    generalEvents.emit(EventType.获得物品, item.config);
   }
 
   /**
@@ -38,14 +40,17 @@ class 背包 {
     }
     const item = this.items[index];
     if (!item.stackable) {
+      generalEvents.emit(EventType.失去物品, item.config);
       this.items.splice(index, 1);
       return;
     }
     if (item.stack === 1) {
+      generalEvents.emit(EventType.失去物品, item.config);
       this.items.splice(index, 1);
       return;
     }
     item.stack -= 1;
+    generalEvents.emit(EventType.失去物品, item.config);
   }
 }
 

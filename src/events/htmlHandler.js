@@ -1,4 +1,4 @@
-import { changeTab, genCombatLayout } from '../htmlHelper.js';
+import { changeTab, genCombatLayout, genInventory } from '../htmlHelper.js';
 import { getPlayer } from '../player/玩家管理器.js';
 import { generalEvents, combatEvents, EventType } from './事件管理器.js';
 
@@ -32,6 +32,16 @@ const registerEvents = () => {
 
   combatEvents.on(EventType.移除实体, ({ entity }) => {
     clearEntityInCombatTab(entity);
+  });
+
+  generalEvents.on(EventType.获得物品, (_itemConfig) => {
+    // 无脑刷新背包……
+    genInventory(getPlayer().背包);
+  });
+
+  generalEvents.on(EventType.失去物品, (_itemConfig) => {
+    // 无脑刷新背包……
+    genInventory(getPlayer().背包);
   });
 };
 

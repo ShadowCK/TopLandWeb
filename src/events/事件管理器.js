@@ -7,6 +7,8 @@ const EventType = {
   实体死亡: '实体死亡',
   生成实体: '生成实体',
   移除实体: '移除实体',
+  获得物品: '获得物品',
+  失去物品: '失去物品',
 };
 
 const combatEvents = new EventEmitter();

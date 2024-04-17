@@ -14,6 +14,8 @@ import {
   genCombatLayout,
   config as htmlConfig,
   genItem,
+  genInventory,
+  genEquipments,
 } from './htmlHelper.js';
 import { StatType } from './combat/战斗属性.js';
 import { 可以提升专精等级, 可以转生, 转生 } from './reincarnate/转生.js';
@@ -190,16 +192,8 @@ const setupHTML = () => {
   genCombatLayout(player, 战斗面板实体列表, { isPlayer: true });
 
   // 背包面板
-  const 背包面板背包 = $('#背包面板-背包');
-  const 背包面板装备 = $('#背包面板-装备');
-  _.forEach(player.背包.items, (item) => {
-    genItem(item, 背包面板背包);
-  });
-  _.forEach(player.装备, (typeEquipments) => {
-    typeEquipments.forEach((equipment) => {
-      genItem(equipment, 背包面板装备);
-    });
-  });
+  genEquipments();
+  genInventory();
 };
 
 /**
