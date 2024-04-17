@@ -7,12 +7,6 @@ class 玩家 extends 实体 {
   金钱 = 0;
 
   // 目前不需要额外的构造函数
-
-  updateStats() {
-    super.updateStats();
-    // TODO: 装备的属性加成
-    // 装备加成也可以用processStats函数处理
-  }
 }
 
 export default 玩家;

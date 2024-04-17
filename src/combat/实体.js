@@ -19,7 +19,8 @@ class 实体 {
 
   魔典 = [];
 
-  装备 = [];
+  /** @type {Object<string, import('../items/装备.js').default[]>} */
+  装备 = {};
 
   生命值 = 100;
 
@@ -74,8 +75,8 @@ class 实体 {
     const 原始最大魔法值 = this.stats[StatType.最大生命值];
 
     const { statGrowth, level } = this.职业;
-    // 递归函数来处理stats
-    const processStats = (stats, path = []) => {
+    // 递归函数来处理statGrowth
+    const applyStatGrowth = (stats, path = []) => {
       _.forEach(stats, (value, key) => {
         const currentPath = path.concat(key);
         if (Array.isArray(value)) {
@@ -84,12 +85,31 @@ class 实体 {
           _.set(this.stats, currentPath, base + scale * (level - 1) * multiplier);
         } else if (_.isObject(value)) {
           // 如果是对象，递归处理
-          processStats(value, currentPath);
+          applyStatGrowth(value, currentPath);
         }
       });
     };
     // 调用递归函数处理所有stats
-    processStats(statGrowth);
+    applyStatGrowth(statGrowth);
+
+    const applyEquipmentBonus = (stats, path = []) => {
+      _.forEach(stats, (value, key) => {
+        const currentPath = path.concat(key);
+        if (_.isObject(value)) {
+          // 如果是对象，递归处理
+          applyEquipmentBonus(value, currentPath);
+        } else {
+          _.set(this.stats, currentPath, this.getStat2(currentPath, false) + value);
+        }
+      });
+    };
+
+    // 添加装备的属性
+    _.forEach(this.装备, (typeEquipments) => {
+      typeEquipments.forEach((item) => {
+        applyEquipmentBonus(item.stats);
+      });
+    });
 
     // 根据新的属性计算新的生命值和魔法值
     const 最大生命值 = this.getStat2(StatType.最大生命值);

@@ -2,6 +2,7 @@ import _ from 'lodash';
 import { defaultStats } from '../combat/战斗属性.js';
 import { getRequiredExp } from '../settings.js';
 import { getMaxLevel } from '../utils.js';
+import { EquipType } from '../items/装备信息.js';
 
 class 职业 {
   requirements = {};
@@ -22,6 +23,17 @@ class 职业 {
   expertiseLevel = 0;
 
   statGrowth = JSON.parse(JSON.stringify(defaultStats));
+
+  装备槽 = {
+    [EquipType.武器]: 1,
+    [EquipType.副手]: 1,
+    [EquipType.头盔]: 1,
+    [EquipType.胸甲]: 1,
+    [EquipType.护腿]: 1,
+    [EquipType.鞋子]: 1,
+    [EquipType.项链]: 1,
+    [EquipType.戒指]: 1,
+  };
 
   // 必杀技/大招
   ultimate = null;
