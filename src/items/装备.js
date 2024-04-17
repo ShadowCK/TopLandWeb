@@ -1,3 +1,4 @@
+import _ from 'lodash';
 import 物品 from './物品.js';
 import { EquipType } from './装备信息.js';
 
@@ -13,6 +14,11 @@ class 装备 extends 物品 {
   type = EquipType.胸甲;
 
   stats = {};
+
+  constructor(config) {
+    super(_.omit(config, 'stats'));
+    this.stats = JSON.parse(JSON.stringify(config.stats));
+  }
 
   /**
    * @param {import('../combat/实体.js').default} entity

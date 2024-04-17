@@ -201,6 +201,9 @@ const genElementForEquipmentStat = (parent, value, key, labelClass = '', path = 
     });
     return;
   }
+  if (value === 0) {
+    return;
+  }
   let formatted;
   if (Array.isArray(value)) {
     formatted = value.map((v) => _.round(v, 2)).join('+');
@@ -236,14 +239,14 @@ const genItemHTML = () =>
   </div>
   `;
 
-const genEquipment = (item, parent) => {
+const genItem = (item, parent) => {
   const tempParent = $(`
   <div>
     <h3 class="ui header">${item.name}</h3>
     <div class="ui message">
       <p>${item.description}</p>
     </div>
-    <div class="ui relaxed divided four column grid">
+    <div class="ui relaxed four column grid">
     </div>
   </div>
   `);
@@ -257,8 +260,10 @@ const genEquipment = (item, parent) => {
   element.popup({
     delay: {
       show: 30,
-      hide: 100000,
+      hide: 100,
     },
+    // inline可以apply local CSS rules，让它看起来更对，但是不会在关闭时自动移除
+    // TODO: 在父元素被删除时移除popup
     inline: true,
     lastResort: true,
   });
@@ -273,5 +278,5 @@ export {
   updateProgressBar,
   genElementForStats,
   genCombatLayout,
-  genEquipment,
+  genItem,
 };

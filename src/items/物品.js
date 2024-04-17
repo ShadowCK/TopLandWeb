@@ -13,8 +13,7 @@ class 物品 {
 
   constructor(itemConfig, count) {
     this.config = itemConfig;
-    const copy = JSON.parse(JSON.stringify(itemConfig));
-    Object.assign(this, copy);
+    Object.assign(this, itemConfig);
     this.stack = count;
   }
 }
