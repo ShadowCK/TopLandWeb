@@ -2,6 +2,7 @@ import _ from 'lodash';
 import * as 玩家管理器 from './player/玩家管理器.js';
 import { getDecimalPrecision } from './utils.js';
 import { StatType } from './combat/战斗属性.js';
+import 装备 from './items/装备.js';
 
 const config = {
   生命条格式: '生命值: {value} / {total}',
@@ -240,6 +241,7 @@ const genItemHTML = () =>
   `;
 
 const genItem = (item, parent) => {
+  const isEquipment = item instanceof 装备;
   const tempParent = $(`
   <div>
     <h3 class="ui header">${item.name}</h3>
@@ -255,6 +257,17 @@ const genItem = (item, parent) => {
     genElementForEquipmentStat(grid, value, key, 'small');
   });
   const element = $(genItemHTML());
+  if (isEquipment) {
+    element.css('cursor', 'pointer');
+    element.on('click', () => {
+      const player = 玩家管理器.getPlayer();
+      if (player.拥有装备(item)) {
+        item.脱下(player);
+      } else {
+        item.穿上(player);
+      }
+    });
+  }
   element.attr('data-variation', 'multiline flowing');
   element.attr('data-html', compressHTML(tempParent.html()));
   element.popup({

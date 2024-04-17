@@ -1,4 +1,4 @@
-import { changeTab, genCombatLayout, genInventory } from '../htmlHelper.js';
+import { changeTab, genCombatLayout, genEquipments, genInventory } from '../htmlHelper.js';
 import { getPlayer } from '../player/玩家管理器.js';
 import { generalEvents, combatEvents, EventType } from './事件管理器.js';
 
@@ -44,6 +44,24 @@ const registerEvents = () => {
     // 无脑刷新背包……
     console.log('失去物品，刷新背包');
     genInventory();
+  });
+
+  generalEvents.on(EventType.穿上装备, ({ entity, _equipment }) => {
+    if (entity !== getPlayer()) {
+      return;
+    }
+    // 无脑刷新！太无脑了！
+    genInventory();
+    genEquipments();
+  });
+
+  generalEvents.on(EventType.脱下装备, ({ entity, _equipment }) => {
+    if (entity !== getPlayer()) {
+      return;
+    }
+    // 无脑刷新！太无脑了！
+    genInventory();
+    genEquipments();
   });
 };
 
