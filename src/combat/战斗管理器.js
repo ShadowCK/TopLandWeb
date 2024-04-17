@@ -238,8 +238,8 @@ const registerEvents = () => {
     // 给予金钱和经验
     /** @type {import('./敌人.js').default} */
     const 敌人 = entity;
-    player.职业.addExp(敌人.经验值);
-    player.金钱 += 敌人.金钱;
+    player.职业.addExp(敌人.经验值 || 0);
+    player.金钱 += 敌人.金钱 || 0;
     当前战斗区域.removeEnemy(entity);
   });
 };

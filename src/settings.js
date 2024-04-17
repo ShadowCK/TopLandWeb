@@ -25,6 +25,7 @@ const config = {
   extraLevelsPerExpertiseLevel: 5,
   statLimits: {
     攻击间隔: { min: 0.1, max: Infinity },
+    攻击速度: { min: 0, max: Infinity },
     闪避率: { min: 0, max: 80 },
     格挡率: { min: 0, max: 100 },
     格挡伤害: { min: 0, max: 95 },

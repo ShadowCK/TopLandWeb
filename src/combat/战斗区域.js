@@ -5,6 +5,16 @@ import 敌人 from './敌人.js';
 import { EventType, combatEvents } from '../events/事件管理器.js';
 
 const configs = {
+  训练场: {
+    name: '训练场',
+    description: '可以测试自己的实力。',
+    enemies: {
+      训练木桩: {
+        config: 敌人信息.训练木桩,
+        weight: 100,
+      },
+    },
+  },
   下水道: {
     name: '下水道',
     description: '下水道里面有很多老鼠，还有一些其他的东西。',
