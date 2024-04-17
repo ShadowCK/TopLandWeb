@@ -2,7 +2,8 @@
 
 .ui .chinese:not(.icon),
 .chinese:not(.icon),
-.chinese *:not(.icon) {
+.chinese *:not(.icon),
+.ui.popup > .header {
   font-family: 'Noto Sans SC', Lato, system-ui, -apple-system, 'Segoe UI', Roboto, Oxygen, Ubuntu,
     Cantarell, 'Helvetica Neue', Arial, 'Noto Sans', 'Liberation Sans', sans-serif,
     'Apple Color Emoji', 'Segoe UI Emoji', 'Segoe UI Symbol', 'Noto Color Emoji' !important;
