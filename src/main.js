@@ -13,6 +13,7 @@ import {
   changeTab,
   genCombatLayout,
   config as htmlConfig,
+  genEquipment,
 } from './htmlHelper.js';
 import { StatType } from './combat/战斗属性.js';
 import { 可以提升专精等级, 可以转生, 转生 } from './reincarnate/转生.js';
@@ -187,6 +188,14 @@ const setupHTML = () => {
   const 战斗面板实体列表 = $('#战斗面板-实体列表');
   const player = 玩家管理器.getPlayer();
   genCombatLayout(player, 战斗面板实体列表, { isPlayer: true });
+
+  // 背包面板
+  const 背包面板装备 = $('#背包面板-装备');
+  _.forEach(player.装备, (typeEquipments) => {
+    typeEquipments.forEach((equipment) => {
+      genEquipment(equipment, 背包面板装备);
+    });
+  });
 };
 
 /**
@@ -231,16 +240,16 @@ const updateHTML = (params) => {
   const 当前属性 = $('#角色面板-当前属性');
   当前属性.empty();
   // FIXME: 最好是事先创建这些元素，然后更新值，而不是每次都重新创建
-  genElementForStats(当前属性, player.生命值, '生命值', 'red');
-  genElementForStats(当前属性, player.魔法值, '魔法值', 'blue');
+  genElementForStats(player, 当前属性, player.生命值, '生命值', 'red');
+  genElementForStats(player, 当前属性, player.魔法值, '魔法值', 'blue');
   _.forEach(player.stats, (value, key) => {
-    genElementForStats(当前属性, value, key);
+    genElementForStats(player, 当前属性, value, key);
   });
 
   const 属性成长 = $('#角色面板-属性成长');
   属性成长.empty();
   _.forEach(player.职业.statGrowth, (value, key) => {
-    genElementForStats(属性成长, value, key);
+    genElementForStats(player, 属性成长, value, key);
   });
 
   // 更新战斗面板
@@ -309,6 +318,9 @@ window.onload = () => {
   // 因为HTML的初始化是在游戏初始化后的。而且，游戏逻辑里也不应该依赖HTML function，应该emit event，让HTML function自己来更新
   update(0);
 
+  const 测试装备 = new 装备(equipConfigs.新手木剑);
+  测试装备.穿上(player);
+
   // 在所有数据都加载完毕后，设置HTML
   setupHTML();
   registerHTMLEvents();
@@ -324,9 +336,6 @@ window.onload = () => {
 
   console.log('游戏加载完成');
   console.log('玩家信息：', player);
-
-  const 测试装备 = new 装备(equipConfigs.新手木剑);
-  测试装备.穿上(player);
 };
 
 window.clearLocalStorage = () => {

@@ -18,16 +18,16 @@ const changeTab = (tabPath) => {
   $(`a[data-tab="${tabPath}"]`).siblings().filter('[data-tab]').removeClass('active');
 };
 
-const labelHTML = (title, content, color = '') =>
+const labelHTML = (title, content, className = '') =>
   `
   <div>
-    <div class="ui ${color} horizontal label">${title}</div>
-    ${content || ''}
+    <div class="ui ${className} horizontal label">${title}</div>
+    ${content != null ? content : ''}
   </div>
   `;
 
-const genLabel = (title, content, color = '') => {
-  const label = $(labelHTML(title, content, color));
+const genLabel = (title, content, className = '') => {
+  const label = $(labelHTML(title, content, className));
   return label;
 };
 
@@ -90,7 +90,6 @@ const genCombatLayout = (
   // TODO: 断言isEnemy=!isPlayer - 目前只有敌人，以后如果有召唤物/队友的话再进行修改
   { isPlayer = false, isEnemy = !isPlayer, config: entityConfig },
 ) => {
-  console.log(isEnemy, entityConfig);
   const html = `
   <div id="${entity.uuid}" class="column">
     <div class="ui segment">
@@ -142,15 +141,15 @@ const genCombatLayout = (
 
 /**
  * 虽然名字叫'ForStats'，允许传入不是战斗属性的数值。
- * 函数内部会检测'path'是否是玩家的属性。
+ * 函数内部会检测'path'是否是实体的属性。
  */
-const genElementForStats = (parent, value, key, labelColor = '', path = [key]) => {
+const genElementForStats = (entity, parent, value, key, labelClass = '', path = [key]) => {
   if (_.isObject(value) && !Array.isArray(value)) {
     const label = $(`<div class="ui teal horizontal label">${key}</div>`);
-    const child = $(`<div class="ui relax list"></div>`);
+    const child = $(`<div class="ui list"></div>`);
     parent.append(label, child);
     _.forEach(value, (v, k) => {
-      genElementForStats(child, v, k, labelColor, [...path, k]);
+      genElementForStats(entity, child, v, k, labelClass, [...path, k]);
     });
     return;
   }
@@ -160,16 +159,15 @@ const genElementForStats = (parent, value, key, labelColor = '', path = [key]) =
   if (Array.isArray(value)) {
     formatted = value.map((v) => _.round(v, 2)).join('+');
   } else {
-    const player = 玩家管理器.getPlayer();
-    const isStat = _.get(player.stats, path) !== undefined;
+    const isStat = _.get(entity.stats, path) !== undefined;
     // 如果是实体属性，不要用原始数值。显示buff加成后的数值
     // FIXME: 这里会浪费一些性能，因为已经有base了。getBuffedStat会更好。
     // TODO: 还有，要把getStat的clamp放到getBuffedStat里面，让getBuffStat也接受range参数。
-    const valueToUse = isStat ? player.getStat2(path) : value;
+    const valueToUse = isStat ? entity.getStat2(path) : value;
     // 如果是实体属性，精确到成长的小数位数
     let precision;
     if (isStat) {
-      const statGrowth = player.getStatGrowth(path);
+      const statGrowth = entity.getStatGrowth(path);
       // 成长是0，精确到基础值的小数位数后一位（比如1.5精确到1.50，否则精确到成长值的小数位数
       precision = getDecimalPrecision(statGrowth[1] === 0 ? statGrowth[0] / 10 : statGrowth[1]);
     } else {
@@ -179,10 +177,80 @@ const genElementForStats = (parent, value, key, labelColor = '', path = [key]) =
   }
   const html = `
     <div class="item">
-      <div class="ui ${labelColor} horizontal label">${key}</div>${formatted}
+      ${labelHTML(key, formatted, labelClass)}
     </div>
     `;
   parent.append(html);
+};
+
+const genElementForEquipmentStat = (parent, value, key, labelClass = '', path = [key]) => {
+  if (_.isObject(value) && _.isEmpty(value)) {
+    return;
+  }
+  if (_.isObject(value) && !Array.isArray(value)) {
+    const label = $(labelHTML(key, '', `teal ${labelClass}`));
+    const child = $(`<div class="ui list"></div>`);
+    parent.append(label, child);
+    _.forEach(value, (v, k) => {
+      genElementForEquipmentStat(child, v, k, labelClass, [...path, k]);
+    });
+    return;
+  }
+  let formatted;
+  if (Array.isArray(value)) {
+    formatted = value.map((v) => _.round(v, 2)).join('+');
+  } else {
+    formatted = _.round(value, 2);
+  }
+  const html = `
+    <div class="item">
+      ${labelHTML(key, formatted, labelClass)}
+    </div>
+    `;
+  parent.append(html);
+};
+
+const genItemHTML = () =>
+  `
+  <div class="column">
+    <div class="ui card">
+      <div class="content">
+        <div class="ui placeholder">
+          <div class="square image">
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+  `;
+
+const genEquipment = (item, parent) => {
+  const tempParent = $(`
+  <div>
+    <h3 class="ui header">${item.name}</h3>
+    <div class="ui message">
+      <p>${item.description}</p>
+    </div>
+    <div class="ui tiny list">
+    </div>
+  </div>
+  `);
+  const list = tempParent.find('.list');
+  _.forEach(item.stats, (value, key) => {
+    genElementForEquipmentStat(list, value, key, 'tiny');
+  });
+  const element = $(genItemHTML());
+  element.attr('data-variation', 'multiline flowing');
+  element.attr('data-html', tempParent.html());
+  element.popup({
+    delay: {
+      show: 50,
+      hide: 100000,
+    },
+    inline: true,
+    lastResort: true,
+  });
+  $(parent).append(element);
 };
 
 export {
@@ -193,4 +261,5 @@ export {
   updateProgressBar,
   genElementForStats,
   genCombatLayout,
+  genEquipment,
 };
