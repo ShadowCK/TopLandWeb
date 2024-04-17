@@ -270,6 +270,26 @@ const genItem = (item, parent) => {
   $(parent).append(element);
 };
 
+const genEquipments = () => {
+  const player = 玩家管理器.getPlayer();
+  const 背包面板背包 = $('#背包面板-背包');
+  背包面板背包.empty();
+  _.forEach(player.背包.items, (item) => {
+    genItem(item, 背包面板背包);
+  });
+};
+
+const genInventory = () => {
+  const player = 玩家管理器.getPlayer();
+  const 背包面板装备 = $('#背包面板-装备');
+  背包面板装备.empty();
+  _.forEach(player.装备, (typeEquipments) => {
+    typeEquipments.forEach((equipment) => {
+      genItem(equipment, 背包面板装备);
+    });
+  });
+};
+
 export {
   config,
   changeTab,
@@ -279,4 +299,6 @@ export {
   genElementForStats,
   genCombatLayout,
   genItem,
+  genEquipments,
+  genInventory,
 };
