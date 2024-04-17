@@ -11,6 +11,7 @@ class 背包 {
   addItem(item) {
     if (!item.stackable) {
       this.items.push(item);
+      generalEvents.emit(EventType.获得物品, item.config);
       return;
     }
     const existingItem = this.items.find((other) => other.name === item.name);
@@ -40,13 +41,13 @@ class 背包 {
     }
     const item = this.items[index];
     if (!item.stackable) {
-      generalEvents.emit(EventType.失去物品, item.config);
       this.items.splice(index, 1);
+      generalEvents.emit(EventType.失去物品, item.config);
       return;
     }
     if (item.stack === 1) {
-      generalEvents.emit(EventType.失去物品, item.config);
       this.items.splice(index, 1);
+      generalEvents.emit(EventType.失去物品, item.config);
       return;
     }
     item.stack -= 1;

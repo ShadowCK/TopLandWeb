@@ -23,7 +23,7 @@ class 装备 extends 物品 {
   /**
    * @param {import('../combat/实体.js').default} entity
    */
-  穿上(entity, updateStats = true) {
+  穿上(entity) {
     if (!entity.装备[this.type]) {
       entity.装备[this.type] = [];
     }
@@ -34,9 +34,6 @@ class 装备 extends 物品 {
       typeEquipments[0].脱下(entity, false);
     }
     typeEquipments.push(this);
-    if (!updateStats) {
-      return;
-    }
     entity.updateStats();
   }
 

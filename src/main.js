@@ -13,7 +13,6 @@ import {
   changeTab,
   genCombatLayout,
   config as htmlConfig,
-  genItem,
   genInventory,
   genEquipments,
 } from './htmlHelper.js';
