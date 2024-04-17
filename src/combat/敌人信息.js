@@ -1,3 +1,5 @@
+import { equipConfigs } from '../items/装备信息.js';
+
 const enemyConfigs = {
   训练木桩: {
     // 其实就是职业信息，但是是给敌人用的
@@ -68,7 +70,13 @@ const enemyConfigs = {
         最大魔典数: [0, 0],
       },
     },
-    掉落: {},
+    掉落: {
+      老鼠皮甲: {
+        chance: 3,
+        count: 1,
+        config: equipConfigs.老鼠皮甲,
+      },
+    },
     金钱: 0,
     经验值: 10,
   },
@@ -232,7 +240,13 @@ const enemyConfigs = {
         最大魔典数: [0, 0],
       },
     },
-    掉落: {},
+    掉落: {
+      新手木剑: {
+        chance: 10,
+        count: 1,
+        config: equipConfigs.新手木剑,
+      },
+    },
     金钱: 10,
     经验值: 100,
   },

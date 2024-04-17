@@ -11,10 +11,11 @@ class 物品 {
 
   config = null;
 
-  constructor(itemConfig) {
+  constructor(itemConfig, count) {
     this.config = itemConfig;
     const copy = JSON.parse(JSON.stringify(itemConfig));
     Object.assign(this, copy);
+    this.stack = count;
   }
 }
 
