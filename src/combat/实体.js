@@ -212,8 +212,19 @@ class 实体 {
     // 属性在setLevel中被更新
     // 使用setLevel是为了保证职业的等级在有效范围内
     职业.setLevel(职业.level);
-    this.生命值 = this.getStat2(StatType.最大生命值, false);
-    this.魔法值 = this.getStat2(StatType.最大魔法值, false);
+    this.生命值 = this.getStat2(StatType.最大生命值, true);
+    this.魔法值 = this.getStat2(StatType.最大魔法值, true);
+  }
+
+  // * 只是为了进度条显示，跟实际攻击间隔同比例增长。数值上没有实际意义
+  // （因为攻速可以发生变化，所以不能代表实际消逝的时间，是*基于当前攻速*的实际时间流逝）
+  攻击计时器去掉攻速() {
+    return this.攻击计时器 / this.getStat2(StatType.攻击速度);
+  }
+
+  // 这个数值上是有意义的
+  实际攻击间隔() {
+    return this.getStat2(StatType.攻击间隔) / this.getStat2(StatType.攻击速度);
   }
 }
 
