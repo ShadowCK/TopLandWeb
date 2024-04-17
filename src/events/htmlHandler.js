@@ -27,7 +27,6 @@ const registerEvents = () => {
     if (isCancelled) {
       return;
     }
-    console.log(config);
     genCombatLayout(entity, $('#战斗面板-实体列表'), { config });
   });
 

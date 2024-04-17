@@ -38,7 +38,7 @@ class 职业 {
 
   addExp(exp) {
     this.exp += exp;
-    const requiredExp = this.getExpToNextLevel();
+    let requiredExp = this.getExpToNextLevel();
     while (this.exp >= requiredExp) {
       if (this.level === this.getMaxLevel()) {
         this.exp = requiredExp;
@@ -46,6 +46,7 @@ class 职业 {
       }
       this.exp -= requiredExp;
       this.addLevel(1);
+      requiredExp = this.getExpToNextLevel();
     }
   }
 
