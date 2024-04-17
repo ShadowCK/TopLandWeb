@@ -270,7 +270,7 @@ const genItem = (item, parent) => {
   $(parent).append(element);
 };
 
-const genEquipments = () => {
+const genInventory = () => {
   const player = 玩家管理器.getPlayer();
   const 背包面板背包 = $('#背包面板-背包');
   背包面板背包.empty();
@@ -279,7 +279,7 @@ const genEquipments = () => {
   });
 };
 
-const genInventory = () => {
+const genEquipments = () => {
   const player = 玩家管理器.getPlayer();
   const 背包面板装备 = $('#背包面板-装备');
   背包面板装备.empty();

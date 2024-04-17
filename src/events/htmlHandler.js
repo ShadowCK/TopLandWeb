@@ -36,12 +36,14 @@ const registerEvents = () => {
 
   generalEvents.on(EventType.获得物品, (_itemConfig) => {
     // 无脑刷新背包……
-    genInventory(getPlayer().背包);
+    console.log('获得物品，刷新背包');
+    genInventory();
   });
 
   generalEvents.on(EventType.失去物品, (_itemConfig) => {
     // 无脑刷新背包……
-    genInventory(getPlayer().背包);
+    console.log('失去物品，刷新背包');
+    genInventory();
   });
 };
 

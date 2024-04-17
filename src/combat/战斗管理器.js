@@ -246,7 +246,7 @@ const registerEvents = () => {
       if (Math.random() * 100 >= dropConfig.chance * 掉落倍率) {
         return;
       }
-      player.背包.addItem(dropConfig.itemConfig, dropConfig.count);
+      player.背包.addItem(dropConfig.config, dropConfig.count);
     });
     当前战斗区域.removeEnemy(entity);
   });
