@@ -295,23 +295,23 @@ const setHTMLInterval = (delay) => {
 window.setHTMLInterval = setHTMLInterval;
 
 window.onload = () => {
+  // Setup game
   const player = new 玩家();
-  玩家管理器.init(player);
-
-  玩家管理器.读档();
-
-  战斗管理器.init();
-
-  console.log('游戏加载完成');
-  console.log('玩家信息：', 玩家管理器.getPlayer());
   addToWindow('player', player);
+  玩家管理器.init(player);
+  玩家管理器.读档();
+  战斗管理器.init();
+  战斗管理器.registerEvents();
+  // Initial game update
+  // 不应该在update里的任何function直接call HTML function，应该用emit event的方式，否则初次更新会出现问题，
+  // 因为HTML的初始化是在游戏初始化后的。而且，游戏逻辑里也不应该依赖HTML function，应该emit event，让HTML function自己来更新
+  update(0);
 
   // 在所有数据都加载完毕后，设置HTML
   setupHTML();
-
-  战斗管理器.registerEvents();
-
   registerHTMLEvents();
+  // Initial HTML update
+  updateHTML({ player });
 
   // 设置update loop
   // 200 ticks per second
@@ -319,6 +319,9 @@ window.onload = () => {
 
   // 20 ticks per second
   setHTMLInterval(50);
+
+  console.log('游戏加载完成');
+  console.log('玩家信息：', player);
 };
 
 window.clearLocalStorage = () => {
