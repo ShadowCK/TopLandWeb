@@ -70,7 +70,7 @@ class 职业 {
       return;
     }
     this.level = newLevel;
-    this.parent.updateStats(this.statGrowth);
+    this.parent.updateStats();
   }
 
   setLevel(level, ignoreMaxLevel = false) {
