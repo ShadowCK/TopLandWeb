@@ -65,11 +65,18 @@ const updateProgressBar = (bar, value, maxValue, format = '{value} / {total}', p
   const roundedValue = _.round(value, precision);
   const roundedTotal = _.round(maxValue, precision);
   const percent = (roundedValue / roundedTotal) * 100;
+  // 手动替换，不然的话fomantic-ui显示的value是roundedTotal * percent，再round到精度（这里默认精度0，就是round到整数）
+  // 只能传入value和total，或total和percent，另外一个值fomantic-ui会自动计算。我们不希望用他自动计算的，因为他自己的精度
+  // 会同时影响百分比和value的显示。
+  let active = format.replace(/{value}/g, roundedValue);
+  if (roundedTotal === Infinity) {
+    active = active.replace(/{total}/g, '∞');
+  }
   element.progress({
     total: roundedTotal,
     percent: percent >= 99.5 && percent < 100 ? 99.49 : percent,
     text: {
-      active: format.replace(/{value}/g, roundedValue),
+      active,
     },
   });
 };
