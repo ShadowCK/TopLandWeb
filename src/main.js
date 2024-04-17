@@ -258,8 +258,8 @@ const updateHTML = (params) => {
     );
     updateProgressBar(
       combatLayout.find('.attack-bar'),
-      entity.攻击计时器,
-      entity.getStat2(StatType.攻击间隔),
+      entity.攻击计时器去掉攻速(),
+      entity.实际攻击间隔(),
       htmlConfig.攻击条格式,
       2,
     );
