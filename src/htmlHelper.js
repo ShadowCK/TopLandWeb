@@ -74,11 +74,18 @@ const updateProgressBar = (bar, value, maxValue, format = '{value} / {total}', p
 /**
  * @param {import('./combat/实体.js').default} entity
  */
-const genCombatLayout = (entity, parent, isPlayer = false) => {
+const genCombatLayout = (
+  entity,
+  parent,
+  // TODO: 断言isEnemy=!isPlayer - 目前只有敌人，以后如果有召唤物/队友的话再进行修改
+  { isPlayer = false, isEnemy = !isPlayer, config: entityConfig },
+) => {
+  console.log(isEnemy, entityConfig);
   const html = `
   <div id="${entity.uuid}" class="column">
     <div class="ui segment">
       ${`<h3 class="ui header">${isPlayer ? '你' : entity.职业.name}</h3>`}
+      ${isEnemy && entityConfig.isBoss ? labelHTML('BOSS', '', 'yellow') : ''}
       ${isPlayer ? labelHTML('职业', entity.职业.name, 'teal') : ''}
       <div class="ui message">
         <p>${entity.职业.description}</p>

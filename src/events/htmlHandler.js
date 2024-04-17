@@ -23,11 +23,12 @@ const registerEvents = () => {
     changeTab('角色面板');
   });
 
-  combatEvents.on(EventType.生成实体, ({ entity, isCancelled }) => {
+  combatEvents.on(EventType.生成实体, ({ entity, isCancelled, config }) => {
     if (isCancelled) {
       return;
     }
-    genCombatLayout(entity, $('#战斗面板-实体列表'));
+    console.log(config);
+    genCombatLayout(entity, $('#战斗面板-实体列表'), { config });
   });
 
   combatEvents.on(EventType.移除实体, ({ entity }) => {
