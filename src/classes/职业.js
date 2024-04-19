@@ -49,8 +49,8 @@ class 职业 {
 
   getExpToNextLevel = () => getRequiredExp(this.level);
 
-  addExp(exp) {
-    this.exp += exp;
+  addExp(exp, mult = 1) {
+    this.exp += exp * mult;
     let requiredExp = this.getExpToNextLevel();
     while (this.exp >= requiredExp) {
       if (this.level === this.getMaxLevel()) {

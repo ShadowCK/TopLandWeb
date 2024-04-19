@@ -37,6 +37,15 @@ const config = {
   必定刷新BOSS刷怪数量: 20,
   最大区域等级: 100,
   每点幸运值增加掉落率百分比: 1,
+  最高专精等级百分比经验加成: 5,
+  最高专精等级倍率经验加成: 1.01,
 };
 
-export { 默认优先级, getRequiredExp, config };
+const get最高专精等级经验倍率 = (expertiseLevel) => {
+  const mult =
+    (1 + (expertiseLevel * config.最高专精等级百分比经验加成) / 100) *
+    config.最高专精等级倍率经验加成 ** expertiseLevel;
+  return mult;
+};
+
+export { 默认优先级, getRequiredExp, config, get最高专精等级经验倍率 };

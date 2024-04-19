@@ -25,6 +25,7 @@ import addToWindow from './debug.js';
 import registerHTMLEvents from './events/htmlHandler.js';
 import 装备 from './items/装备.js';
 import { equipConfigs } from './items/装备信息.js';
+import { get最高专精等级经验倍率 } from './settings.js';
 
 const setupHTML = () => {
   loadAndRenderMarkdown('./更新日志与计划更新.md', $('#更新日志面板'));
@@ -213,7 +214,14 @@ const updateHTML = (params) => {
   const 职业描述 = $('#角色面板-职业描述');
   职业描述.text(玩家职业.description);
   const 职业专精等级 = $('#角色面板-职业专精等级');
-  职业专精等级.text(`${玩家职业.expertiseLevel}（最高${player.玩家存档.最高专精等级}）`);
+  职业专精等级.html(
+    `${玩家职业.expertiseLevel}（最高${
+      player.玩家存档.最高专精等级
+    } <i class="angle double right icon"></i>${_.round(
+      get最高专精等级经验倍率(player.玩家存档.最高专精等级),
+      2,
+    )}X 经验值）`,
+  );
   const 职业等级 = $('#角色面板-职业等级');
   职业等级.text(`${玩家职业.level}/${玩家职业.getMaxLevel()}`);
   const 职业经验值 = $('#角色面板-职业经验值');
