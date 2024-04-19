@@ -238,7 +238,7 @@ const registerEvents = () => {
     // 给予金钱和经验
     /** @type {import('./敌人.js').default} */
     const 敌人 = entity;
-    player.职业.addExp(敌人.经验值 || 0);
+    player.addExp(敌人.经验值 || 0);
     player.金钱 += 敌人.金钱 || 0;
     const 幸运值 = player.getStat2(StatType.幸运值);
     const 掉落倍率 = 1 + (settingsConfig.每点幸运值增加掉落率百分比 * 幸运值) / 100;

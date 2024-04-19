@@ -32,6 +32,10 @@ class 实体 {
 
   攻击计时器 = 0;
 
+  addExp(exp, mult = 1) {
+    this.职业.addExp(exp, mult);
+  }
+
   takeDamage(value) {
     if (value <= 0) {
       return;
