@@ -148,7 +148,7 @@ class 实体 {
    */
   getStat(statType, calcBuffs = true, range = { min: -Infinity, max: Infinity }) {
     const base = _.get(this.stats, statType);
-    // 有可能是属性名写错了，也有可能是没有配置该属性（比如实体没有抗性穿透.物理）
+    // 有可能是属性名写错了，也有可能是没有配置该属性（比如该实体没有抗性穿透.物理）
     // TODO: 可以细分该情况，通过比对一个默认的属性配置表（默认属性值，来判断是写错了还是略过配置
     // 已经有defaultStats可以利用了，但是defaultStats不全。而且Object.assign给statGrowth不是递归赋值，只是简单地覆盖
     // 也就是说，抗性穿透这种是一个object的属性，即使默认配置是全的，也会被职业配置里内容更少的完全覆盖，导致抗性穿透.XX还是空的。
@@ -156,6 +156,7 @@ class 实体 {
     // 要么让defaultStats给statGrowth时是递归赋值，保证配置不写全的情况下，所有属性也都有默认值（那样就不用检测defaultStats里是否有该属性了，
     // this.stats/statGrowth没有就是肯定没有）。递归赋值可以参考updateStats里的processStats的结构。
     if (base == null) {
+      // TODO 获取默认值，而不是0
       return 0;
     }
     const result = calcBuffs ? getBuffedStat(this, { value: base, type: statType }) : base;

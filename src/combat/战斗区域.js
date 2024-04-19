@@ -29,8 +29,12 @@ const configs = {
       },
       老鼠国王: {
         config: 敌人信息.老鼠国王,
-        weight: 0.1,
+        weight: 1,
         isBoss: true,
+      },
+      老鼠隐者: {
+        config: 敌人信息.老鼠隐者,
+        weight: 0.1,
       },
     },
   },
@@ -48,6 +52,25 @@ const configs = {
       },
       装逼的骑士: {
         config: 敌人信息.装逼的骑士,
+        weight: 1,
+        isBoss: true,
+      },
+    },
+  },
+  科科猪场: {
+    name: '科科猪场',
+    description: '新大陆传奇人物李科养育的无性繁殖猪的牧场。他一直不擅长管理猪的数量。',
+    enemies: {
+      小猪: {
+        config: 敌人信息.小猪,
+        weight: 100,
+      },
+      魔法母猪: {
+        config: 敌人信息.魔法母猪,
+        weight: 25,
+      },
+      暴怒野猪王: {
+        config: 敌人信息.暴怒野猪王,
         weight: 1,
         isBoss: true,
       },

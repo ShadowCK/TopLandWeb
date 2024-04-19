@@ -33,6 +33,7 @@ class 职业 {
     [EquipType.鞋子]: 1,
     [EquipType.项链]: 1,
     [EquipType.戒指]: 1,
+    [EquipType.饰品]: 1,
   };
 
   // 必杀技/大招
