@@ -72,7 +72,7 @@ class 实体 {
 
   updateStats(multiplier = 1) {
     const 原始最大生命值 = this.stats[StatType.最大生命值];
-    const 原始最大魔法值 = this.stats[StatType.最大生命值];
+    const 原始最大魔法值 = this.stats[StatType.最大魔法值];
 
     const { statGrowth, level } = this.职业;
     // 递归函数来处理statGrowth
@@ -114,8 +114,13 @@ class 实体 {
     // 根据新的属性计算新的生命值和魔法值
     const 最大生命值 = this.getStat2(StatType.最大生命值);
     const 最大魔法值 = this.getStat2(StatType.最大魔法值);
-    this.生命值 = (this.生命值 / 原始最大生命值) * 最大生命值;
-    this.魔法值 = (this.魔法值 / 原始最大魔法值) * 最大魔法值;
+    // 等比例缩放生命值和魔法值。第一次更新时不存在原始值（previous value），不需要等比例缩放
+    if (原始最大生命值) {
+      this.生命值 = (this.生命值 / 原始最大生命值) * 最大生命值;
+    }
+    if (原始最大魔法值) {
+      this.魔法值 = (this.魔法值 / 原始最大魔法值) * 最大魔法值;
+    }
   }
 
   heal(value) {
