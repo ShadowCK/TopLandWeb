@@ -329,6 +329,7 @@ window.onload = () => {
   update(0);
 
   const 测试装备 = new 装备(equipConfigs.新手木剑);
+  player.背包.addItem(测试装备);
   测试装备.穿上(player);
 
   const 测试物品 = new 装备(equipConfigs.新手木剑);
