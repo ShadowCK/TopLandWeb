@@ -257,11 +257,11 @@ const enemyConfigs = {
     金钱: 0,
     经验值: 50,
   },
-  新手剑士: {
+  剑士练习生: {
     职业: {
       requirements: {},
-      name: '新手剑士',
-      description: '皮糙肉厚的倒霉蛋。',
+      name: '剑士练习生',
+      description: '皮糙肉厚的倒霉蛋，练习刚满两年半。',
       maxLevel: 1,
       statGrowth: {
         最大生命值: [70, 0],

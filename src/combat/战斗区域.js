@@ -46,8 +46,8 @@ const configs = {
         config: 敌人信息.菜鸡魔能使,
         weight: 100,
       },
-      新手剑士: {
-        config: 敌人信息.新手剑士,
+      剑士练习生: {
+        config: 敌人信息.剑士练习生,
         weight: 50,
       },
       装逼的骑士: {
