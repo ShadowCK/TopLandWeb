@@ -13,7 +13,7 @@ class 玩家 extends 实体 {
   // 目前不需要额外的构造函数
 
   addExp(exp) {
-    super.addExp(exp, get最高专精等级经验倍率(this.职业.expertiseLevel));
+    super.addExp(exp, get最高专精等级经验倍率(this.玩家存档.最高专精等级));
   }
 }
 

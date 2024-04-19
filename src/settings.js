@@ -41,10 +41,10 @@ const config = {
   最高专精等级倍率经验加成: 1.01,
 };
 
-const get最高专精等级经验倍率 = (expertiseLevel) => {
+const get最高专精等级经验倍率 = (最高专精等级) => {
   const mult =
-    (1 + (expertiseLevel * config.最高专精等级百分比经验加成) / 100) *
-    config.最高专精等级倍率经验加成 ** expertiseLevel;
+    (1 + (最高专精等级 * config.最高专精等级百分比经验加成) / 100) *
+    config.最高专精等级倍率经验加成 ** 最高专精等级;
   return mult;
 };
 

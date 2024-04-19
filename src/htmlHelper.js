@@ -134,25 +134,31 @@ const genProgressBar = ({
 
 const updateProgressBar = (bar, value, maxValue, format = '{value} / {total}', precision = 0) => {
   const element = _.isString(bar) ? $(bar) : bar;
-  const roundedValue = _.round(value, precision);
-  const roundedTotal = _.round(maxValue, precision);
-  const percent = (roundedValue / roundedTotal) * 100;
-  // 手动替换，不然的话fomantic-ui显示的value是roundedTotal * percent，再round到精度（这里默认精度0，就是round到整数）
-  // 只能传入value和total，或total和percent，另外一个值fomantic-ui会自动计算。我们不希望用他自动计算的，因为他自己的精度
-  // 会同时影响百分比和value的显示。
-  let active = format.replace(/{value}/g, roundedValue);
-  if (roundedTotal === Infinity) {
-    active = active.replace(/{total}/g, '∞');
+  let percent = (value / maxValue) * 100;
+  // 边缘情况： 0/0 或 Infinity/Infinity显示100%
+  if (value === maxValue && (value === 0 || value === Infinity)) {
+    percent = 100;
   }
+  // 其他边缘情况：-Infinity/Infinity，或者value，maxValue不是数字
+  else if (Number.isNaN(value / maxValue)) {
+    percent = 0;
+  } else {
+    // 为了保证UI刷新，在超过fomantic-ui的精度阈值时设置为恰好低于阈值。
+    percent = percent >= 99.5 && percent < 100 ? 99.49 : percent;
+  }
+  // fomantic-ui自带的精度只影响百分比显示，显示value精度是固定的，total却又保留原数值（不round），很混乱。
+  // 这里直接将value和total都round，然后替换format中的{value}和{total}。
+  const active = format
+    .replace(/{value}/g, value === Infinity ? '∞' : _.round(value, precision))
+    .replace(/{total}/g, maxValue === Infinity ? '∞' : _.round(maxValue, precision));
   element.progress({
-    total: roundedTotal,
-    percent: percent >= 99.5 && percent < 100 ? 99.49 : percent,
+    total: maxValue,
+    percent,
     text: {
       active,
     },
   });
 };
-
 /**
  * @param {import('./combat/实体.js').default} entity
  */
