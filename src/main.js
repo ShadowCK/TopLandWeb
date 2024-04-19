@@ -1,5 +1,6 @@
 import _ from 'lodash';
 import { clearInterval, setInterval } from 'worker-timers';
+import { labelHTML } from './htmlHelper.js';
 
 import 玩家 from './player/玩家.js';
 import * as 玩家管理器 from './player/玩家管理器.js';
@@ -147,19 +148,20 @@ const setupHTML = () => {
   // 区域面板
   const 区域面板 = $('#区域面板');
   _.forEach(战斗管理器.所有战斗区域, (战斗区域) => {
-    const enemyConfigs = _.map(战斗区域.enemies, (literal) => literal.config);
-    const 敌人信息 = enemyConfigs
-      .map(
-        (enemyConfig) => `
+    const 敌人信息 = Object.values(战斗区域.enemies)
+      .map((areaEnemyConfig) => {
+        const enemyConfig = areaEnemyConfig.config;
+        const label = areaEnemyConfig.isBoss ? labelHTML('BOSS', '', 'yellow', true) : '';
+        return `
         <div class="column">
           <div class="ui segment">
-            <div>${enemyConfig.职业.name}</div>
+          <div>${enemyConfig.职业.name}${label}</div>
             <div>金钱: ${enemyConfig.金钱}</div>
             <div>经验值: ${enemyConfig.经验值}</div>
           </div>
         </div>
-      `,
-      )
+      `;
+      })
       .join('');
     const element = $(`
       <div class="ui segment">
