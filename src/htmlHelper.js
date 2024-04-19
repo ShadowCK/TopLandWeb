@@ -1,4 +1,6 @@
 import _ from 'lodash';
+import showdown from 'showdown';
+
 import * as 玩家管理器 from './player/玩家管理器.js';
 import { getDecimalPrecision } from './utils.js';
 import { StatType } from './combat/战斗属性.js';
@@ -10,6 +12,49 @@ const config = {
   经验条格式: '经验值: {value} / {total}',
   攻击条格式: '下次攻击: {value} / {total}',
   默认进度条格式: '{value} / {total}',
+};
+
+const githubMarkdownCSS = fetch(
+  'https://cdnjs.cloudflare.com/ajax/libs/github-markdown-css/5.1.0/github-markdown.min.css',
+)
+  .then((response) => {
+    if (!response.ok) {
+      throw new Error(`Failed to load CSS due to response error: Status ${response.status}`);
+    }
+    return response.text();
+  })
+  .catch((error) => new Error(`Error while fetching GitHub Markdown CSS ${error.message}`));
+/**
+ * 使用了Shadow DOM，所以外部的CSS不会影响到内部，反之亦然。
+ * @param {string} url
+ * @param {JQuery<HTMLElement>} parent
+ */
+const loadAndRenderMarkdown = async (url, parent) => {
+  try {
+    const response = await fetch(url);
+    if (!response.ok) {
+      throw new Error('Network response was not ok');
+    }
+    const markdown = await response.text();
+    const converter = new showdown.Converter();
+    const html = converter.makeHtml(markdown);
+
+    const parentElement = parent[0];
+    const shadowRoot = parentElement.attachShadow({ mode: 'open' });
+    const css = await githubMarkdownCSS;
+    if (css instanceof Error) {
+      throw css;
+    }
+    const style = document.createElement('style');
+    style.textContent = css;
+    const div = document.createElement('div');
+    div.className = 'markdown-body'; // Assume GitHub CSS expects this class
+    div.innerHTML = html;
+    shadowRoot.append(style, div);
+  } catch (error) {
+    console.error('Failed to generate markdown', error);
+    parent.html(`<p>生成markdown文件失败。</p>`);
+  }
 };
 
 const wrapHtml = (htmlString, tags) => {
@@ -336,4 +381,5 @@ export {
   genItem,
   genEquipments,
   genInventory,
+  loadAndRenderMarkdown,
 };
