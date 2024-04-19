@@ -1,12 +1,12 @@
 import _ from 'lodash';
 import { clearInterval, setInterval } from 'worker-timers';
-import { labelHTML } from './htmlHelper.js';
 
 import 玩家 from './player/玩家.js';
 import * as 玩家管理器 from './player/玩家管理器.js';
 import * as 战斗管理器 from './combat/战斗管理器.js';
 import classConfigs from './classes/职业信息.js';
 import {
+  labelHTML,
   genLabel,
   genElementForStats,
   genProgressBar,
@@ -16,6 +16,7 @@ import {
   config as htmlConfig,
   genInventory,
   genEquipments,
+  loadAndRenderMarkdown,
 } from './htmlHelper.js';
 import { StatType } from './combat/战斗属性.js';
 import { 可以提升专精等级, 可以转生, 转生 } from './reincarnate/转生.js';
@@ -26,6 +27,8 @@ import 装备 from './items/装备.js';
 import { equipConfigs } from './items/装备信息.js';
 
 const setupHTML = () => {
+  loadAndRenderMarkdown('./更新日志与计划更新.md', $('#更新日志面板'));
+
   const onVisible = (tabPath) => {
     if (tabPath === '转生面板') {
       const player = 玩家管理器.getPlayer();
