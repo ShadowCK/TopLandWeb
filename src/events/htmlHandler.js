@@ -272,7 +272,7 @@ const setupHTML = () => {
   });
   const 战斗面板实体列表 = $('#战斗面板-实体列表');
   const player = 玩家管理器.getPlayer();
-  genCombatLayout(player, 战斗面板实体列表, { isPlayer: true });
+  战斗面板实体列表.append(genCombatLayout(player, { isPlayer: true }));
 
   // 背包面板
   $('#背包面板').on('contextmenu', (e) => {
