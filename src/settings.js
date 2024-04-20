@@ -21,6 +21,8 @@ const getRequiredExp = (level) => {
   return total;
 };
 
+// 游戏的重要参数，不是用户设置！
+// alias: gameConfig
 const config = {
   extraLevelsPerExpertiseLevel: 5,
   statLimits: {
@@ -41,6 +43,11 @@ const config = {
   最高专精等级倍率经验加成: 1.01,
 };
 
+// 用户设置
+const settings = {
+  HTML更新间隔: 50, // ms
+};
+
 const get最高专精等级经验倍率 = (最高专精等级) => {
   const mult =
     (1 + (最高专精等级 * config.最高专精等级百分比经验加成) / 100) *
@@ -48,4 +55,11 @@ const get最高专精等级经验倍率 = (最高专精等级) => {
   return mult;
 };
 
-export { 默认优先级, getRequiredExp, config, get最高专精等级经验倍率 };
+export {
+  默认优先级,
+  getRequiredExp,
+  config,
+  config as gameConfig,
+  get最高专精等级经验倍率,
+  settings,
+};
