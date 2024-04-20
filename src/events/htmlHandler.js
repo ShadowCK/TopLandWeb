@@ -295,6 +295,10 @@ const setupHTML = () => {
   genCombatLayout(player, 战斗面板实体列表, { isPlayer: true });
 
   // 背包面板
+  $('#背包面板').on('contextmenu', (e) => {
+    // 防止玩家右键丢东西的时候，不小心打开浏览器的右键菜单
+    e.preventDefault();
+  });
   genEquipments();
   genInventory();
 };

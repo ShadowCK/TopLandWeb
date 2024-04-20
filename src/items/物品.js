@@ -1,13 +1,13 @@
 import { ItemType } from '../enums.js';
 
 class 物品 {
+  type = ItemType.物品; // ItemConfig里用于创建物品的，其实实例化后用不着
+
   name = '玻璃瓶';
 
   description = '一个玻璃瓶。';
 
   stackable = true;
-
-  type = ItemType.物品;
 
   stack = 1;
 

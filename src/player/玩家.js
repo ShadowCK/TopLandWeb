@@ -1,5 +1,6 @@
 import 实体 from '../combat/实体.js';
 import 背包 from '../items/背包.js';
+import 装备 from '../items/装备.js';
 import { get最高专精等级经验倍率 } from '../settings.js';
 
 class 玩家 extends 实体 {
@@ -19,6 +20,14 @@ class 玩家 extends 实体 {
 
   addExp(exp) {
     super.addExp(exp, get最高专精等级经验倍率(this.最高专精等级));
+  }
+
+  dropItem(item) {
+    const isEquipment = item instanceof 装备;
+    if (isEquipment && this.拥有装备(item)) {
+      item.脱下(this);
+    }
+    this.背包.removeItem(item);
   }
 }
 

@@ -267,9 +267,10 @@ const genElementForEquipmentStat = (parent, value, key, labelClass = '', path = 
   }
   if (_.isObject(value) && !Array.isArray(value)) {
     const label = $(labelHTML(key, '', `teal ${labelClass}`));
-    const segment = $(`<div class="ui tiny segment"></div>`);
-    const list = $(`<div class="ui list"></div>`);
-    parent.append($('<div class="column"></div>').append(label, segment.append(list)));
+    const list = $(`<div class="ui relaxed divided horizontal list"></div>`);
+    parent.append(
+      $('<div class="ui center aligned segment" style="border:none;"></div>').append(label, list),
+    );
     _.forEach(value, (v, k) => {
       genElementForEquipmentStat(list, v, k, labelClass, [...path, k]);
     });
@@ -284,16 +285,15 @@ const genElementForEquipmentStat = (parent, value, key, labelClass = '', path = 
   } else {
     formatted = _.round(value, 2);
   }
+  // Leaf
   const html =
     path.length > 1
       ? `<div class="item">
           ${labelHTML(key, formatted, labelClass)}
          </div>
          `
-      : `<div class="column">
-           <div class="item">
-             ${labelHTML(key, formatted, labelClass)}
-           </div>
+      : `<div class="ui center aligned segment" style="border:none;">
+          ${labelHTML(key, formatted, labelClass)}
          </div>
          `;
   parent.append(html);
@@ -303,10 +303,8 @@ const genItemHTML = () =>
   `
   <div class="column">
     <div class="ui card">
-      <div class="content">
-        <div class="ui placeholder">
-          <div class="square image">
-          </div>
+      <div class="ui image placeholder">
+        <div class="square icon image">
         </div>
       </div>
     </div>
@@ -334,25 +332,52 @@ const genItem = (item, parent) => {
       <div class="ui message">
         <p>${item.description}</p>
       </div>
-      <div class="ui relaxed four column grid">
-      </div>
+      <div class="ui horizontal wrapping segments"></div>
+      <div class="ui divider"></div>
+      <button class="ui button" data-use="丢弃">丢弃</button>
     </div>
     `);
-  const grid = tempParent.find('.ui.grid');
+  const grid = tempParent.find('.ui.segments');
   _.forEach(item.stats, (value, key) => {
     genElementForEquipmentStat(grid, value, key, 'small');
   });
   element.attr('data-variation', 'multiline flowing');
   element.attr('data-html', compressHTML(tempParent.html()));
   element.popup({
+    hoverable: true,
     delay: {
       show: 30,
       hide: 100,
+    },
+    onCreate: function onCreate() {
+      this.find('.button[data-use="丢弃"]').on('click', () => {
+        玩家管理器.getPlayer().dropItem(item);
+        $.toast({
+          message: `你丢掉了${item.name}。`,
+        });
+      });
     },
     // inline可以apply local CSS rules，让它看起来更对，但是不会在关闭时自动移除
     // TODO: 在父元素被删除时移除popup
     inline: true,
     lastResort: true,
+  });
+  // 右键也可以丢弃物品
+  element.on('contextmenu', (e) => {
+    e.preventDefault();
+    const player = 玩家管理器.getPlayer();
+    if (isEquipment && player.拥有装备(item)) {
+      $.toast({
+        title: '危险！',
+        class: 'red',
+        message: `我禁止了右键丢弃已经穿戴的装备，防止误操作。`,
+      });
+      return;
+    }
+    player.dropItem(item);
+    $.toast({
+      message: `你丢掉了${item.name}。`,
+    });
   });
   $(parent).append(element);
 };
