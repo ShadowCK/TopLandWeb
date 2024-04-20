@@ -1,3 +1,4 @@
+import { setInterval, clearInterval } from 'worker-timers';
 import _ from 'lodash';
 import {
   labelHTML,
@@ -312,9 +313,6 @@ const setHTMLInterval = (delay) => {
 };
 
 const clearHTMLInterval = () => {
-  if (htmlWorkerId != null) {
-    return;
-  }
   if (htmlWorkerId != null) {
     clearInterval(htmlWorkerId);
     htmlWorkerId = null;

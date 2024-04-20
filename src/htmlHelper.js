@@ -304,7 +304,7 @@ const genItemHTML = () =>
   `
   <div class="column">
     <div class="ui card">
-      <div class="ui image placeholder">
+      <div class="ui image placeholder" style="animation:none;">
         <div class="square icon image">
         </div>
       </div>
@@ -383,7 +383,7 @@ const genItem = (item, parent) => {
   $(parent).append(element);
 };
 
-const paginationHTML = (parent, itemsPerPage, items, maxPages, activePageIndex = 1) => {
+const paginationHTML = (itemsPerPage, items, maxPages, activePageIndex = 1) => {
   const pageButtonHTML = (index) =>
     activePageIndex === index
       ? `<a class="item active" data-index="${index}">${index}</a>`
@@ -398,26 +398,30 @@ const paginationHTML = (parent, itemsPerPage, items, maxPages, activePageIndex =
   }
   // 总页数大于最大页数，显示省略号和前后按钮
   let html = '';
-  const prevButton = `<a class="item"><i class="chevron left icon prev-button"></i></a>`;
-  const nextButton = `<a class="item"><i class="chevron right icon next-button"></i></a>`;
+  const prevButton = `<a class="item prev-button"><i class="chevron left icon"></i></a>`;
+  const nextButton = `<a class="item next-button"><i class="chevron right icon"></i></a>`;
   const ellipsis = `<div class="disabled item">...</div>`;
-  const pagesBeforeEllipsis = Math.floor(maxPages / 2);
-  const pagesAfterEllipsis = maxPages - pagesBeforeEllipsis;
-  const startPageIndex = Math.max(1, activePageIndex - pagesBeforeEllipsis + 1);
-  const endPageIndex = Math.min(totalPages, activePageIndex + pagesAfterEllipsis - 1);
+  const pagesBeforeActive = Math.floor((maxPages - 1) / 2);
+  const pagesAfterActive = maxPages - 1 - pagesBeforeActive;
+  let startPageIndex = Math.max(1, activePageIndex - pagesBeforeActive);
+  let endPageIndex = Math.min(totalPages, activePageIndex + pagesAfterActive);
   if (startPageIndex > 1) {
     html += pageButtonHTML(1);
+    startPageIndex = Math.min(activePageIndex, startPageIndex + 1);
     if (startPageIndex > 2) {
       html += ellipsis;
     }
   }
+  if (endPageIndex < totalPages) {
+    endPageIndex = Math.max(activePageIndex, endPageIndex - 1);
+  }
   html += _.range(startPageIndex, endPageIndex + 1)
     .map((index) => pageButtonHTML(index))
     .join('');
+  if (endPageIndex < totalPages - 1) {
+    html += ellipsis;
+  }
   if (endPageIndex < totalPages) {
-    if (endPageIndex < totalPages - 1) {
-      html += ellipsis;
-    }
     html += pageButtonHTML(totalPages);
   }
   html = prevButton + html + nextButton;
@@ -437,44 +441,64 @@ const genInventoryItems = (itemsPerPage, pageIndex) => {
   });
 };
 
+let _genPagination;
+
+const pageButtonClicked = (parent, itemsPerPage, items, maxPages, activePageIndex, callback) => {
+  _genPagination(parent, itemsPerPage, items, maxPages, activePageIndex, callback);
+  callback({ parent, itemsPerPage, items, maxPages, activePageIndex });
+};
+
+const genPagination = (parent, itemsPerPage, items, maxPages, activePageIndex, callback) => {
+  const totalPages = Math.ceil(items.length / itemsPerPage);
+  // 防止页数越界
+  const _activePageIndex = _.clamp(activePageIndex, 1, totalPages);
+  // 生成分页栏
+  parent.html(paginationHTML(itemsPerPage, items, maxPages, _activePageIndex));
+  // 为每个按钮添加事件
+  parent.find('[data-index]').each((_index, element) => {
+    const pageIndex = parseInt($(element).attr('data-index'), 10);
+    $(element).on('click', () => {
+      pageButtonClicked(parent, itemsPerPage, items, maxPages, pageIndex, callback);
+    });
+  });
+  parent.find('.prev-button').on('click', () => {
+    pageButtonClicked(
+      parent,
+      itemsPerPage,
+      items,
+      maxPages,
+      Math.max(1, _activePageIndex - 1),
+      callback,
+    );
+  });
+  parent.find('.next-button').on('click', () => {
+    pageButtonClicked(
+      parent,
+      itemsPerPage,
+      items,
+      maxPages,
+      Math.min(_activePageIndex + 1, totalPages),
+      callback,
+    );
+  });
+};
+
+_genPagination = genPagination;
+
 const genInventory = () => {
   const player = 玩家管理器.getPlayer();
   const 选择背包分页 = $('#背包面板-选择背包分页');
   选择背包分页.empty();
   const itemsPerPage = settings.背包物品每页数量;
-  const pageButtonClicked = (pageIndex, callback) => {
-    // 生成新的分页栏(genPagination)
-    callback(pageIndex);
-    // 更新显示的背包物品
-    genInventoryItems(itemsPerPage, pageIndex);
-  };
-  const genPagination = (activePageIndex) => {
-    // 生成分页栏
-    选择背包分页.html(
-      paginationHTML(
-        选择背包分页,
-        itemsPerPage,
-        player.背包.items,
-        settings.背包页面最大数量,
-        activePageIndex,
-      ),
-    );
-    // 为每个按钮添加事件
-    选择背包分页.find('[data-index]').each((_index, element) => {
-      const pageIndex = parseInt($(element).attr('data-index'), 10);
-      $(element).on('click', () => {
-        pageButtonClicked(pageIndex, genPagination);
-      });
-    });
-    选择背包分页.find('.prev-button').on('click', () => {
-      pageButtonClicked(activePageIndex - 1, genPagination);
-    });
-    选择背包分页.find('.next-button').on('click', () => {
-      pageButtonClicked(activePageIndex + 1, genPagination);
-    });
-  };
 
-  genPagination(1);
+  genPagination(
+    选择背包分页,
+    itemsPerPage,
+    player.背包.items,
+    settings.背包页面最大数量,
+    1,
+    ({ activePageIndex }) => genInventoryItems(itemsPerPage, activePageIndex),
+  );
   // 初始化生成第一页物品
   genInventoryItems(itemsPerPage, 1);
 };
