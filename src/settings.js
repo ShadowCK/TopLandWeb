@@ -47,6 +47,8 @@ const config = {
 const settings = {
   HTML更新间隔: 50, // ms
   游戏倍速: 1,
+  背包物品每页数量: 36,
+  背包页面最大数量: 10,
 };
 
 const get最高专精等级经验倍率 = (最高专精等级) => {

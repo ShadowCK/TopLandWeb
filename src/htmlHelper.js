@@ -5,6 +5,7 @@ import * as 玩家管理器 from './player/玩家管理器.js';
 import { getDecimalPrecision } from './utils.js';
 import { StatType } from './combat/战斗属性.js';
 import 装备 from './items/装备.js';
+import { settings } from './settings.js';
 
 const config = {
   生命条格式: '生命值: {value} / {total}',
@@ -92,7 +93,7 @@ const changeTab = (tabPath) => {
 
 const labelHTML = (title, content, className = '', inline = false) => {
   const settings = `class="ui ${className} horizontal label"`;
-  return `
+  return /* html */ `
     ${wrapHtml(title, [{ name: inline ? 'span' : 'div', settings }])}
     ${content != null ? content : ''}
     `;
@@ -168,7 +169,7 @@ const genCombatLayout = (
   // TODO: 断言isEnemy=!isPlayer - 目前只有敌人，以后如果有召唤物/队友的话再进行修改
   { isPlayer = false, isEnemy = !isPlayer, config: entityConfig },
 ) => {
-  const html = `
+  const html = /* html */ `
   <div id="${entity.uuid}" class="column">
     <div class="ui segment">
       ${`<h3 class="ui header">${isPlayer ? '你' : entity.职业.name}</h3>`}
@@ -382,13 +383,100 @@ const genItem = (item, parent) => {
   $(parent).append(element);
 };
 
-const genInventory = () => {
+const paginationHTML = (parent, itemsPerPage, items, maxPages, activePageIndex = 1) => {
+  const pageButtonHTML = (index) =>
+    activePageIndex === index
+      ? `<a class="item active" data-index="${index}">${index}</a>`
+      : `<a class="item" data-index="${index}">${index}</a>`;
+
+  const totalPages = Math.ceil(items.length / itemsPerPage);
+  // 如果总页数小于最大页数，直接显示所有页数
+  if (totalPages < maxPages) {
+    return _.range(1, totalPages + 1)
+      .map((index) => pageButtonHTML(index))
+      .join('');
+  }
+  // 总页数大于最大页数，显示省略号和前后按钮
+  let html = '';
+  const prevButton = `<a class="item"><i class="chevron left icon prev-button"></i></a>`;
+  const nextButton = `<a class="item"><i class="chevron right icon next-button"></i></a>`;
+  const ellipsis = `<div class="disabled item">...</div>`;
+  const pagesBeforeEllipsis = Math.floor(maxPages / 2);
+  const pagesAfterEllipsis = maxPages - pagesBeforeEllipsis;
+  const startPageIndex = Math.max(1, activePageIndex - pagesBeforeEllipsis + 1);
+  const endPageIndex = Math.min(totalPages, activePageIndex + pagesAfterEllipsis - 1);
+  if (startPageIndex > 1) {
+    html += pageButtonHTML(1);
+    if (startPageIndex > 2) {
+      html += ellipsis;
+    }
+  }
+  html += _.range(startPageIndex, endPageIndex + 1)
+    .map((index) => pageButtonHTML(index))
+    .join('');
+  if (endPageIndex < totalPages) {
+    if (endPageIndex < totalPages - 1) {
+      html += ellipsis;
+    }
+    html += pageButtonHTML(totalPages);
+  }
+  html = prevButton + html + nextButton;
+  return html;
+};
+
+const genInventoryItems = (itemsPerPage, pageIndex) => {
   const player = 玩家管理器.getPlayer();
   const 背包面板背包 = $('#背包面板-背包');
   背包面板背包.empty();
-  _.forEach(player.背包.items, (item) => {
+  const itemsToRender = player.背包.items.slice(
+    (pageIndex - 1) * itemsPerPage,
+    pageIndex * itemsPerPage,
+  );
+  _.forEach(itemsToRender, (item) => {
     genItem(item, 背包面板背包);
   });
+};
+
+const genInventory = () => {
+  const player = 玩家管理器.getPlayer();
+  const 选择背包分页 = $('#背包面板-选择背包分页');
+  选择背包分页.empty();
+  const itemsPerPage = settings.背包物品每页数量;
+  const pageButtonClicked = (pageIndex, callback) => {
+    // 生成新的分页栏(genPagination)
+    callback(pageIndex);
+    // 更新显示的背包物品
+    genInventoryItems(itemsPerPage, pageIndex);
+  };
+  const genPagination = (activePageIndex) => {
+    // 生成分页栏
+    选择背包分页.html(
+      paginationHTML(
+        选择背包分页,
+        itemsPerPage,
+        player.背包.items,
+        settings.背包页面最大数量,
+        activePageIndex,
+      ),
+    );
+    // 为每个按钮添加事件
+    选择背包分页.find('[data-index]').each((_index, element) => {
+      const pageIndex = parseInt($(element).attr('data-index'), 10);
+      $(element).on('click', () => {
+        pageButtonClicked(pageIndex, genPagination);
+      });
+    });
+    选择背包分页.find('.prev-button').on('click', () => {
+      pageButtonClicked(activePageIndex - 1, genPagination);
+    });
+    选择背包分页.find('.next-button').on('click', () => {
+      pageButtonClicked(activePageIndex + 1, genPagination);
+    });
+  };
+
+  genPagination(1);
+  // 初始化生成第一页物品
+  genInventoryItems(itemsPerPage, 1);
 };
 
 const genEquipments = () => {
