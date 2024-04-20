@@ -10,7 +10,7 @@ import {
   updateHTML,
   setHTMLInterval,
 } from './events/htmlHandler.js';
-import { config } from './settings.js';
+import { config, settings } from './settings.js';
 
 const update = (dt) => {
   战斗管理器.update(dt);
@@ -50,7 +50,7 @@ window.onload = () => {
     const now = performance.now();
     const dt = (now - lastUpdate) / 1000;
     lastUpdate = now; // 用于计算到下次回调实际的间隔时间
-    update(dt);
+    update(dt * settings.游戏倍速);
   }, 5);
 
   // 20 ticks per second
@@ -59,6 +59,16 @@ window.onload = () => {
   console.log('游戏加载完成');
   console.log('玩家信息：', player);
 };
+
+const setGameSpeed = (speed) => {
+  if (speed < 0 || speed > 10000) {
+    console.error('游戏倍速必须在0到10000之间');
+    return;
+  }
+  settings.游戏倍速 = speed;
+};
+
+addToWindow('setGameSpeed', setGameSpeed);
 
 window.clearLocalStorage = () => {
   localStorage.clear();
