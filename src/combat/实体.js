@@ -12,7 +12,7 @@ class 实体 {
 
   buffs = {};
 
-  skills = [];
+  技能 = [];
 
   /** @type {import('../classes/职业.js').default} */
   职业 = null;
@@ -50,6 +50,8 @@ class 实体 {
   }
 
   die() {
+    this.回复计时器 = 0;
+    this.攻击计时器 = 0;
     this.isDead = true;
     combatEvents.emit(EventType.实体死亡, { entity: this });
   }
@@ -263,7 +265,7 @@ class 实体 {
    * @param {import('../items/装备.js').default} equipment
    */
   拥有装备(equipment) {
-    const typeEquipments = this.装备[equipment.type];
+    const typeEquipments = this.装备[equipment.slot];
     // 如果实体已经装备了这个装备，就不再装备
     return typeEquipments && typeEquipments.includes(equipment);
   }

@@ -1,60 +1,90 @@
 import * as LZString from 'lz-string';
 import _ from 'lodash';
 import 职业 from '../classes/职业.js';
+import 装备 from '../items/装备.js';
 
 class 玩家存档 {
-  最高专精等级 = 0;
+  /** @type {import('./玩家.js').default} */
+  player = null;
 
-  /** @type{{[专精名:string]:number}} */
-  专精等级 = {};
+  data = null;
 
-  /** @type {import('../classes/职业').default} */
-  职业 = null;
-
-  constructor(data) {
-    if (data === undefined) {
-      throw new Error('玩家存档数据不能为空。请提供一个默认值。');
-    }
-    // 允许显式创造空对象
-    if (data === null) {
-      return;
-    }
-    // 这里没有使用JSON.parse(JSON.stringify(data))
-    // 创建deep copy是安全的，因为data不会被其他地方引用
-    Object.assign(this, data);
+  constructor(player, defaultSaveData) {
+    this.player = player;
+    this.读档(defaultSaveData);
   }
 
   存档() {
-    // ! 清除parent，防止循环引用。而且parent不需要存档
-    _.set(this, '职业.parent', null);
-    const compressed = LZString.compress(JSON.stringify(this));
+    const needed = _.pick(
+      this.player,
+      '职业',
+      // 玩家属性
+      '背包',
+      '金钱',
+      '最高专精等级',
+      '专精等级',
+      // 实体属性
+      '魔典',
+      '装备',
+      '技能',
+      '职业',
+    );
+    needed.职业 = needed.职业.toSaveData();
+    needed.背包 = needed.背包.items;
+    const compressed = LZString.compress(JSON.stringify(needed));
     localStorage.setItem('玩家存档', compressed);
   }
 
-  /**
-   * 通常情况下，每次读档后都要应用存档数据
-   */
-  应用存档(player) {
-    player.玩家存档 = this;
-    // this.职业可能是普通对象(classConfig)，不能直接player.职业=this.职业。
-    // 需要使用this.职业作为模板创建新职业并更新this.职业的引用
-    player.设置职业(new 职业(this.职业));
-    this.职业 = player.职业;
-  }
-
-  static 拥有存档() {
-    return localStorage.getItem('玩家存档') !== null;
-  }
-
-  static 读档(defaultSaveData) {
-    if (this.拥有存档()) {
-      const decompressd = LZString.decompress(localStorage.getItem('玩家存档'));
+  读档(defaultSaveData) {
+    const save = localStorage.getItem('玩家存档');
+    if (save !== null) {
+      const decompressd = LZString.decompress(save);
       const data = JSON.parse(decompressd);
-      console.log('读档成功', data);
-      return new 玩家存档(data);
+      this.data = data;
+    } else {
+      this.data = defaultSaveData;
     }
-    // 如果没有存档，使用默认存档信息
-    return new 玩家存档(defaultSaveData);
+    console.log('读取本地存档', this.data);
+    return this;
+  }
+
+  /**
+   * 创建存档会自动读档，但是为了代码的灵活性，要手动应用存档。
+   * @param {import('./玩家.js').default} player
+   */
+  应用存档() {
+    const { player } = this;
+    if (!player) {
+      console.error('没有玩家实例');
+      return;
+    }
+    player.玩家存档 = this;
+    if (!this.data) {
+      console.error('没有存档数据');
+      return;
+    }
+    try {
+      // 用读取的职业信息为玩家设置职业
+      if (this.data.职业) {
+        player.设置职业(new 职业(this.data.职业));
+      }
+      // 将存档里背包的内容添加到玩家背包
+      if (this.data.背包) {
+        console.log('存档-背包', this.data.背包);
+        player.背包.loadSavedItems(this.data.背包);
+      }
+      if (this.data.装备) {
+        console.log('存档-装备', this.data.装备);
+        _.forEach(this.data.装备, (typeEquipments, key) => {
+          player.装备[key] = typeEquipments.map((e) => new 装备(e));
+        });
+      }
+      const rest = _.omit(this.data, '职业', '背包', '装备');
+      Object.assign(player, rest);
+      console.log('玩家存档已应用', player);
+    } catch (error) {
+      console.error('应用存档失败', error);
+    }
   }
 }
 

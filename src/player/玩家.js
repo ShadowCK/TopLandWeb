@@ -10,10 +10,15 @@ class 玩家 extends 实体 {
 
   金钱 = 0;
 
+  最高专精等级 = 0;
+
+  /** @type{{[专精名:string]:number}} */
+  专精等级 = {};
+
   // 目前不需要额外的构造函数
 
   addExp(exp) {
-    super.addExp(exp, get最高专精等级经验倍率(this.玩家存档.最高专精等级));
+    super.addExp(exp, get最高专精等级经验倍率(this.最高专精等级));
   }
 }
 

@@ -23,8 +23,6 @@ import { 可以提升专精等级, 可以转生, 转生 } from './reincarnate/�
 import { getMaxLevel, templateFromElement } from './utils.js';
 import addToWindow from './debug.js';
 import registerHTMLEvents from './events/htmlHandler.js';
-import 装备 from './items/装备.js';
-import { equipConfigs } from './items/装备信息.js';
 import { get最高专精等级经验倍率 } from './settings.js';
 
 const setupHTML = () => {
@@ -51,7 +49,7 @@ const setupHTML = () => {
         if (!可以转生(player, classConfig.name)) {
           return;
         }
-        const 专精等级 = player.玩家存档.专精等级[classConfig.name] || 0;
+        const 专精等级 = player.专精等级[classConfig.name] || 0;
         const button = $(`<div class="ui button">${classConfig.name} +${专精等级}</div>`);
         可转生职业.append(button);
         button.on('click', () => {
@@ -66,7 +64,7 @@ const setupHTML = () => {
     const 当前职业名 = player.职业.name;
     const 新职业名称 = classConfig.name;
     const canLevelUpExpertise = 可以提升专精等级(player);
-    let 新职业专精等级 = player.玩家存档.专精等级[新职业名称] || 0;
+    let 新职业专精等级 = player.专精等级[新职业名称] || 0;
     if (新职业名称 === 当前职业名 && canLevelUpExpertise) {
       新职业专精等级 += 1;
     }
@@ -216,9 +214,9 @@ const updateHTML = (params) => {
   const 职业专精等级 = $('#角色面板-职业专精等级');
   职业专精等级.html(
     `${玩家职业.expertiseLevel}（最高${
-      player.玩家存档.最高专精等级
+      player.最高专精等级
     } <i class="angle double right icon"></i>${_.round(
-      get最高专精等级经验倍率(player.玩家存档.最高专精等级),
+      get最高专精等级经验倍率(player.最高专精等级),
       2,
     )}X 经验值）`,
   );
@@ -327,14 +325,7 @@ window.onload = () => {
   // 不应该在update里的任何function直接call HTML function，应该用emit event的方式，否则初次更新会出现问题，
   // 因为HTML的初始化是在游戏初始化后的。而且，游戏逻辑里也不应该依赖HTML function，应该emit event，让HTML function自己来更新
   update(0);
-
-  const 测试装备 = new 装备(equipConfigs.新手木剑);
-  player.背包.addItem(测试装备);
-  测试装备.穿上(player);
-
-  const 测试物品 = new 装备(equipConfigs.新手木剑);
-  player.背包.addItem(测试物品);
-
+  
   // 在所有数据都加载完毕后，设置HTML
   setupHTML();
   registerHTMLEvents();

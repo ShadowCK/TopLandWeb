@@ -22,7 +22,7 @@ const 可以转生 = (player, 新职业名称) => {
   }
   const requirementsMet = !_.some(
     新职业配置.requirements,
-    (value, key) => _.get(player, `玩家存档.专精等级.${key}`, 0) < value,
+    (value, key) => _.get(player, `专精等级.${key}`, 0) < value,
   );
   return requirementsMet;
 };
@@ -38,14 +38,14 @@ const 转生 = (player, 新职业名称) => {
   }
   if (可以提升专精等级(player)) {
     const 当前职业名 = player.职业.name;
-    const 新专精等级 = _.get(player, `玩家存档.专精等级.${当前职业名}`, 0) + 1;
-    player.玩家存档.专精等级[当前职业名] = 新专精等级;
-    if (新专精等级 > player.玩家存档.最高专精等级) {
-      player.玩家存档.最高专精等级 = 新专精等级;
+    const 新专精等级 = _.get(player, `专精等级.${当前职业名}`, 0) + 1;
+    player.专精等级[当前职业名] = 新专精等级;
+    if (新专精等级 > player.最高专精等级) {
+      player.最高专精等级 = 新专精等级;
     }
   }
   const 新职业配置 = classConfigs[新职业名称];
-  新职业配置.expertiseLevel = _.get(player, `玩家存档.专精等级.${新职业名称}`, 0);
+  新职业配置.expertiseLevel = _.get(player, `专精等级.${新职业名称}`, 0);
   player.设置职业(new 职业(新职业配置));
   player.玩家存档.职业 = player.职业;
   return true;
