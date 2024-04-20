@@ -5,7 +5,7 @@ import * as 玩家管理器 from './player/玩家管理器.js';
 import { getDecimalPrecision } from './utils.js';
 import { StatType } from './combat/战斗属性.js';
 import 装备 from './items/装备.js';
-import { settings } from './settings.js';
+import { settings as gameSettings } from './settings.js';
 
 const config = {
   生命条格式: '生命值: {value} / {total}',
@@ -160,21 +160,55 @@ const updateProgressBar = (bar, value, maxValue, format = '{value} / {total}', p
     },
   });
 };
+
+const getCombatLayout = (parent, entity) => parent.find(`#${entity.uuid}`);
+
+/**
+ * @param {import('./combat/实体.js').default} entity
+ */
+const updateCombatLayout = (combatLayout, entity, { isPlayer = false, isEnemy = !isPlayer}) => {
+  combatLayout.find('.ui.header').text(isPlayer ? '你' : entity.职业.name);
+  combatLayout.find('.标签s').html(`${isEnemy && entity.isBoss ? labelHTML('BOSS', '', 'yellow') : ''}${isPlayer ? labelHTML('职业', entity.职业.name, 'teal') : ''}`);
+  combatLayout.find('.ui.message').html(`<p>${entity.职业.description}</p>`);
+  
+  updateProgressBar(
+    combatLayout.find('.health-bar'),
+    entity.生命值,
+    entity.getStat2(StatType.最大生命值),
+    '生命值: {value} / {total}',
+  );
+  updateProgressBar(
+    combatLayout.find('.mana-bar'),
+    entity.魔法值,
+    entity.getStat2(StatType.最大魔法值),
+    '魔法值: {value} / {total}',
+  );
+  updateProgressBar(
+    combatLayout.find('.attack-bar'),
+    entity.攻击计时器去掉攻速(),
+    entity.实际攻击间隔(),
+    config.攻击条格式,
+    2,
+  );
+};
+
 /**
  * @param {import('./combat/实体.js').default} entity
  */
 const genCombatLayout = (
   entity,
-  parent,
   // TODO: 断言isEnemy=!isPlayer - 目前只有敌人，以后如果有召唤物/队友的话再进行修改
-  { isPlayer = false, isEnemy = !isPlayer, config: entityConfig },
+  // TODO: 断言isEnemy时entityConfig不为空
+  { isPlayer = false, isEnemy = false} = {},
 ) => {
   const html = /* html */ `
   <div id="${entity.uuid}" class="column">
     <div class="ui segment">
       ${`<h3 class="ui header">${isPlayer ? '你' : entity.职业.name}</h3>`}
-      ${isEnemy && entityConfig.isBoss ? labelHTML('BOSS', '', 'yellow') : ''}
-      ${isPlayer ? labelHTML('职业', entity.职业.name, 'teal') : ''}
+      <div class="标签s">
+        ${isEnemy && entity.isBoss ? labelHTML('BOSS', '', 'yellow') : ''}
+        ${isPlayer ? labelHTML('职业', entity.职业.name, 'teal') : ''}
+      </div>
       <div class="ui message">
         <p>${entity.职业.description}</p>
       </div>
@@ -195,27 +229,8 @@ const genCombatLayout = (
   </div>
   `;
   const element = $(html);
-  // 初始化进度条
-  updateProgressBar(
-    element.find('.health-bar'),
-    entity.生命值,
-    entity.getStat2(StatType.最大生命值),
-    config.生命条格式,
-  );
-  updateProgressBar(
-    element.find('.mana-bar'),
-    entity.魔法值,
-    entity.getStat2(StatType.最大魔法值),
-    config.魔法条格式,
-  );
-  updateProgressBar(
-    element.find('.attack-bar'),
-    entity.攻击计时器去掉攻速(),
-    entity.实际攻击间隔(),
-    config.攻击条格式,
-    2,
-  );
-  $(parent).append(element);
+  updateCombatLayout(element, entity, {isPlayer, isEnemy});
+  return element;
 };
 
 /**
@@ -489,13 +504,13 @@ const genInventory = () => {
   const player = 玩家管理器.getPlayer();
   const 选择背包分页 = $('#背包面板-选择背包分页');
   选择背包分页.empty();
-  const itemsPerPage = settings.背包物品每页数量;
+  const itemsPerPage = gameSettings.背包物品每页数量;
 
   genPagination(
     选择背包分页,
     itemsPerPage,
     player.背包.items,
-    settings.背包页面最大数量,
+    gameSettings.背包页面最大数量,
     1,
     ({ activePageIndex }) => genInventoryItems(itemsPerPage, activePageIndex),
   );
@@ -522,7 +537,9 @@ export {
   genProgressBar,
   updateProgressBar,
   genElementForStats,
+  getCombatLayout,
   genCombatLayout,
+  updateCombatLayout,
   genItem,
   genEquipments,
   genInventory,
