@@ -11,6 +11,8 @@ const EventType = {
   失去物品: '失去物品',
   穿上装备: '穿上装备',
   脱下装备: '脱下装备',
+  退出战斗区域: '退出战斗区域',
+  进入战斗区域: '进入战斗区域',
 };
 
 const combatEvents = new EventEmitter();

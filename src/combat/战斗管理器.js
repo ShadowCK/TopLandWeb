@@ -96,6 +96,7 @@ const 退出战斗区域 = () => {
   if (!当前战斗区域) {
     return;
   }
+  combatEvents.emit(EventType.退出战斗区域, 当前战斗区域);
   // 移除敌人
   当前战斗区域.clearEnemies();
   当前战斗区域 = null;
@@ -110,6 +111,7 @@ const 切换战斗区域 = (新区域) => {
   }
   退出战斗区域();
   当前战斗区域 = 新区域;
+  combatEvents.emit(EventType.进入战斗区域, 新区域);
 };
 
 const update = (dt) => {
