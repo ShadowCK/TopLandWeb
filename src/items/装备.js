@@ -6,7 +6,7 @@ import { getPlayer } from '../player/玩家管理器.js';
 
 class 装备 extends 物品 {
   // 改写继承自物品类的属性
-  type = ItemType.装备;
+  type = ItemType.装备; // ItemConfig里用于创建物品的，其实实例化后用不着
 
   stackable = false;
 
@@ -22,6 +22,7 @@ class 装备 extends 物品 {
   constructor(config) {
     super(_.omit(config, 'stats', 'slot', 'requirements'));
     this.config = config;
+    // 避免修改config原始数据
     Object.assign(
       this,
       JSON.parse(
