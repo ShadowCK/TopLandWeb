@@ -18,16 +18,18 @@ const init = (p) => {
 const getPlayer = () => player;
 
 const 存档 = () => {
-  if (!player.玩家存档) {
+  const save = player.玩家存档;
+  if (!save) {
     console.error('玩家存档不存在');
+    return;
   }
-  player.玩家存档.存档();
+  save.存档();
 };
 
 const 读档 = () => {
-  const defaultSaveData = new 玩家存档(null);
-  defaultSaveData.职业 = new 职业(classConfigs.初心者);
-  const playerSave = 玩家存档.读档(defaultSaveData);
+  const defaultSave = new 玩家存档(null, null);
+  defaultSave.职业 = new 职业(classConfigs.初心者);
+  const playerSave = 玩家存档.读档(defaultSave);
   playerSave.应用存档(player);
 };
 

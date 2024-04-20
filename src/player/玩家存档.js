@@ -3,31 +3,29 @@ import _ from 'lodash';
 import 职业 from '../classes/职业.js';
 
 class 玩家存档 {
-  最高专精等级 = 0;
+  /** @type {import('./玩家.js').default} */
+  player = null;
 
-  /** @type{{[专精名:string]:number}} */
-  专精等级 = {};
-
-  /** @type {import('../classes/职业').default} */
-  职业 = null;
-
-  constructor(data) {
+  constructor(player, data) {
     if (data === undefined) {
       throw new Error('玩家存档数据不能为空。请提供一个默认值。');
     }
-    // 允许显式创造空对象
+    this.player = player;
+    // 如果没有存档数据，使用默认数据
     if (data === null) {
       return;
     }
-    // 这里没有使用JSON.parse(JSON.stringify(data))
-    // 创建deep copy是安全的，因为data不会被其他地方引用
+    // data不会被其他地方引用，不需要深拷贝
     Object.assign(this, data);
   }
 
   存档() {
-    // ! 清除parent，防止循环引用。而且parent不需要存档
-    _.set(this, '职业.parent', null);
-    const compressed = LZString.compress(JSON.stringify(this));
+    const needed = _.omit(this.player, ['玩家存档'], ['职业']);
+    const data = {
+      职业: new 职业(this.player.职业), // 去除parent, 防止被修改
+      ...needed,
+    };
+    const compressed = LZString.compress(JSON.stringify(data));
     localStorage.setItem('玩家存档', compressed);
   }
 
@@ -46,15 +44,16 @@ class 玩家存档 {
     return localStorage.getItem('玩家存档') !== null;
   }
 
-  static 读档(defaultSaveData) {
+  读档(defaultSaveData) {
+    debugger;
     if (this.拥有存档()) {
       const decompressd = LZString.decompress(localStorage.getItem('玩家存档'));
       const data = JSON.parse(decompressd);
       console.log('读档成功', data);
-      return new 玩家存档(data);
+      return new 玩家存档(this.player, data);
     }
     // 如果没有存档，使用默认存档信息
-    return new 玩家存档(defaultSaveData);
+    return new 玩家存档(this.player, defaultSaveData);
   }
 }
 
