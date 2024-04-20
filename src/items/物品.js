@@ -1,3 +1,5 @@
+import { ItemType } from '../enums.js';
+
 class 物品 {
   name = '玻璃瓶';
 
@@ -5,9 +7,11 @@ class 物品 {
 
   stackable = true;
 
+  type = ItemType.物品;
+
   stack = 1;
 
-  maxStack = 64;
+  maxStack = 10;
 
   config = null;
 

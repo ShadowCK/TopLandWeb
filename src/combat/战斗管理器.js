@@ -99,6 +99,9 @@ const 退出战斗区域 = () => {
   // 移除敌人
   当前战斗区域.clearEnemies();
   当前战斗区域 = null;
+  // 清除玩家的攻击计时器
+  const player = getPlayer();
+  player.攻击计时器 = 0;
 };
 
 const 切换战斗区域 = (新区域) => {
@@ -246,7 +249,7 @@ const registerEvents = () => {
       if (Math.random() * 100 >= dropConfig.chance * 掉落倍率) {
         return;
       }
-      player.背包.addItem(new dropConfig.Ctor(dropConfig.config), dropConfig.count);
+      player.背包.addItemFromConfig(dropConfig.config, dropConfig.count);
     });
     当前战斗区域.removeEnemy(entity);
   });

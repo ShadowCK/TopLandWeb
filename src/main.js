@@ -23,8 +23,6 @@ import { 可以提升专精等级, 可以转生, 转生 } from './reincarnate/�
 import { getMaxLevel, templateFromElement } from './utils.js';
 import addToWindow from './debug.js';
 import registerHTMLEvents from './events/htmlHandler.js';
-import 装备 from './items/装备.js';
-import { equipConfigs } from './items/装备信息.js';
 import { get最高专精等级经验倍率 } from './settings.js';
 
 const setupHTML = () => {
@@ -327,14 +325,7 @@ window.onload = () => {
   // 不应该在update里的任何function直接call HTML function，应该用emit event的方式，否则初次更新会出现问题，
   // 因为HTML的初始化是在游戏初始化后的。而且，游戏逻辑里也不应该依赖HTML function，应该emit event，让HTML function自己来更新
   update(0);
-
-  const 测试装备 = new 装备(equipConfigs.新手木剑);
-  player.背包.addItem(测试装备);
-  测试装备.穿上(player);
-
-  const 测试物品 = new 装备(equipConfigs.新手木剑);
-  player.背包.addItem(测试物品);
-
+  
   // 在所有数据都加载完毕后，设置HTML
   setupHTML();
   registerHTMLEvents();

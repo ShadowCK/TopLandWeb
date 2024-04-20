@@ -1,11 +1,13 @@
 import _ from 'lodash';
 import 物品 from './物品.js';
-import { EquipType } from './装备信息.js';
+import { EquipSlot, ItemType } from '../enums.js';
 import { EventType, generalEvents } from '../events/事件管理器.js';
 import { getPlayer } from '../player/玩家管理器.js';
 
 class 装备 extends 物品 {
   // 改写继承自物品类的属性
+  type = ItemType.装备;
+
   stackable = false;
 
   maxStack = 1;
@@ -13,18 +15,19 @@ class 装备 extends 物品 {
   // 装备自身的属性
   requirements = { level: 1, expertiseLevel: 0 };
 
-  type = EquipType.胸甲;
+  slot = EquipSlot.胸甲;
 
   stats = {};
 
   constructor(config) {
-    super(_.omit(config, 'stats', 'type', 'requirements'));
+    super(_.omit(config, 'stats', 'slot', 'requirements'));
+    this.config = config;
     Object.assign(
       this,
       JSON.parse(
         JSON.stringify({
           stats: config.stats,
-          type: config.type,
+          slot: config.slot,
           requirements: config.requirements,
         }),
       ),
@@ -36,15 +39,15 @@ class 装备 extends 物品 {
    * @param {import('../combat/实体.js').default} entity
    */
   穿上(entity) {
-    if (!entity.装备[this.type]) {
-      entity.装备[this.type] = [];
+    if (!entity.装备[this.slot]) {
+      entity.装备[this.slot] = [];
     }
-    const typeEquipments = entity.装备[this.type];
+    const typeEquipments = entity.装备[this.slot];
     // 如果实体已经装备了这个装备，就不再装备
     if (entity.拥有装备(this)) {
       return;
     }
-    const 装备槽数量 = entity.职业.装备槽[this.type] || 0;
+    const 装备槽数量 = entity.职业.装备槽[this.slot] || 0;
     if (typeEquipments.length >= 装备槽数量 && 装备槽数量 > 0) {
       // 脱下第一件装备。不用让玩家选择脱哪一件，他们可以手动脱。
       typeEquipments[0].脱下(entity, true);
@@ -61,7 +64,7 @@ class 装备 extends 物品 {
    * @param {import('../combat/实体.js').default} entity
    */
   脱下(entity, 换装备 = false) {
-    const typeEquipments = entity.装备[this.type];
+    const typeEquipments = entity.装备[this.slot];
     if (!typeEquipments) {
       console.error('Entity has no equipped items of this type');
       return;

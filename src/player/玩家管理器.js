@@ -1,5 +1,4 @@
 import 玩家存档 from './玩家存档.js';
-import 职业 from '../classes/职业.js';
 import classConfigs from '../classes/职业信息.js';
 
 /** @type {import('./玩家.js').default} */
@@ -27,10 +26,10 @@ const 存档 = () => {
 };
 
 const 读档 = () => {
-  const defaultSave = new 玩家存档(null, null);
-  defaultSave.职业 = new 职业(classConfigs.初心者);
-  const playerSave = 玩家存档.读档(defaultSave);
-  playerSave.应用存档(player);
+  const defaultSaveData = {
+    职业: classConfigs.初心者,
+  };
+  new 玩家存档(player, defaultSaveData).应用存档();
 };
 
 export { init, getPlayer, 存档, 读档 };

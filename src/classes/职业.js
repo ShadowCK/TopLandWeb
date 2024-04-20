@@ -2,7 +2,7 @@ import _ from 'lodash';
 import { defaultStats } from '../combat/战斗属性.js';
 import { getRequiredExp } from '../settings.js';
 import { getMaxLevel } from '../utils.js';
-import { EquipType } from '../items/装备信息.js';
+import { EquipSlot } from '../enums.js';
 
 class 职业 {
   requirements = {};
@@ -25,15 +25,15 @@ class 职业 {
   statGrowth = JSON.parse(JSON.stringify(defaultStats));
 
   装备槽 = {
-    [EquipType.武器]: 1,
-    [EquipType.副手]: 1,
-    [EquipType.头盔]: 1,
-    [EquipType.胸甲]: 1,
-    [EquipType.护腿]: 1,
-    [EquipType.鞋子]: 1,
-    [EquipType.项链]: 1,
-    [EquipType.戒指]: 1,
-    [EquipType.饰品]: 1,
+    [EquipSlot.武器]: 1,
+    [EquipSlot.副手]: 1,
+    [EquipSlot.头盔]: 1,
+    [EquipSlot.胸甲]: 1,
+    [EquipSlot.护腿]: 1,
+    [EquipSlot.鞋子]: 1,
+    [EquipSlot.项链]: 1,
+    [EquipSlot.戒指]: 1,
+    [EquipSlot.饰品]: 1,
   };
 
   // 必杀技/大招
@@ -88,6 +88,10 @@ class 职业 {
     if (this.parent) {
       this.parent.updateStats();
     }
+  }
+
+  toSaveData() {
+    return _.omit(this, 'parent');
   }
 }
 

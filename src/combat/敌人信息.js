@@ -1,6 +1,4 @@
 import { equipConfigs } from '../items/装备信息.js';
-import 装备 from '../items/装备.js';
-import 物品 from '../items/物品.js';
 
 const enemyConfigs = {
   训练木桩: {
@@ -74,7 +72,6 @@ const enemyConfigs = {
     },
     掉落: [
       {
-        Ctor: 装备,
         config: equipConfigs.老鼠皮甲,
         chance: 3,
         count: 1,
@@ -157,7 +154,6 @@ const enemyConfigs = {
     },
     掉落: [
       {
-        Ctor: 装备,
         config: equipConfigs.破碎老鼠王冠,
         chance: 5,
         count: 1,
@@ -204,7 +200,6 @@ const enemyConfigs = {
     },
     掉落: [
       {
-        Ctor: 装备,
         config: equipConfigs.老鼠王国身份证,
         chance: 100,
         count: 1,
@@ -299,7 +294,6 @@ const enemyConfigs = {
     },
     掉落: [
       {
-        Ctor: 装备,
         config: equipConfigs.新手木剑,
         chance: 10,
         count: 1,
@@ -350,7 +344,6 @@ const enemyConfigs = {
     },
     掉落: [
       {
-        Ctor: 装备,
         config: equipConfigs.铁剑,
         chance: 10,
         count: 1,
@@ -445,7 +438,6 @@ const enemyConfigs = {
     },
     掉落: [
       {
-        Ctor: 装备,
         config: equipConfigs.魔法水晶碎片,
         chance: 2,
         count: 1,
@@ -497,13 +489,11 @@ const enemyConfigs = {
     },
     掉落: [
       {
-        Ctor: 装备,
         config: equipConfigs.野猪鞭,
         chance: 5,
         count: 1,
       },
       {
-        Ctor: 装备,
         config: equipConfigs.野猪粪,
         chance: 5,
         count: 1,

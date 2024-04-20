@@ -1,20 +1,11 @@
-const EquipType = {
-  武器: '武器',
-  副手: '副手',
-  头盔: '头盔',
-  胸甲: '胸甲',
-  护腿: '护腿',
-  鞋子: '鞋子',
-  项链: '项链',
-  戒指: '戒指',
-  饰品: '饰品',
-};
+import { ItemType, EquipSlot } from '../enums.js';
 
 const equipConfigs = {
   // 下水道
   老鼠皮甲: {
     requirements: { level: 3 },
-    type: EquipType.胸甲,
+    type: ItemType.装备,
+    slot: EquipSlot.胸甲,
     name: '老鼠皮甲',
     description: '用老鼠皮做成的胸甲。',
     stats: {
@@ -30,7 +21,8 @@ const equipConfigs = {
   },
   破碎老鼠王冠: {
     requirements: { level: 5, expertiseLevel: 1 },
-    type: EquipType.头盔,
+    type: ItemType.装备,
+    slot: EquipSlot.头盔,
     name: '破碎老鼠王冠',
     description: '下水道里老鼠国王的王冠。种种证据显示它不是真正的国王。',
     stats: {
@@ -50,7 +42,8 @@ const equipConfigs = {
   },
   老鼠王国身份证: {
     requirements: { expertiseLevel: 3 },
-    type: EquipType.饰品,
+    type: ItemType.装备,
+    slot: EquipSlot.饰品,
     name: '老鼠王国身份证',
     description: '一张被撕碎的身份证。上面隐约写着老鼠王国的地址。',
     stats: {
@@ -70,7 +63,8 @@ const equipConfigs = {
   // 新大陆
   新手木剑: {
     requirements: { level: 2 },
-    type: EquipType.武器,
+    type: ItemType.装备,
+    slot: EquipSlot.武器,
     name: '新手木剑',
     description: '一把普通的木剑。',
     stats: {
@@ -85,7 +79,8 @@ const equipConfigs = {
   },
   铁剑: {
     requirements: { level: 8 },
-    type: EquipType.武器,
+    type: ItemType.装备,
+    slot: EquipSlot.武器,
     name: '铁剑',
     description: '一把像样的铁剑。',
     stats: {
@@ -104,7 +99,8 @@ const equipConfigs = {
   // 科科猪场
   魔法水晶碎片: {
     requirements: { level: 8 },
-    type: EquipType.饰品,
+    type: ItemType.装备,
+    slot: EquipSlot.饰品,
     name: '魔法水晶碎片',
     description: '一些劣等魔法生物的生命结晶。可以增幅你的法力。',
     stats: {
@@ -127,7 +123,8 @@ const equipConfigs = {
   },
   野猪鞭: {
     requirements: { level: 10 },
-    type: EquipType.武器,
+    type: ItemType.装备,
+    slot: EquipSlot.武器,
     name: '野猪鞭',
     description: '拿在手上意外地沉重，是一件不错的钝器。',
     stats: {
@@ -149,7 +146,8 @@ const equipConfigs = {
   },
   野猪粪: {
     requirements: { level: 1, expertiseLevel: 1 },
-    type: EquipType.饰品,
+    type: ItemType.装备,
+    slot: EquipSlot.饰品,
     name: '野猪粪',
     description: '虽然不能吃，涂在身上能让你意外地坚韧。护体屎肤，小子。',
     stats: {
@@ -166,7 +164,8 @@ const equipConfigs = {
   // 装备模板
   _装备模板: {
     requirements: { level: 1, expertiseLevel: 1 },
-    type: EquipType.武器,
+    type: ItemType.装备,
+    slot: EquipSlot.武器,
     name: '新手木剑',
     description: '一把普通的木剑。',
     stats: {
@@ -197,4 +196,4 @@ const equipConfigs = {
   },
 };
 
-export { EquipType, equipConfigs };
+export { equipConfigs };
