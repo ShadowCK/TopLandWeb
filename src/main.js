@@ -10,7 +10,7 @@ import {
   updateHTML,
   setHTMLInterval,
 } from './events/htmlHandler.js';
-import { config, settings } from './settings.js';
+import { settings } from './settings.js';
 
 const update = (dt) => {
   战斗管理器.update(dt);
@@ -54,7 +54,7 @@ window.onload = () => {
   }, 5);
 
   // 20 ticks per second
-  setHTMLInterval(config.默认HTML更新间隔);
+  setHTMLInterval(settings.HTML更新间隔);
 
   console.log('游戏加载完成');
   console.log('玩家信息：', player);
