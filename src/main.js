@@ -190,6 +190,16 @@ const setupHTML = () => {
   });
 
   // 战斗面板
+  // 游戏初始化后，*如果玩家没有在战斗区域*，隐藏区域信息。（这个判断是为了兼容以后的自动化，比如游戏一开始就自动前往一个区域。）
+  const 战斗面板区域信息 = $('#战斗面板-区域信息');
+  if (!战斗管理器.isPlayerInCombat()) {
+    战斗面板区域信息.hide();
+  }
+  const 战斗面板离开按钮 = $('#战斗面板-离开按钮');
+  战斗面板离开按钮.on('click', () => {
+    changeTab('区域面板');
+    战斗管理器.退出战斗区域();
+  });
   const 战斗面板实体列表 = $('#战斗面板-实体列表');
   const player = 玩家管理器.getPlayer();
   genCombatLayout(player, 战斗面板实体列表, { isPlayer: true });
@@ -325,7 +335,7 @@ window.onload = () => {
   // 不应该在update里的任何function直接call HTML function，应该用emit event的方式，否则初次更新会出现问题，
   // 因为HTML的初始化是在游戏初始化后的。而且，游戏逻辑里也不应该依赖HTML function，应该emit event，让HTML function自己来更新
   update(0);
-  
+
   // 在所有数据都加载完毕后，设置HTML
   setupHTML();
   registerHTMLEvents();

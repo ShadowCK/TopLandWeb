@@ -61,6 +61,16 @@ const registerEvents = () => {
     clearEntityInCombatTab(entity);
   });
 
+  combatEvents.on(EventType.进入战斗区域, (combatArea) => {
+    $('#战斗面板-区域信息').show();
+    $('#战斗面板-区域名称').text(combatArea.name);
+    $('#战斗面板-区域描述').text(combatArea.description);
+  });
+
+  combatEvents.on(EventType.退出战斗区域, (_combatArea) => {
+    $('#战斗面板-区域信息').hide();
+  });
+
   generalEvents.on(EventType.获得物品, (_itemConfig) => {
     // 无脑刷新背包……
     console.log('获得物品，刷新背包');
