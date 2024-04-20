@@ -7,7 +7,9 @@ import {
   genProgressBar,
   updateProgressBar,
   changeTab,
+  getCombatLayout,
   genCombatLayout,
+  updateCombatLayout,
   config as htmlConfig,
   genInventory,
   genEquipments,
@@ -86,34 +88,11 @@ const updateHTML = (params) => {
     genElementForStats(player, 属性成长, value, key);
   });
 
-  // 更新战斗面板
-  const updateCombatLayout = (parent, entity) => {
-    const combatLayout = parent.find(`#${entity.uuid}`);
-    updateProgressBar(
-      combatLayout.find('.health-bar'),
-      entity.生命值,
-      entity.getStat2(StatType.最大生命值),
-      '生命值: {value} / {total}',
-    );
-    updateProgressBar(
-      combatLayout.find('.mana-bar'),
-      entity.魔法值,
-      entity.getStat2(StatType.最大魔法值),
-      '魔法值: {value} / {total}',
-    );
-    updateProgressBar(
-      combatLayout.find('.attack-bar'),
-      entity.攻击计时器去掉攻速(),
-      entity.实际攻击间隔(),
-      htmlConfig.攻击条格式,
-      2,
-    );
-  };
   const 战斗面板实体列表 = $('#战斗面板-实体列表');
   // 即使不在战斗，也更新玩家的生命条等信息。
-  updateCombatLayout(战斗面板实体列表, player);
+  updateCombatLayout(getCombatLayout(战斗面板实体列表, player), player, {isPlayer : true});
   const enemies = 战斗管理器.getEnemiesInCombat();
-  enemies.forEach((enemy) => updateCombatLayout(战斗面板实体列表, enemy));
+  enemies.forEach((enemy) => updateCombatLayout(getCombatLayout(战斗面板实体列表, enemy), enemy, {isEnemy : true}));
 };
 
 const setupHTML = () => {
@@ -376,11 +355,11 @@ const registerEvents = () => {
     changeTab('角色面板');
   });
 
-  combatEvents.on(EventType.生成实体, ({ entity, isCancelled, config }) => {
+  combatEvents.on(EventType.生成实体, ({ entity, isCancelled }) => {
     if (isCancelled) {
       return;
     }
-    genCombatLayout(entity, $('#战斗面板-实体列表'), { config });
+    $('#战斗面板-实体列表').append(genCombatLayout(entity));
   });
 
   combatEvents.on(EventType.移除实体, ({ entity }) => {

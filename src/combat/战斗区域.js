@@ -134,7 +134,7 @@ class 战斗区域 {
       return;
     }
     const enemy = this.genEnemy();
-    const eventData = { entity: enemy.instance, isCancelled: false, config: enemy.config };
+    const eventData = { entity: enemy.instance, isCancelled: false};
     combatEvents.emit(EventType.生成实体, eventData);
     if (eventData.isCancelled) {
       return;
@@ -188,9 +188,7 @@ class 战斗区域 {
       });
     }
     return {
-      instance: new 敌人(enemyLiteral.config, this.statMultiplier),
-      // 不是enemyConfig，是area的enemyConfig，有额外内容（刷新权重，是否BOSS等）
-      config: enemyLiteral,
+      instance: new 敌人(enemyLiteral.config, !!enemyLiteral.isBoss, this.statMultiplier),
     };
   }
 
