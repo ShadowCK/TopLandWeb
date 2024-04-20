@@ -56,38 +56,45 @@ class 背包 {
     }
   }
 
-  removeItem(item) {
-    const index = this.items.indexOf(item);
-    if (index === -1) {
+  removeItemAt(index) {
+    const item = this.items[index];
+    if (!item) {
       console.error('Trying to remove an item that is not in the bag');
       return;
     }
-    this.items.splice(index, 1);
+    if (!item.stackable || item.stack === 1) {
+      this.items.splice(index, 1);
+    } else {
+      item.stack -= 1;
+    }
     generalEvents.emit(EventType.失去物品, item.config);
   }
 
   /**
    * @param {import('./物品.js').default} item
    */
+  removeItem(item) {
+    const index = this.items.indexOf(item);
+    if (index === -1) {
+      console.error('Trying to remove an item that is not in the bag');
+      return;
+    }
+    this.removeItemAt(index);
+  }
+
   removeByName(itemName) {
     const index = this.items.findIndex((other) => other.name === itemName);
     if (index === -1) {
       console.error('Trying to remove an item that is not in the bag');
       return;
     }
-    const item = this.items[index];
-    if (!item.stackable) {
-      this.items.splice(index, 1);
-      generalEvents.emit(EventType.失去物品, item.config);
-      return;
-    }
-    if (item.stack === 1) {
-      this.items.splice(index, 1);
-      generalEvents.emit(EventType.失去物品, item.config);
-      return;
-    }
-    item.stack -= 1;
-    generalEvents.emit(EventType.失去物品, item.config);
+    this.removeItemAt(index);
+  }
+
+  clear() {
+    const itemConfigs = this.items.map((item) => item.config);
+    this.items.length = 0;
+    generalEvents.emit(EventType.失去物品, itemConfigs);
   }
 }
 

@@ -21,7 +21,7 @@ const getRequiredExp = (level) => {
   return total;
 };
 
-// 游戏的重要参数，不是用户设置！
+// 游戏的重要参数，不应该在游戏过程中被修改。
 // alias: gameConfig
 const config = {
   extraLevelsPerExpertiseLevel: 5,
@@ -43,9 +43,10 @@ const config = {
   最高专精等级倍率经验加成: 1.01,
 };
 
-// 用户设置
+// 游戏设置，有些影响游戏性，有些影响用户体验。
 const settings = {
   HTML更新间隔: 50, // ms
+  游戏倍速: 1,
 };
 
 const get最高专精等级经验倍率 = (最高专精等级) => {

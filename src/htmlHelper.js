@@ -267,10 +267,11 @@ const genElementForEquipmentStat = (parent, value, key, labelClass = '', path = 
   }
   if (_.isObject(value) && !Array.isArray(value)) {
     const label = $(labelHTML(key, '', `teal ${labelClass}`));
-    const child = $(`<div class="ui tiny segment"><div class="ui list"></div></div>`);
-    parent.append($('<div class="column"></div>').append(label, child));
+    const segment = $(`<div class="ui tiny segment"></div>`);
+    const list = $(`<div class="ui list"></div>`);
+    parent.append($('<div class="column"></div>').append(label, segment.append(list)));
     _.forEach(value, (v, k) => {
-      genElementForEquipmentStat(child, v, k, labelClass, [...path, k]);
+      genElementForEquipmentStat(list, v, k, labelClass, [...path, k]);
     });
     return;
   }
@@ -314,20 +315,6 @@ const genItemHTML = () =>
 
 const genItem = (item, parent) => {
   const isEquipment = item instanceof 装备;
-  const tempParent = $(`
-  <div>
-    <h3 class="ui header">${item.name}</h3>
-    <div class="ui message">
-      <p>${item.description}</p>
-    </div>
-    <div class="ui relaxed four column grid">
-    </div>
-  </div>
-  `);
-  const grid = tempParent.find('.ui.grid');
-  _.forEach(item.stats, (value, key) => {
-    genElementForEquipmentStat(grid, value, key, 'small');
-  });
   const element = $(genItemHTML());
   if (isEquipment) {
     element.css('cursor', 'pointer');
@@ -340,6 +327,21 @@ const genItem = (item, parent) => {
       }
     });
   }
+  // popup content
+  const tempParent = $(`
+    <div>
+      <h3 class="ui header">${item.name}</h3>
+      <div class="ui message">
+        <p>${item.description}</p>
+      </div>
+      <div class="ui relaxed four column grid">
+      </div>
+    </div>
+    `);
+  const grid = tempParent.find('.ui.grid');
+  _.forEach(item.stats, (value, key) => {
+    genElementForEquipmentStat(grid, value, key, 'small');
+  });
   element.attr('data-variation', 'multiline flowing');
   element.attr('data-html', compressHTML(tempParent.html()));
   element.popup({
