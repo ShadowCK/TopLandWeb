@@ -272,6 +272,7 @@ export {
   isInCombat,
   getTarget,
   registerEvents,
+  isPlayerInCombat,
 };
 
 window.当前战斗区域 = () => 当前战斗区域;
