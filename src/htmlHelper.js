@@ -6,6 +6,7 @@ import { getDecimalPrecision } from './utils.js';
 import { StatType } from './combat/战斗属性.js';
 import 装备 from './items/装备.js';
 import { settings as gameSettings } from './settings.js';
+import { SemanticUIColor } from './enums.js';
 
 const config = {
   生命条格式: '生命值: {value} / {total}',
@@ -14,6 +15,8 @@ const config = {
   攻击条格式: '下次攻击: {value} / {total}',
   默认进度条格式: '{value} / {total}',
 };
+
+const randomColor = () => _.sample(SemanticUIColor);
 
 const githubMarkdownCSS = fetch(
   'https://cdnjs.cloudflare.com/ajax/libs/github-markdown-css/5.1.0/github-markdown.min.css',
@@ -321,13 +324,11 @@ const genElementForEquipmentStat = (parent, value, key, labelClass = '', path = 
   parent.append(html);
 };
 
-const genItemHTML = () =>
-  `
+const genItemHTML = () => /* html */ `
   <div class="column">
     <div class="ui card">
       <div class="ui image placeholder" style="animation:none;">
         <div class="square icon image">
-        </div>
       </div>
     </div>
   </div>
@@ -585,4 +586,5 @@ export {
   genInventory,
   loadAndRenderMarkdown,
   isItemInPage,
+  randomColor,
 };
