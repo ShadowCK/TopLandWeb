@@ -1,3 +1,4 @@
+import LZString from 'lz-string';
 import { setInterval, clearInterval } from 'worker-timers';
 import _ from 'lodash';
 import {
@@ -319,7 +320,7 @@ const setupHTML = () => {
       $.toast({
         message: `已设置游戏倍速为${value}`,
         displayTime: 1000,
-        showProgress: true,
+        showProgress: 'bottom',
         class: 'success chinese',
       });
       templateFromElement($('#设置面板-游戏倍速标题'), { 游戏倍速: value });
@@ -336,7 +337,7 @@ const setupHTML = () => {
       $.toast({
         message: `已设置页面更新频率为${value}`,
         displayTime: 1000,
-        showProgress: true,
+        showProgress: 'bottom',
         class: 'success chinese',
       });
       templateFromElement($('#设置面板-更新频率标题'), { 页面更新频率: value });
@@ -345,6 +346,73 @@ const setupHTML = () => {
         value: 1000 / value,
       });
     },
+  });
+  // 导出存档
+  $('#设置面板-导出存档').on('click', () => {
+    const 存档数据 = 玩家管理器.打包存档数据();
+    if (!存档数据) {
+      $.toast({
+        title: '导出失败',
+        message: '没有找到存档数据。',
+        class: 'error chinese',
+        displayTime: 2000,
+        showProgress: 'bottom',
+      });
+    }
+    const compressed = LZString.compressToUTF16(存档数据);
+    const blob = new Blob([compressed], { type: 'application/octet-stream' });
+    // 创建一个指向该Blob的URL
+    const url = URL.createObjectURL(blob);
+    // 创建一个下载链接，指定下载文件名，模拟点击以触发下载
+    const date = new Date();
+    const 存档名称 = `巅峰神域-v${VERSION}-${date.getFullYear()}-${date.getMonth()}-${date.getDate()}-${date.getHours()}-${date.getMinutes()}-${date.getSeconds()}.txt`;
+    $('<a></a>').attr('href', url).attr('download', 存档名称).get(0).click();
+    // 清理创建的URL，以释放资源
+    URL.revokeObjectURL(url);
+    $.toast({
+      title: '导出成功',
+      message: '存档文件已经下载。',
+      class: 'success chinese',
+      displayTime: 2000,
+      showProgress: 'bottom',
+    });
+  });
+  // 导入存档
+  $('#设置面板-导入存档').on('change', (event) => {
+    // 获取到用户选中的文件
+    const file = event.target.files[0];
+    if (!file) {
+      console.warn('没有存档文件被选择.');
+      return;
+    }
+    // 创建 FileReader 对象来读取这个文件
+    const reader = new FileReader();
+    reader.onload = (e) => {
+      const content = e.target.result; // 文件内容的文本形式
+      try {
+        const decompressed = LZString.decompressFromUTF16(content);
+        // 应用存档
+        player.玩家存档.data = JSON.parse(decompressed);
+        player.玩家存档.应用存档();
+        $.toast({
+          title: '导入成功',
+          message: '存档文件已经导入。',
+          class: 'success chinese',
+          displayTime: 2000,
+          showProgress: 'bottom',
+        });
+      } catch (error) {
+        $.toast({
+          title: '导入失败',
+          message: '存档文件格式错误。',
+          class: 'error chinese',
+          displayTime: 2000,
+          showProgress: 'bottom',
+        });
+      }
+    };
+    // 以文本形式读取文件
+    reader.readAsText(file);
   });
 };
 

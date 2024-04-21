@@ -1,4 +1,4 @@
-import * as LZString from 'lz-string';
+import LZString from 'lz-string';
 import _ from 'lodash';
 import 职业 from '../classes/职业.js';
 import 装备 from '../items/装备.js';
@@ -14,7 +14,7 @@ class 玩家存档 {
     this.读档(defaultSaveData);
   }
 
-  存档() {
+  打包存档数据() {
     const needed = _.pick(
       this.player,
       '职业',
@@ -31,7 +31,11 @@ class 玩家存档 {
     );
     needed.职业 = needed.职业.toSaveData();
     needed.背包 = needed.背包.items;
-    const compressed = LZString.compress(JSON.stringify(needed));
+    return JSON.stringify(needed);
+  }
+
+  存档() {
+    const compressed = LZString.compress(this.打包存档数据());
     localStorage.setItem('玩家存档', compressed);
   }
 

@@ -16,6 +16,14 @@ const init = (p) => {
 
 const getPlayer = () => player;
 
+const 打包存档数据 = () => {
+  if (!player.玩家存档) {
+    console.error('玩家存档不存在');
+    return null;
+  }
+  return player.玩家存档.打包存档数据();
+};
+
 const 存档 = () => {
   const save = player.玩家存档;
   if (!save) {
@@ -32,4 +40,4 @@ const 读档 = () => {
   new 玩家存档(player, defaultSaveData).应用存档();
 };
 
-export { init, getPlayer, 存档, 读档 };
+export { init, getPlayer, 存档, 读档, 打包存档数据 };
