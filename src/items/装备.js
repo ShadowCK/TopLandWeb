@@ -53,6 +53,7 @@ class 装备 extends 物品 {
       // 脱下第一件装备。不用让玩家选择脱哪一件，他们可以手动脱。
       typeEquipments[0].脱下(entity, true);
     }
+    // TODO: 改成用事件“实体改变装备”，action=“穿上”这样就不用getPlayer了，从而摆脱循环依赖
     if (entity === getPlayer()) {
       entity.背包.removeItem(this);
     }
