@@ -1,9 +1,10 @@
 import _ from 'lodash';
 import { v4 as uuidv4 } from 'uuid';
 import { getBuffedStat } from './buff管理器.js';
-import { StatType } from './战斗属性.js';
+import { DamageType, StatType } from './战斗属性.js';
 import * as settings from '../settings.js';
 import { EventType, combatEvents } from '../events/事件管理器.js';
+import { deepMapObject } from '../utils.js';
 
 class 实体 {
   uuid = uuidv4();
@@ -141,9 +142,25 @@ class 实体 {
     this.魔法值 = Math.min(最大魔法值, this.魔法值 + value * 魔法回复效率);
   }
 
-  getStat2(statType, calcBuffs = true) {
-    const range = settings.config.statLimits[statType];
-    return this.getStat(statType, calcBuffs, range);
+  /**
+   * 获取伤害分布、抗性穿透、伤害抗性等多级属性的数值，返回一个同样结构的对象
+   * @param {string[]} path
+   * @param {boolean} calcBuffs
+   */
+  getStat3(path, calcBuffs = true, applyRange = true) {
+    const fixedPath = _.isString(path) ? path.split('.') : path;
+    const result = deepMapObject(_.get(this.stats, fixedPath), (leafPath) =>
+      this.getStat2(fixedPath.concat(leafPath), calcBuffs, applyRange),
+    );
+    return _.isEmpty(result) ? null : result;
+  }
+
+  getStat2(statType, calcBuffs = true, applyRange = true) {
+    if (applyRange) {
+      const range = settings.config.statLimits[statType];
+      return this.getStat(statType, calcBuffs, range);
+    }
+    return this.getStat(statType, calcBuffs);
   }
 
   /**
@@ -159,8 +176,9 @@ class 实体 {
     // 已经有defaultStats可以利用了，但是defaultStats不全。而且Object.assign给statGrowth不是递归赋值，只是简单地覆盖
     // 也就是说，抗性穿透这种是一个object的属性，即使默认配置是全的，也会被职业配置里内容更少的完全覆盖，导致抗性穿透.XX还是空的。
     // 所以，要么补全defaultStats并在这里检测defaultStats里是否有该属性（也就是不用考虑被更少的覆盖，反正defaultStats里有）；
-    // 要么让defaultStats给statGrowth时是递归赋值，保证配置不写全的情况下，所有属性也都有默认值（那样就不用检测defaultStats里是否有该属性了，
-    // this.stats/statGrowth没有就是肯定没有）。递归赋值可以参考updateStats里的processStats的结构。
+    // 要么让补全defaultStats并让defaultStats给statGrowth时是递归赋值，保证配置不写全的情况下，所有属性也都有默认值（那样就不用检测defaultStats里是否有该属性了，
+    // this.stats/statGrowth没有就是肯定没有）。递归赋值可以---参考updateStats里的processStats的结构。---不，lodash有_.merge非常给力。
+    // 总之，必须补全defaultStats，然后两个选择：1.检测defaultStats里是否有该属性，2.递归赋值defaultStats给statGrowth，并检测statGrowth里是否有该属性。
     if (base == null) {
       // TODO 获取默认值，而不是0
       return 0;

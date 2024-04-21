@@ -40,4 +40,27 @@ const templateFromElement = (element, data, apply = true) => {
   return result;
 };
 
-export { getDecimalPrecision, getMaxLevel, template, templateFromElement };
+/**
+ *
+ * @param {Object} obj
+ * @param {Function} callback (path: string[], settings) => {...}
+ * @param {Object} settings
+ * @param {string} path 递归用，不要传入
+ * @param {Ojbect} result 递归用，不要传入
+ * @returns
+ */
+const deepMapObject = (obj, callback, settings, path = [], result = {}) => {
+  _.forEach(obj, (value, key) => {
+    const newPath = [...path, key];
+    if (_.isObject(value) && !_.isArray(value)) {
+      deepMapObject(value, callback, settings, newPath, result);
+    } else {
+      _.set(result, newPath, callback(newPath, settings));
+    }
+  });
+  return result;
+};
+
+window.deepMapObject = deepMapObject;
+
+export { getDecimalPrecision, getMaxLevel, template, templateFromElement, deepMapObject };

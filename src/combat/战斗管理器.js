@@ -3,7 +3,7 @@ import { DamageSource, DamageType, StatType } from './战斗属性.js';
 import { getPlayer } from '../player/玩家管理器.js';
 import { 战斗区域, configs } from './战斗区域.js';
 import { EventType, combatEvents } from '../events/事件管理器.js';
-import { config as settingsConfig } from '../settings.js';
+import { gameConfig } from '../settings.js';
 
 /** @type {import('./战斗区域.js').战斗区域} */
 let 当前战斗区域 = null;
@@ -42,6 +42,34 @@ const getTarget = (实体) => {
   return player;
 };
 
+const 计算伤害分布 = (damageDistribution) => {
+  // 去掉伤害分布中值小于等于0的项。理论上可以有负值，但会让机制太过复杂且对玩家不友好
+  // 比如，敌人有一个-200%物理伤害分布的技能，玩家的伤害分布是100%物理，50%奥术，那么总伤害直接为负，打不出伤害了。
+  // 可以加额外的保护机制，比如totalMult不小于1，也就是伤害分布不会减少总伤害。但这样会让伤害计算过于复杂。而且这样负值就等效于0了。
+  const filtered = _.pickBy(damageDistribution, (v) => v > 0);
+  const total = _.sum(_.values(filtered));
+  const totalMult =
+    (total > 100 ? 100 + (total - 100) * gameConfig.伤害分布总伤害加成 : total) / 100;
+  return _.mapValues(filtered, (v) => {
+    // 伤害分布首先会被标准化到100%，然后再计算加成
+    const singleMult = (v > 100 ? (v - 100) * gameConfig.伤害分布单体伤害加成 : 0) / 100;
+    return (v / total) * totalMult + singleMult;
+  });
+};
+
+const 获取伤害分布 = (damageDistribution, damageType, defaultDamageType) => {
+  let trueDamageDistribution;
+  if (damageDistribution) {
+    trueDamageDistribution = 计算伤害分布(damageDistribution);
+  } else if (damageType) {
+    trueDamageDistribution = { [damageType]: 1 };
+  } else {
+    trueDamageDistribution = { [defaultDamageType]: 1 };
+  }
+  console.log('真伤害分布', trueDamageDistribution);
+  return trueDamageDistribution;
+};
+
 /**
  * @param {{damager, damaged, damageType, damageDistribution}} params
  */
@@ -56,8 +84,7 @@ const basicAttack = (params) => {
     damaged,
     damage: damager.getStat2(StatType.攻击力),
     damageSource: DamageSource.普攻,
-    damageDistribution:
-      damageDistribution || damageType ? { [damageType]: 1 } : { [DamageType.物理]: 1 },
+    damageDistribution: 获取伤害分布(damageDistribution, damageType, DamageType.物理),
   });
 };
 
@@ -83,7 +110,7 @@ const skillDamage = (params) => {
     damaged,
     damage: damager.calcStat(damage, StatType.攻击力), // 技能伤害享受攻击力Buff
     damageSource: DamageSource.技能,
-    damageDistribution: damageDistribution || { [damageType]: 1 },
+    damageDistribution: 获取伤害分布(damageDistribution, damageType, DamageType.奥术),
   });
 };
 
@@ -139,7 +166,7 @@ const updateCombat = (entity, dt) => {
     basicAttack({
       damager: entity,
       damaged: target,
-      damageType: '物理', // TODO: 以后会给实体加入伤害类型（伤害分布）
+      damageDistribution: entity.getStat3(StatType.伤害分布, true),
     });
   }
 
@@ -241,7 +268,7 @@ const registerEvents = () => {
     player.addExp(敌人.经验值 || 0);
     player.金钱 += 敌人.金钱 || 0;
     const 幸运值 = player.getStat2(StatType.幸运值);
-    const 掉落倍率 = 1 + (settingsConfig.每点幸运值增加掉落率百分比 * 幸运值) / 100;
+    const 掉落倍率 = 1 + (gameConfig.每点幸运值增加掉落率百分比 * 幸运值) / 100;
     敌人.config.掉落.forEach((dropConfig) => {
       if (Math.random() * 100 >= dropConfig.chance * 掉落倍率) {
         return;
