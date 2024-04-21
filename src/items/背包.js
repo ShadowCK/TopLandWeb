@@ -1,3 +1,4 @@
+import _ from 'lodash';
 import { ItemType } from '../enums.js';
 import { EventType, generalEvents } from '../events/事件管理器.js';
 import 物品 from './物品.js';
@@ -30,33 +31,56 @@ class 背包 {
    * @param {物品} item
    */
   addItem(item, count = 1) {
-    const add = () => {
-      if (!item.stackable) {
-        this.items.push(item);
-        generalEvents.emit(EventType.获得物品, item.config);
+    const prevLength = this.items.length;
+    if (!item.stackable) {
+      _.times(count, this.items.push(new item.constructor(item.config)));
+      generalEvents.emit(EventType.获得物品, {
+        config: item.config,
+        stack: count,
+        startIndex: this.items.length - count,
+        endIndex: this.items.length - 1,
+        prevLength,
+      });
+      return;
+    }
+    const existingItem = this.items.find((other) => other.name === item.name);
+    const stacksToAdd = item.stack * count;
+    let stackLeft = stacksToAdd;
+    let index = null;
+    if (existingItem) {
+      const added = Math.min(stackLeft, existingItem.maxStack - existingItem.stack);
+      index = this.items.indexOf(existingItem);
+      existingItem.stack += added;
+      stackLeft -= added;
+      if (stackLeft === 0) {
+        generalEvents.emit(EventType.获得物品, {
+          config: item.config,
+          stack: stacksToAdd,
+          index,
+          prevLength,
+        });
         return;
       }
-      const existingItem = this.items.find((other) => other.name === item.name);
-      let stackLeft = item.stack;
-      if (existingItem) {
-        const added = Math.min(stackLeft, existingItem.maxStack - existingItem.stack);
-        existingItem.stack += added;
-        stackLeft -= added;
-      }
-      while (stackLeft > 0) {
-        const newItem = new 物品(item.config);
-        newItem.stack = Math.min(stackLeft, newItem.maxStack);
-        stackLeft -= newItem.stack;
-        this.items.push(newItem);
-      }
-      generalEvents.emit(EventType.获得物品, item.config);
-    };
-    for (let i = 0; i < count; i++) {
-      add();
     }
+    const startIndex = this.items.length;
+    while (stackLeft > 0) {
+      const newItem = new 物品(item.config);
+      newItem.stack = Math.min(stackLeft, newItem.maxStack);
+      stackLeft -= newItem.stack;
+      this.items.push(newItem);
+    }
+    generalEvents.emit(EventType.获得物品, {
+      config: item.config,
+      stack: stacksToAdd,
+      index,
+      startIndex,
+      endIndex: this.items.length - 1,
+      prevLength,
+    });
   }
 
   removeItemAt(index) {
+    const prevLength = this.items.length;
     const item = this.items[index];
     if (!item) {
       console.error('Trying to remove an item that is not in the bag');
@@ -67,7 +91,7 @@ class 背包 {
     } else {
       item.stack -= 1;
     }
-    generalEvents.emit(EventType.失去物品, item.config);
+    generalEvents.emit(EventType.失去物品, { config: item.config, stack: 1, index, prevLength });
   }
 
   /**

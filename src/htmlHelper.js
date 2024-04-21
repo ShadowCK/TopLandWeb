@@ -166,11 +166,17 @@ const getCombatLayout = (parent, entity) => parent.find(`#${entity.uuid}`);
 /**
  * @param {import('./combat/实体.js').default} entity
  */
-const updateCombatLayout = (combatLayout, entity, { isPlayer = false, isEnemy = !isPlayer}) => {
+const updateCombatLayout = (combatLayout, entity, { isPlayer = false, isEnemy = !isPlayer }) => {
   combatLayout.find('.ui.header').text(isPlayer ? '你' : entity.职业.name);
-  combatLayout.find('.标签s').html(`${isEnemy && entity.isBoss ? labelHTML('BOSS', '', 'yellow') : ''}${isPlayer ? labelHTML('职业', entity.职业.name, 'teal') : ''}`);
+  combatLayout
+    .find('.标签s')
+    .html(
+      `${isEnemy && entity.isBoss ? labelHTML('BOSS', '', 'yellow') : ''}${
+        isPlayer ? labelHTML('职业', entity.职业.name, 'teal') : ''
+      }`,
+    );
   combatLayout.find('.ui.message').html(`<p>${entity.职业.description}</p>`);
-  
+
   updateProgressBar(
     combatLayout.find('.health-bar'),
     entity.生命值,
@@ -199,7 +205,7 @@ const genCombatLayout = (
   entity,
   // TODO: 断言isEnemy=!isPlayer - 目前只有敌人，以后如果有召唤物/队友的话再进行修改
   // TODO: 断言isEnemy时entityConfig不为空
-  { isPlayer = false, isEnemy = false} = {},
+  { isPlayer = false, isEnemy = false } = {},
 ) => {
   const html = /* html */ `
   <div id="${entity.uuid}" class="column">
@@ -229,7 +235,7 @@ const genCombatLayout = (
   </div>
   `;
   const element = $(html);
-  updateCombatLayout(element, entity, {isPlayer, isEnemy});
+  updateCombatLayout(element, entity, { isPlayer, isEnemy });
   return element;
 };
 
@@ -407,9 +413,14 @@ const paginationHTML = (itemsPerPage, items, maxPages, activePageIndex = 1) => {
   const totalPages = Math.ceil(items.length / itemsPerPage);
   // 如果总页数小于最大页数，直接显示所有页数
   if (totalPages < maxPages) {
-    return _.range(1, totalPages + 1)
-      .map((index) => pageButtonHTML(index))
-      .join('');
+    return {
+      html: _.range(1, totalPages + 1)
+        .map((index) => pageButtonHTML(index))
+        .join(''),
+      startPageIndex: 1,
+      endPageIndex: totalPages + 1,
+      totalPages,
+    };
   }
   // 总页数大于最大页数，显示省略号和前后按钮
   let html = '';
@@ -440,16 +451,19 @@ const paginationHTML = (itemsPerPage, items, maxPages, activePageIndex = 1) => {
     html += pageButtonHTML(totalPages);
   }
   html = prevButton + html + nextButton;
-  return html;
+  return { html, startPageIndex, endPageIndex, totalPages };
 };
 
 const genInventoryItems = (itemsPerPage, pageIndex) => {
   const player = 玩家管理器.getPlayer();
+  const totalPages = Math.ceil(player.背包.items.length / itemsPerPage);
+  // 防止页数越界
+  const trueActivePageIndex = _.clamp(pageIndex, 1, totalPages);
   const 背包面板背包 = $('#背包面板-背包');
   背包面板背包.empty();
   const itemsToRender = player.背包.items.slice(
-    (pageIndex - 1) * itemsPerPage,
-    pageIndex * itemsPerPage,
+    (trueActivePageIndex - 1) * itemsPerPage,
+    trueActivePageIndex * itemsPerPage,
   );
   _.forEach(itemsToRender, (item) => {
     genItem(item, 背包面板背包);
@@ -466,9 +480,16 @@ const pageButtonClicked = (parent, itemsPerPage, items, maxPages, activePageInde
 const genPagination = (parent, itemsPerPage, items, maxPages, activePageIndex, callback) => {
   const totalPages = Math.ceil(items.length / itemsPerPage);
   // 防止页数越界
-  const _activePageIndex = _.clamp(activePageIndex, 1, totalPages);
+  const trueActivePageIndex = _.clamp(activePageIndex, 1, totalPages);
   // 生成分页栏
-  parent.html(paginationHTML(itemsPerPage, items, maxPages, _activePageIndex));
+  const data = paginationHTML(itemsPerPage, items, maxPages, trueActivePageIndex);
+  parent.html(data.html);
+  parent
+    .attr('data-start-page-index', data.startPageIndex)
+    .attr('data-end-page-index', data.endPageIndex)
+    .attr('data-total-pages', data.totalPages)
+    .attr('data-active-page-index', trueActivePageIndex)
+    .attr('data-items-per-page', itemsPerPage);
   // 为每个按钮添加事件
   parent.find('[data-index]').each((_index, element) => {
     const pageIndex = parseInt($(element).attr('data-index'), 10);
@@ -477,45 +498,60 @@ const genPagination = (parent, itemsPerPage, items, maxPages, activePageIndex, c
     });
   });
   parent.find('.prev-button').on('click', () => {
-    pageButtonClicked(
-      parent,
-      itemsPerPage,
-      items,
-      maxPages,
-      Math.max(1, _activePageIndex - 1),
-      callback,
-    );
+    if (trueActivePageIndex === 1) {
+      $.toast({ message: '已经是第一页了。', displayTime: 1000, class: 'error' });
+      return;
+    }
+    pageButtonClicked(parent, itemsPerPage, items, maxPages, trueActivePageIndex - 1, callback);
   });
   parent.find('.next-button').on('click', () => {
-    pageButtonClicked(
-      parent,
-      itemsPerPage,
-      items,
-      maxPages,
-      Math.min(_activePageIndex + 1, totalPages),
-      callback,
-    );
+    if (trueActivePageIndex === totalPages) {
+      $.toast({ message: '已经是最后一页了。', displayTime: 1000, class: 'error' });
+      return;
+    }
+    pageButtonClicked(parent, itemsPerPage, items, maxPages, trueActivePageIndex + 1, callback);
   });
 };
 
 _genPagination = genPagination;
 
-const genInventory = () => {
+const genInventory = (activePageIndex = 1, refreshMenu = true, refreshPage = true) => {
   const player = 玩家管理器.getPlayer();
-  const 选择背包分页 = $('#背包面板-选择背包分页');
-  选择背包分页.empty();
   const itemsPerPage = gameSettings.背包物品每页数量;
 
-  genPagination(
-    选择背包分页,
-    itemsPerPage,
-    player.背包.items,
-    gameSettings.背包页面最大数量,
-    1,
-    ({ activePageIndex }) => genInventoryItems(itemsPerPage, activePageIndex),
-  );
-  // 初始化生成第一页物品
-  genInventoryItems(itemsPerPage, 1);
+  if (refreshMenu) {
+    const 选择背包分页 = $('#背包面板-选择背包分页');
+    选择背包分页.empty();
+    genPagination(
+      选择背包分页,
+      itemsPerPage,
+      player.背包.items,
+      gameSettings.背包页面最大数量,
+      activePageIndex,
+      ({ activePageIndex: _activePageIndex }) => genInventoryItems(itemsPerPage, _activePageIndex),
+    );
+  }
+  if (refreshPage) {
+    genInventoryItems(itemsPerPage, activePageIndex);
+  }
+};
+
+/**
+ * 检测分页菜单对应的数组中被操作的物品是否在当前页，index和startIndex、endIndex可以同时存在。
+ * TODO: 以后换成更好的检测，应该是indices和startIndex和endIndex。
+ * 目前用index（单数）是因为只给一个已经存在的物品堆叠，然后多出来的直接添加到背包末尾……应该循环添加给已经存在的物品，再将剩下的添加到末尾。
+ * @param {JQuery<HTMLElement>} paginationMenu
+ * @param {number} index 被操作物品在数组中的索引
+ * @param {number} startIndex 被操作的多个物品的起始索引
+ * @param {number} endIndex 被操作的多个物品的结束索引
+ * @returns
+ */
+const isItemInPage = (paginationMenu, index, startIndex, endIndex) => {
+  const activePageIndex = paginationMenu.attr('data-active-page-index');
+  const itemsPerPage = paginationMenu.attr('data-items-per-page');
+  const start = (activePageIndex - 1) * itemsPerPage;
+  const end = activePageIndex * itemsPerPage - 1;
+  return _.inRange(index, start, end) || (startIndex <= end && endIndex >= start);
 };
 
 const genEquipments = () => {
@@ -544,4 +580,5 @@ export {
   genEquipments,
   genInventory,
   loadAndRenderMarkdown,
+  isItemInPage,
 };

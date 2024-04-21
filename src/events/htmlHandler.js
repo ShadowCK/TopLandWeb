@@ -14,6 +14,7 @@ import {
   genInventory,
   genEquipments,
   loadAndRenderMarkdown,
+  isItemInPage,
 } from '../htmlHelper.js';
 import * as 玩家管理器 from '../player/玩家管理器.js';
 import * as 战斗管理器 from '../combat/战斗管理器.js';
@@ -26,6 +27,8 @@ import { 可以提升专精等级, 可以转生, 转生 } from '../reincarnate/�
 import addToWindow from '../debug.js';
 
 let htmlWorkerId = null;
+
+const isUpdatingHTML = () => htmlWorkerId != null;
 
 /**
  * @param {{player:玩家}} params
@@ -90,9 +93,11 @@ const updateHTML = (params) => {
 
   const 战斗面板实体列表 = $('#战斗面板-实体列表');
   // 即使不在战斗，也更新玩家的生命条等信息。
-  updateCombatLayout(getCombatLayout(战斗面板实体列表, player), player, {isPlayer : true});
+  updateCombatLayout(getCombatLayout(战斗面板实体列表, player), player, { isPlayer: true });
   const enemies = 战斗管理器.getEnemiesInCombat();
-  enemies.forEach((enemy) => updateCombatLayout(getCombatLayout(战斗面板实体列表, enemy), enemy, {isEnemy : true}));
+  enemies.forEach((enemy) =>
+    updateCombatLayout(getCombatLayout(战斗面板实体列表, enemy), enemy, { isEnemy: true }),
+  );
 };
 
 const setupHTML = () => {
@@ -285,14 +290,14 @@ const setupHTML = () => {
 
 // 可以根据玩家的需求，重置UI更新频率
 const setHTMLInterval = (delay) => {
-  if (htmlWorkerId != null) {
+  if (isUpdatingHTML()) {
     clearInterval(htmlWorkerId);
   }
   htmlWorkerId = setInterval(() => updateHTML({ player: 玩家管理器.getPlayer() }), delay);
 };
 
 const clearHTMLInterval = () => {
-  if (htmlWorkerId != null) {
+  if (isUpdatingHTML()) {
     clearInterval(htmlWorkerId);
     htmlWorkerId = null;
   }
@@ -376,24 +381,58 @@ const registerEvents = () => {
     $('#战斗面板-区域信息').hide();
   });
 
-  generalEvents.on(EventType.获得物品, (_itemConfig) => {
-    // 无脑刷新背包……
-    console.log('获得物品，刷新背包');
-    genInventory();
+  generalEvents.on(EventType.获得物品, ({ index, startIndex, endIndex, prevLength }) => {
+    const 选择背包分页 = $('#背包面板-选择背包分页');
+    const activePageIndex = 选择背包分页.attr('data-active-page-index');
+    // 如果获得物品在当前页，刷新背包物品
+    if (isItemInPage(选择背包分页, index, startIndex, endIndex)) {
+      console.log('当前页面获得物品，刷新背包物品');
+      genInventory(activePageIndex, false, true);
+    }
+    // 如果获得物品后总页数增加，刷新背包分页
+    const player = 玩家管理器.getPlayer();
+    const itemsPerPage = 选择背包分页.attr('data-items-per-page');
+    const previousTotalPages = Math.ceil(prevLength / itemsPerPage);
+    const totalPages = Math.ceil(player.背包.items.length / itemsPerPage);
+    if (totalPages > previousTotalPages) {
+      console.log('最大页数增加，刷新背包分页');
+      genInventory(activePageIndex, true, false);
+    }
   });
 
-  generalEvents.on(EventType.失去物品, (_itemConfig) => {
-    // 无脑刷新背包……
-    console.log('失去物品，刷新背包');
-    genInventory();
+  generalEvents.on(EventType.失去物品, ({ index, prevLength }) => {
+    const 选择背包分页 = $('#背包面板-选择背包分页');
+    const activePageIndex = 选择背包分页.attr('data-active-page-index');
+
+    const player = 玩家管理器.getPlayer();
+    const itemsPerPage = 选择背包分页.attr('data-items-per-page');
+    const activePageStart = (activePageIndex - 1) * itemsPerPage;
+    const previousTotalPages = Math.ceil(prevLength / itemsPerPage);
+    const totalPages = Math.ceil(player.背包.items.length / itemsPerPage);
+    // 如果失去物品后总页数减少，刷新背包分页。
+    if (totalPages < previousTotalPages) {
+      console.log('最大页数减少，刷新背包分页');
+      genInventory(activePageIndex, true, false);
+    }
+    // 如果失去物品在当前页，刷新背包物品
+    if (isItemInPage(选择背包分页, index)) {
+      // 如果当前页（最后一页）没有物品了，刷新背包物品到上一页
+      if (activePageStart > player.背包.items.length - 1) {
+        console.log('当前页面失去物品，且没有剩余物品，刷新背包物品到上一页');
+        genInventory(activePageIndex - 1, false, true);
+        return;
+      }
+      console.log('当前页面失去物品，刷新背包物品');
+      genInventory(activePageIndex, false, true);
+    }
   });
 
   generalEvents.on(EventType.穿上装备, ({ entity, _equipment }) => {
     if (entity !== 玩家管理器.getPlayer()) {
       return;
     }
+    // TODO: 更新指定装备栏。等装备栏布局完善后再实现，目前显示所有装备，并不理想。
     // 无脑刷新！太无脑了！
-    genInventory();
     genEquipments();
   });
 
@@ -401,10 +440,10 @@ const registerEvents = () => {
     if (entity !== 玩家管理器.getPlayer()) {
       return;
     }
+    // TODO: 更新指定装备栏。等装备栏布局完善后再实现，目前显示所有装备，并不理想。
     // 无脑刷新！太无脑了！
-    genInventory();
     genEquipments();
   });
 };
 
-export { registerEvents, updateHTML, setupHTML, setHTMLInterval };
+export { registerEvents, updateHTML, setupHTML, setHTMLInterval, isUpdatingHTML };
