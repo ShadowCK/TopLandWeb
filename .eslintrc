@@ -19,6 +19,7 @@
   },
   "globals": {
     "WEBPACK_MODE": "readonly", // Our webpack "macro"
+    "VERSION": "readonly",
     "$": "readonly" // jQuery
   },
   "ignorePatterns": ["test/**/*.js", "dist/**/*.js"]
