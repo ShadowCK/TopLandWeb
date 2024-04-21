@@ -561,6 +561,34 @@ const registerEvents = () => {
     // 无脑刷新！太无脑了！
     genEquipments();
   });
+
+  HTMLEvents.on(EventType.渲染战斗信息, ({ damager, damaged, damages, heal }) => {
+    if (!isUpdatingHTML()) {
+      return;
+    }
+    const player = 玩家管理器.getPlayer();
+    const playerName = '<span class="ui large red text">你</span>';
+    const damagername = damager === player ? playerName : damager.职业.name;
+    const damagedname = damaged === player ? playerName : damaged.职业.name;
+    const damageMsg = _.map(damages, (damage, type) => `${_.round(damage)}点${type}伤害`).join(
+      '，',
+    );
+    $.toast({
+      message: `<span>${damagername}</span>对${damagedname}造成了${damageMsg}。`,
+      class: 'chinese',
+      displayTime: 1000,
+      showProgress: 'bottom',
+    });
+    const roundedHeal = _.round(heal);
+    if (roundedHeal > 0) {
+      $.toast({
+        message: `${damagername}通过伤害${damagedname}恢复了${roundedHeal}点生命值。`,
+        class: 'chinese',
+        displayTime: 1000,
+        showProgress: 'bottom',
+      });
+    }
+  });
 };
 
 export {

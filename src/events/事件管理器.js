@@ -16,6 +16,7 @@ const EventType = {
   进入战斗区域: '进入战斗区域',
   // HTML events
   更改设置: '更改设置',
+  渲染战斗信息: '渲染战斗信息',
 };
 
 const combatEvents = new EventEmitter();

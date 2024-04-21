@@ -2,7 +2,7 @@ import _ from 'lodash';
 import { DamageSource, DamageType, StatType } from './战斗属性.js';
 import { getPlayer } from '../player/玩家管理器.js';
 import { 战斗区域, configs } from './战斗区域.js';
-import { EventType, combatEvents } from '../events/事件管理器.js';
+import { EventType, HTMLEvents, combatEvents } from '../events/事件管理器.js';
 import { gameConfig } from '../settings.js';
 
 /** @type {import('./战斗区域.js').战斗区域} */
@@ -66,7 +66,6 @@ const 获取伤害分布 = (damageDistribution, damageType, defaultDamageType) =
   } else {
     trueDamageDistribution = { [defaultDamageType]: 1 };
   }
-  console.log('真伤害分布', trueDamageDistribution);
   return trueDamageDistribution;
 };
 
@@ -207,6 +206,8 @@ const registerEvents = () => {
     const 触发格挡 = Math.random() < 格挡率 / 100;
     const 格挡倍率 = 1 - damaged.getStat2(StatType.格挡伤害, true) / 100;
 
+    const eventData = { damager, damaged, damages: {}, heal: null };
+
     // 遍历伤害分布，根据不同的伤害类型计算总伤害
     let totalDamage = 0;
     _.forEach(damageDistribution, (mult, type) => {
@@ -243,12 +244,17 @@ const registerEvents = () => {
       // 计算防御力对伤害的影响（后加算）
       const defensePartition = damaged.getStat2(StatType.防御力) * mult;
       totalDamage += damagePartition - defensePartition;
+      eventData.damages[type] = damagePartition;
     });
     // 对受击者造成伤害
     damaged.takeDamage(totalDamage);
     // 生命偷取
     const 生命偷取 = (damager.getStat2(StatType.生命偷取, true) / 100) * totalDamage;
-    damager.heal(生命偷取);
+    if (生命偷取 > 0) {
+      eventData.heal = damager.heal(生命偷取);
+    }
+
+    HTMLEvents.emit(EventType.渲染战斗信息, eventData);
   });
 
   // 监听实体死亡事件
