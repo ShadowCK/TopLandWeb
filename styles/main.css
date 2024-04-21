@@ -10,3 +10,21 @@
   font-optical-sizing: auto;
   font-style: normal;
 }
+
+/* 背包面板内容不应该超过整个页面 */
+body:has(#背包面板.active) {
+  overflow-y: hidden;
+}
+
+#背包面板 {
+  border: none;
+  box-shadow: none;
+}
+
+#背包面板-装备容器 {
+  height: 50vh;
+}
+
+#背包面板-背包容器 {
+  height: 80vh;
+}
