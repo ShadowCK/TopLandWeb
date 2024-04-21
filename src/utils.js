@@ -24,9 +24,7 @@ const getMaxLevel = (baseMaxLevel, expertiseLevel) =>
   baseMaxLevel + expertiseLevel * config.extraLevelsPerExpertiseLevel;
 
 const template = (str, data) =>
-  str.replace(/{{(.*?)}}/gs, (match, key) =>
-    typeof data[key] !== 'undefined' ? data[key] : match,
-  );
+  str.replace(/{{(.*?)}}/gs, (match, key) => (data[key] !== undefined ? data[key] : match));
 
 const templateFromElement = (element, data, apply = true) => {
   // 使用jQuery缓存模板

@@ -1,7 +1,7 @@
 import EventEmitter from 'eventemitter3';
 
 const EventType = {
-  // combat events
+  // Combat events
   实体攻击实体: '实体攻击实体',
   普攻伤害事件: '普攻伤害事件',
   技能伤害事件: '技能伤害事件',
@@ -14,7 +14,8 @@ const EventType = {
   脱下装备: '脱下装备',
   退出战斗区域: '退出战斗区域',
   进入战斗区域: '进入战斗区域',
-  // html events
+  // HTML events
+  更改设置: '更改设置',
 };
 
 const combatEvents = new EventEmitter();

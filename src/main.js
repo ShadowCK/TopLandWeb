@@ -3,7 +3,7 @@ import { setInterval } from 'worker-timers';
 import 玩家 from './player/玩家.js';
 import * as 玩家管理器 from './player/玩家管理器.js';
 import * as 战斗管理器 from './combat/战斗管理器.js';
-import addToWindow from './debug.js';
+import { addToWindow } from './debug.js';
 import {
   registerEvents as registerHTMLEvents,
   setupHTML,
@@ -11,6 +11,7 @@ import {
   setHTMLInterval,
 } from './events/htmlHandler.js';
 import { settings } from './settings.js';
+import * as settingsHandler from './settingsHandler.js';
 
 const update = (dt) => {
   战斗管理器.update(dt);
@@ -30,8 +31,8 @@ window.onload = () => {
   addToWindow('player', player);
   玩家管理器.init(player);
   玩家管理器.读档();
-  战斗管理器.init();
   战斗管理器.registerEvents();
+  settingsHandler.registerEvents();
   // Initial game update
   // 不应该在update里的任何function直接call HTML function，应该用emit event的方式，否则初次更新会出现问题，
   // 因为HTML的初始化是在游戏初始化后的。而且，游戏逻辑里也不应该依赖HTML function，应该emit event，让HTML function自己来更新
@@ -59,16 +60,6 @@ window.onload = () => {
   console.log('游戏加载完成');
   console.log('玩家信息：', player);
 };
-
-const setGameSpeed = (speed) => {
-  if (speed < 0 || speed > 10000) {
-    console.error('游戏倍速必须在0到10000之间');
-    return;
-  }
-  settings.游戏倍速 = speed;
-};
-
-addToWindow('setGameSpeed', setGameSpeed);
 
 window.clearLocalStorage = () => {
   localStorage.clear();

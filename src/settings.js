@@ -1,4 +1,6 @@
+import _ from 'lodash';
 import * as math from 'mathjs';
+import { addToWindow, isProduction } from './debug.js';
 
 // 计算实际属性时，基础值、Buff等加成的应用顺序
 const 默认优先级 = {
@@ -58,6 +60,17 @@ const get最高专精等级经验倍率 = (最高专精等级) => {
   return mult;
 };
 
+const setGameSpeed = (speed) => {
+  if (isProduction() && (speed < 0 || speed > 10)) {
+    console.error('游戏倍速必须在0到10之间');
+    settings.游戏倍速 = _.clamp(speed, 0, 10);
+  } else {
+    settings.游戏倍速 = speed;
+  }
+};
+
+addToWindow('setGameSpeed', setGameSpeed);
+
 export {
   默认优先级,
   getRequiredExp,
@@ -65,4 +78,5 @@ export {
   config as gameConfig,
   get最高专精等级经验倍率,
   settings,
+  setGameSpeed,
 };
