@@ -15,4 +15,20 @@ const EquipSlot = {
   饰品: '饰品',
 };
 
-export { ItemType, EquipSlot };
+const SemanticUIColor = {
+  red: 'red',
+  orange: 'orange',
+  yellow: 'yellow',
+  olive: 'olive',
+  green: 'green',
+  teal: 'teal',
+  blue: 'blue',
+  violet: 'violet',
+  purple: 'purple',
+  pink: 'pink',
+  brown: 'brown',
+  grey: 'grey',
+  black: 'black',
+};
+
+export { ItemType, EquipSlot, SemanticUIColor };
