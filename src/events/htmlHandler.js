@@ -242,10 +242,10 @@ const setupHTML = () => {
       .join('');
     const element = $(`
       <div class="ui segment">
-        <h3 class="ui header">
+        <div class="ui medium header">
           ${战斗区域.name}
           <div class="sub header">${战斗区域.description}</div>
-        </h3>
+        </div>
         <div class="ui three column grid">
           ${敌人信息}
         </div>

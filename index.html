@@ -78,7 +78,7 @@
         <p>现在转生，还无法提升专精等级。达到最大等级后转生可以提升专精等级。</p>
       </div>
       <div class="ui bottom attached segment">
-        <h3 class="header">可转生职业</h3>
+        <div class="ui medium header">可转生职业</div>
         <div class="ui vertical buttons" id="转生面板-可转生职业"></div>
       </div>
     </div>
@@ -100,9 +100,12 @@
     </div>
 
     <div class="ui bottom attached segment tab chinese" id="背包面板" data-tab="背包面板">
-      <div class="ui two column centered grid">
+      <div class="ui two column centered grid" style="align-items: center">
         <div class="six wide column">
-          <div class="ui segment four column relaxed grid" id="背包面板-装备"></div>
+          <div class="ui header"></div>
+          <div class="ui segment" id="背包面板-装备容器">
+            <div class="ui four column relaxed grid" id="背包面板-装备"></div>
+          </div>
         </div>
         <div class="ten wide column">
           <div class="ui pagination menu" id="背包面板-选择背包分页">
@@ -110,7 +113,7 @@
             <div class="disabled item">...</div>
             <a class="item"> 1 </a>
           </div>
-          <div class="ui segment">
+          <div class="ui segment" id="背包面板-背包容器">
             <div class="ui nine column grid" id="背包面板-背包">
               <!-- Content is generated here -->
             </div>

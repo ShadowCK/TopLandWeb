@@ -404,13 +404,12 @@ const genItem = (item, parent) => {
   $(parent).append(element);
 };
 
-const paginationHTML = (itemsPerPage, items, maxPages, activePageIndex = 1) => {
+const paginationHTML = (totalPages, maxPages, activePageIndex = 1) => {
   const pageButtonHTML = (index) =>
     activePageIndex === index
       ? `<a class="item active" data-index="${index}">${index}</a>`
       : `<a class="item" data-index="${index}">${index}</a>`;
 
-  const totalPages = Math.ceil(items.length / itemsPerPage);
   // 如果总页数小于最大页数，直接显示所有页数
   if (totalPages < maxPages) {
     return {
@@ -478,11 +477,12 @@ const pageButtonClicked = (parent, itemsPerPage, items, maxPages, activePageInde
 };
 
 const genPagination = (parent, itemsPerPage, items, maxPages, activePageIndex, callback) => {
-  const totalPages = Math.ceil(items.length / itemsPerPage);
+  // 就算没有物品，也应该有一页。
+  const totalPages = Math.max(1, Math.ceil(items.length / itemsPerPage));
   // 防止页数越界
   const trueActivePageIndex = _.clamp(activePageIndex, 1, totalPages);
   // 生成分页栏
-  const data = paginationHTML(itemsPerPage, items, maxPages, trueActivePageIndex);
+  const data = paginationHTML(totalPages, maxPages, trueActivePageIndex);
   parent.html(data.html);
   parent
     .attr('data-start-page-index', data.startPageIndex)
@@ -494,6 +494,10 @@ const genPagination = (parent, itemsPerPage, items, maxPages, activePageIndex, c
   parent.find('[data-index]').each((_index, element) => {
     const pageIndex = parseInt($(element).attr('data-index'), 10);
     $(element).on('click', () => {
+      if (pageIndex === trueActivePageIndex) {
+        $.toast({ message: '已经在这一页了。', displayTime: 1000, class: 'error' });
+        return;
+      }
       pageButtonClicked(parent, itemsPerPage, items, maxPages, pageIndex, callback);
     });
   });
