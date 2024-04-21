@@ -131,9 +131,11 @@ class 实体 {
   }
 
   heal(value) {
+    const 原始生命值 = this.生命值;
     const 最大生命值 = this.getStat2(StatType.最大生命值);
     const 生命回复效率 = this.getStat2(StatType.生命回复效率);
     this.生命值 = Math.min(最大生命值, this.生命值 + value * 生命回复效率);
+    return this.生命值 - 原始生命值;
   }
 
   restoreMana(value) {
