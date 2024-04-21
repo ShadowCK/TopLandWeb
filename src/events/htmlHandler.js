@@ -307,7 +307,7 @@ const setupHTML = () => {
   // 初始化每个设置标题的内容
   templateFromElement($('#设置面板-游戏倍速标题'), { 游戏倍速: settings.游戏倍速 });
   templateFromElement($('#设置面板-更新频率标题'), {
-    页面更新频率: (1000 / settings.HTML更新间隔).toFixed(2),
+    页面更新频率: _.round(1000 / settings.HTML更新间隔, 2),
   });
   // 初始化滑块
   $('#设置面板-游戏倍速滑块').slider({
