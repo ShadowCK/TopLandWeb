@@ -8,7 +8,7 @@ import 装备 from './items/装备.js';
 import { settings as gameSettings } from './settings.js';
 import { SemanticUIColor } from './enums.js';
 
-const config = {
+const Format = {
   生命条格式: '生命值: {value} / {total}',
   魔法条格式: '魔法值: {value} / {total}',
   经验条格式: '经验值: {value} / {total}',
@@ -196,7 +196,7 @@ const updateCombatLayout = (combatLayout, entity, { isPlayer = false, isEnemy = 
     combatLayout.find('.attack-bar'),
     entity.攻击计时器去掉攻速(),
     entity.实际攻击间隔(),
-    config.攻击条格式,
+    Format.攻击条格式,
     2,
   );
 };
@@ -376,6 +376,7 @@ const genItem = (item, parent) => {
       this.find('.button[data-use="丢弃"]').on('click', () => {
         玩家管理器.getPlayer().dropItem(item);
         $.toast({
+          class: 'chinese',
           message: `你丢掉了${item.name}。`,
         });
       });
@@ -392,13 +393,14 @@ const genItem = (item, parent) => {
     if (isEquipment && player.拥有装备(item)) {
       $.toast({
         title: '危险！',
-        class: 'red',
+        class: 'red chinese',
         message: `我禁止了右键丢弃已经穿戴的装备，防止误操作。`,
       });
       return;
     }
     player.dropItem(item);
     $.toast({
+      class: 'chinese',
       message: `你丢掉了${item.name}。`,
     });
   });
@@ -496,7 +498,7 @@ const genPagination = (parent, itemsPerPage, items, maxPages, activePageIndex, c
     const pageIndex = parseInt($(element).attr('data-index'), 10);
     $(element).on('click', () => {
       if (pageIndex === trueActivePageIndex) {
-        $.toast({ message: '已经在这一页了。', displayTime: 1000, class: 'error' });
+        $.toast({ message: '已经在这一页了。', displayTime: 1000, class: 'error chinese' });
         return;
       }
       pageButtonClicked(parent, itemsPerPage, items, maxPages, pageIndex, callback);
@@ -504,14 +506,14 @@ const genPagination = (parent, itemsPerPage, items, maxPages, activePageIndex, c
   });
   parent.find('.prev-button').on('click', () => {
     if (trueActivePageIndex === 1) {
-      $.toast({ message: '已经是第一页了。', displayTime: 1000, class: 'error' });
+      $.toast({ message: '已经是第一页了。', displayTime: 1000, class: 'error chinese' });
       return;
     }
     pageButtonClicked(parent, itemsPerPage, items, maxPages, trueActivePageIndex - 1, callback);
   });
   parent.find('.next-button').on('click', () => {
     if (trueActivePageIndex === totalPages) {
-      $.toast({ message: '已经是最后一页了。', displayTime: 1000, class: 'error' });
+      $.toast({ message: '已经是最后一页了。', displayTime: 1000, class: 'error chinese' });
       return;
     }
     pageButtonClicked(parent, itemsPerPage, items, maxPages, trueActivePageIndex + 1, callback);
@@ -571,7 +573,7 @@ const genEquipments = () => {
 };
 
 export {
-  config,
+  Format,
   changeTab,
   labelHTML,
   genLabel,

@@ -31,4 +31,9 @@ const SemanticUIColor = {
   black: 'black',
 };
 
-export { ItemType, EquipSlot, SemanticUIColor };
+const GameSettingName = {
+  HTML更新间隔: 'HTML更新间隔',
+  游戏倍速: '游戏倍速',
+};
+
+export { ItemType, EquipSlot, SemanticUIColor, GameSettingName };

@@ -32,11 +32,6 @@ _.forEach(configs, (config) => {
 
 const get战斗区域 = (name) => 所有战斗区域[name];
 
-const init = () => {
-  // Do nothing for now
-  // TODO: is this necessary?
-};
-
 const isInCombat = (实体) => getEntitiesInCombat().includes(实体);
 
 const getTarget = (实体) => {
@@ -266,7 +261,6 @@ export {
   getEnemiesInCombat,
   getEntitiesInCombat,
   updateCombat,
-  init,
   basicAttack,
   skillDamage,
   isInCombat,

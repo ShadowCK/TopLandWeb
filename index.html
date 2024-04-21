@@ -28,6 +28,7 @@
       <a class="item disabled" data-tab="商店面板">商店</a>
       <a class="item disabled" data-tab="魔典面板">魔典</a>
       <a class="item disabled" data-tab="天赋面板">天赋</a>
+      <a class="item" data-tab="设置面板">设置</a>
       <a class="item" data-tab="更新日志面板">更新日志</a>
     </div>
 
@@ -73,7 +74,7 @@
     </div>
 
     <div class="ui bottom attached segment tab chinese" id="转生面板" data-tab="转生面板">
-      <div class="ui top attached message" id="转生面板-无法提升专精">
+      <div class="ui top attached warning message" id="转生面板-无法提升专精">
         <div class="header">你确定要转生吗？ {{等级}}/{{最大等级}}</div>
         <p>现在转生，还无法提升专精等级。达到最大等级后转生可以提升专精等级。</p>
       </div>
@@ -88,7 +89,7 @@
     </div>
 
     <div class="ui bottom attached segment tab chinese" id="战斗面板" data-tab="战斗面板">
-      <div class="ui message" id="战斗面板-区域信息">
+      <div class="ui info message" id="战斗面板-区域信息">
         <div class="header" id="战斗面板-区域名称">{{当前战斗区域名称}}</div>
         <p id="战斗面板-区域描述">{{当前战斗区域描述}}</p>
         <div class="ui divider"></div>
@@ -122,6 +123,27 @@
               <!-- Content is generated here -->
             </div>
           </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="ui bottom attached segment tab chinese" id="设置面板" data-tab="设置面板">
+      <div class="ui segments">
+        <div class="ui segment">
+          <div class="ui large header">游戏性</div>
+          <div class="ui message">
+            <div class="header" id="设置面板-游戏倍速标题">游戏倍速: {{游戏倍速}}X</div>
+            <p>觉得练级太慢，或是想要挑战某个BOSS却无法精准操作？我就是解药。</p>
+          </div>
+          <div class="ui labeled slider" id="设置面板-游戏倍速滑块"></div>
+        </div>
+        <div class="ui segment">
+          <div class="ui large header">用户体验</div>
+          <div class="ui message">
+            <div class="header" id="设置面板-更新频率标题">页面更新频率: {{页面更新频率}}FPS</div>
+            <p>调整游戏界面的刷新帧率，可以避免卡顿或获得更丝滑的游戏体验。</p>
+          </div>
+          <div class="ui labeled slider" id="设置面板-更新频率滑块"></div>
         </div>
       </div>
     </div>

@@ -10,7 +10,7 @@ import {
   getCombatLayout,
   genCombatLayout,
   updateCombatLayout,
-  config as htmlConfig,
+  Format,
   genInventory,
   genEquipments,
   loadAndRenderMarkdown,
@@ -19,12 +19,13 @@ import {
 import * as 玩家管理器 from '../player/玩家管理器.js';
 import * as 战斗管理器 from '../combat/战斗管理器.js';
 import classConfigs from '../classes/职业信息.js';
-import { generalEvents, combatEvents, EventType } from './事件管理器.js';
+import { generalEvents, combatEvents, EventType, HTMLEvents } from './事件管理器.js';
 import { get最高专精等级经验倍率, settings } from '../settings.js';
 import { StatType } from '../combat/战斗属性.js';
 import { templateFromElement, getMaxLevel } from '../utils.js';
 import { 可以提升专精等级, 可以转生, 转生 } from '../reincarnate/转生.js';
-import addToWindow from '../debug.js';
+import { addToWindow } from '../debug.js';
+import { GameSettingName } from '../enums.js';
 
 let htmlWorkerId = null;
 
@@ -66,15 +67,15 @@ const updateHTML = (params) => {
     $('#角色面板-生命值进度条'),
     player.生命值,
     player.getStat2(StatType.最大生命值),
-    htmlConfig.生命条格式,
+    Format.生命条格式,
   );
   updateProgressBar(
     $('#角色面板-魔法值进度条'),
     player.魔法值,
     player.getStat2(StatType.最大魔法值),
-    htmlConfig.魔法条格式,
+    Format.魔法条格式,
   );
-  updateProgressBar($('#角色面板-经验值进度条'), 玩家职业.exp, requiredExp, htmlConfig.经验条格式);
+  updateProgressBar($('#角色面板-经验值进度条'), 玩家职业.exp, requiredExp, Format.经验条格式);
 
   const 当前属性 = $('#角色面板-当前属性');
   当前属性.empty();
@@ -98,6 +99,21 @@ const updateHTML = (params) => {
   enemies.forEach((enemy) =>
     updateCombatLayout(getCombatLayout(战斗面板实体列表, enemy), enemy, { isEnemy: true }),
   );
+};
+
+// 可以根据玩家的需求，重置UI更新频率
+const setHTMLInterval = (delay) => {
+  if (isUpdatingHTML()) {
+    clearInterval(htmlWorkerId);
+  }
+  htmlWorkerId = setInterval(() => updateHTML({ player: 玩家管理器.getPlayer() }), delay);
+};
+
+const clearHTMLInterval = () => {
+  if (isUpdatingHTML()) {
+    clearInterval(htmlWorkerId);
+    htmlWorkerId = null;
+  }
 };
 
 const setupHTML = () => {
@@ -207,19 +223,19 @@ const setupHTML = () => {
     id: '角色面板-生命值进度条',
     parent: 角色面板进度条,
     color: 'red',
-    format: htmlConfig.生命条格式,
+    format: Format.生命条格式,
   }).wrap($('<div class="column"></div>'));
   genProgressBar({
     id: '角色面板-魔法值进度条',
     parent: 角色面板进度条,
     color: 'blue',
-    format: htmlConfig.魔法条格式,
+    format: Format.魔法条格式,
   }).wrap($('<div class="column"></div>'));
   genProgressBar({
     id: '角色面板-经验值进度条',
     parent: 角色面板进度条,
     color: 'green',
-    format: htmlConfig.经验条格式,
+    format: Format.经验条格式,
   }).wrap('<div class="column"></div>');
 
   // 区域面板
@@ -286,21 +302,50 @@ const setupHTML = () => {
   });
   genEquipments();
   genInventory();
-};
 
-// 可以根据玩家的需求，重置UI更新频率
-const setHTMLInterval = (delay) => {
-  if (isUpdatingHTML()) {
-    clearInterval(htmlWorkerId);
-  }
-  htmlWorkerId = setInterval(() => updateHTML({ player: 玩家管理器.getPlayer() }), delay);
-};
-
-const clearHTMLInterval = () => {
-  if (isUpdatingHTML()) {
-    clearInterval(htmlWorkerId);
-    htmlWorkerId = null;
-  }
+  // 设置面板
+  // 初始化每个设置标题的内容
+  templateFromElement($('#设置面板-游戏倍速标题'), { 游戏倍速: settings.游戏倍速 });
+  templateFromElement($('#设置面板-更新频率标题'), {
+    页面更新频率: (1000 / settings.HTML更新间隔).toFixed(2),
+  });
+  // 初始化滑块
+  $('#设置面板-游戏倍速滑块').slider({
+    min: 0,
+    max: 10,
+    start: 1,
+    step: 0,
+    onChange: (value) => {
+      $.toast({
+        message: `已设置游戏倍速为${value}`,
+        displayTime: 1000,
+        showProgress: true,
+        class: 'success chinese',
+      });
+      templateFromElement($('#设置面板-游戏倍速标题'), { 游戏倍速: value });
+      HTMLEvents.emit(EventType.更改设置, { setting: GameSettingName.游戏倍速, value });
+    },
+  });
+  $('#设置面板-更新频率滑块').slider({
+    min: 0,
+    max: 60,
+    start: 1000 / settings.HTML更新间隔,
+    step: 0.1,
+    restrictedLabels: _.range(0, 61, 5),
+    onChange: (value) => {
+      $.toast({
+        message: `已设置页面更新频率为${value}`,
+        displayTime: 1000,
+        showProgress: true,
+        class: 'success chinese',
+      });
+      templateFromElement($('#设置面板-更新频率标题'), { 页面更新频率: value });
+      HTMLEvents.emit(EventType.更改设置, {
+        setting: GameSettingName.HTML更新间隔,
+        value: 1000 / value,
+      });
+    },
+  });
 };
 
 addToWindow('setHTMLInterval', setHTMLInterval);
@@ -319,6 +364,10 @@ $(document).on('visibilitychange', () => {
   if (document.visibilityState === 'visible') {
     isUserOnPage = true;
     // 重新设置HTML更新频率
+    if (settings.HTML更新间隔 === Infinity) {
+      console.log('欢迎回来！更新频率被设置为0，不恢复更新HTML。');
+      return;
+    }
     console.log('欢迎回来！恢复更新HTML');
     setHTMLInterval(settings.HTML更新间隔);
   } else if (document.visibilityState === 'hidden') {
@@ -446,4 +495,11 @@ const registerEvents = () => {
   });
 };
 
-export { registerEvents, updateHTML, setupHTML, setHTMLInterval, isUpdatingHTML };
+export {
+  registerEvents,
+  updateHTML,
+  setupHTML,
+  setHTMLInterval,
+  clearHTMLInterval,
+  isUpdatingHTML,
+};
