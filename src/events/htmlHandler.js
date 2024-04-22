@@ -430,6 +430,13 @@ const setupHTML = () => {
     // 以文本形式读取文件
     reader.readAsText(file);
   });
+
+  // 切换战斗面板外战斗信息toast的显示。
+  const 设置面板战斗面板外战斗信息 = $('#设置面板-战斗面板外战斗信息');
+  设置面板战斗面板外战斗信息[0].checked = settings.战斗面板外战斗信息;
+  设置面板战斗面板外战斗信息.on('change', function f() {
+    settings.战斗面板外战斗信息 = this.checked;
+  });
 };
 
 addToWindow('setHTMLInterval', setHTMLInterval);
@@ -609,7 +616,7 @@ const registerEvents = () => {
             });
           }
         });
-      } else {
+      } else if (settings.战斗面板外战斗信息) {
         $.toast({
           message: `<span>${damagername}</span>对${damagedname}造成了${damageMsg}。`,
           class: 'chinese',
@@ -630,7 +637,7 @@ const registerEvents = () => {
           gravityFactor: 1,
           offset: { x: 0, y: -0.3 },
         });
-      } else {
+      } else if (settings.战斗面板外战斗信息) {
         $.toast({
           message: `${damagername}通过伤害${damagedname}恢复了${roundedHealing}点生命值。`,
           class: 'chinese',

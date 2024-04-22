@@ -95,7 +95,9 @@ const changeTab = (tabPath) => {
 };
 
 const labelHTML = (title, content, className = '', inline = false) => {
-  const settings = `class="ui ${className} horizontal label"`;
+  const settings = className
+    ? `class="ui ${className} horizontal label"`
+    : 'class="ui horizontal label"';
   return /* html */ `
     ${wrapHtml(title, [{ name: inline ? 'span' : 'div', settings }])}
     ${content != null ? content : ''}
@@ -334,6 +336,10 @@ const genItemHTML = () => /* html */ `
   </div>
   `;
 
+/**
+ * @param {物品} item
+ * @param {HTMLElement} parent
+ */
 const genItem = (item, parent) => {
   const isEquipment = item instanceof 装备;
   const element = $(genItemHTML());
@@ -349,9 +355,10 @@ const genItem = (item, parent) => {
     });
   }
   // popup content
-  const tempParent = $(`
+  const tempParent = $(/* html */ `
     <div>
       <h3 class="ui header">${item.name}</h3>
+      ${labelHTML(item.type)}${isEquipment ? labelHTML(item.slot) : ''}
       <div class="ui message">
         <p>${item.description}</p>
       </div>
