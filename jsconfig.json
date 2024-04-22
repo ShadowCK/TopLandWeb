@@ -1,0 +1,17 @@
+// https://stackoverflow.com/questions/78085423/which-typescript-module-settings-for-a-library-that-is-used-in-browsers-and-node
+{
+  "compilerOptions": {
+    "module": "ESNext",
+    "target": "ESNext",
+    "baseUrl": ".",
+    "paths": {
+      "*": ["*", "types/*"]
+    },
+    "checkJs": true,
+    "allowJs": true,
+    "typeRoots": ["./node_modules/@types"],
+    "moduleResolution": "Bundler"
+  },
+  "include": ["src/**/*", "types/**/*"],
+  "exclude": ["node_modules"]
+}

@@ -326,15 +326,22 @@ const genElementForEquipmentStat = (parent, value, key, labelClass = '', path = 
   parent.append(html);
 };
 
-const genItemHTML = () => /* html */ `
+const genItemHTML = (name) => {
+  const nameHTML = name
+    ? `<div style="display:flex; text-align: center; align-items: center; justify-content: center; position: absolute; width: 100%; height: 100%; top: 50%; left: 50%; transform: translate(-50%, -50%)"><span class="ui black text" style="font-size: max(1em, 15cqw)">${name}</span></div>`
+    : '';
+  return /* html */ `
   <div class="column">
-    <div class="ui card">
-      <div class="ui image placeholder" style="animation:none;">
-        <div class="square icon image">
+    <div class="ui card" style="container-type: inline-size;">
+      <div class="ui image placeholder" style="animation:none; overflow: visible;">
+        <div class="square icon image"></div>
+        ${nameHTML}
+        </div>
       </div>
     </div>
   </div>
   `;
+};
 
 /**
  * @param {物品} item
@@ -342,7 +349,7 @@ const genItemHTML = () => /* html */ `
  */
 const genItem = (item, parent) => {
   const isEquipment = item instanceof 装备;
-  const element = $(genItemHTML());
+  const element = $(genItemHTML(item.name));
   if (isEquipment) {
     element.css('cursor', 'pointer');
     element.on('click', () => {
