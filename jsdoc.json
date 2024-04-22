@@ -5,12 +5,6 @@
     "excludePattern": "(^|\\/|\\\\)_"
   },
   "opts": {
-    "destination": "./out/",
-    "recurse": true
-  },
-  "plugins": ["plugins/markdown"],
-  "templates": {
-    "cleverLinks": false,
-    "monospaceLinks": false
+    "destination": "./out/"
   }
 }
