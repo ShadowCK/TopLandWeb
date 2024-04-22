@@ -255,12 +255,19 @@ const setupHTML = () => {
       .map((areaEnemyConfig) => {
         const enemyConfig = areaEnemyConfig.config;
         const label = areaEnemyConfig.isBoss ? labelHTML('BOSS', '', 'yellow', true) : '';
+        const dropsString =
+          enemyConfig.掉落.length > 0
+            ? enemyConfig.掉落
+                .map((drop) => `${drop.chance}%${drop.config.name}X${drop.count}`)
+                .join('，')
+            : '无';
         return `
         <div class="column">
           <div class="ui segment">
           <div>${enemyConfig.职业.name}${label}</div>
             <div>金钱: ${enemyConfig.金钱}</div>
             <div>经验值: ${enemyConfig.经验值}</div>
+            <div>掉落: ${dropsString}</div>
           </div>
         </div>
       `;
