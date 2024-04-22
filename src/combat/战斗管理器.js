@@ -4,6 +4,7 @@ import { getPlayer } from '../player/玩家管理器.js';
 import { 战斗区域, configs } from './战斗区域.js';
 import { EventType, HTMLEvents, combatEvents } from '../events/事件管理器.js';
 import { gameConfig } from '../settings.js';
+import { calcHealing } from '../utils.js';
 
 /** @type {import('./战斗区域.js').战斗区域} */
 let 当前战斗区域 = null;
@@ -206,7 +207,7 @@ const registerEvents = () => {
     const 触发格挡 = Math.random() < 格挡率 / 100;
     const 格挡倍率 = 1 - damaged.getStat2(StatType.格挡伤害, true) / 100;
 
-    const eventData = { damager, damaged, damages: {}, heal: null };
+    const eventData = { damager, damaged, damages: {}, healing: null };
 
     // 遍历伤害分布，根据不同的伤害类型计算总伤害
     let totalDamage = 0;
@@ -246,15 +247,18 @@ const registerEvents = () => {
       totalDamage += damagePartition - defensePartition;
       eventData.damages[type] = damagePartition;
     });
-    // 对受击者造成伤害
-    damaged.takeDamage(totalDamage);
+
     // 生命偷取
     const 生命偷取 = (damager.getStat2(StatType.生命偷取, true) / 100) * totalDamage;
-    if (生命偷取 > 0) {
-      eventData.heal = damager.heal(生命偷取);
+    // 实际的治疗值
+    const healing = 生命偷取 > 0 ? calcHealing(damager, 生命偷取) : 0;
+    if (healing > 0) {
+      eventData.healing = healing;
     }
-
+    // 先渲染战斗信息，再造成实际伤害，否则实体死亡->实体被移除->战斗UI被移除，无法渲染战斗信息
     HTMLEvents.emit(EventType.渲染战斗信息, eventData);
+    damaged.takeDamage(totalDamage);
+    damager.heal(生命偷取);
   });
 
   // 监听实体死亡事件
