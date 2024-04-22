@@ -81,6 +81,9 @@ class 实体 {
     const 原始最大生命值 = this.stats[StatType.最大生命值];
     const 原始最大魔法值 = this.stats[StatType.最大魔法值];
 
+    // 清空所有属性
+    this.stats = {};
+
     const { statGrowth, level } = this.职业;
     // 递归函数来处理statGrowth
     const applyStatGrowth = (stats, path = []) => {
@@ -96,7 +99,7 @@ class 实体 {
         }
       });
     };
-    // 调用递归函数处理所有stats
+    // 调用递归函数，根据属性成长重新设置当前等级的属性。
     applyStatGrowth(statGrowth);
 
     const applyEquipmentBonus = (stats, path = []) => {
