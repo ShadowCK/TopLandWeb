@@ -437,6 +437,15 @@ const setupHTML = () => {
   设置面板战斗面板外战斗信息.on('change', function f() {
     settings.战斗面板外战斗信息 = this.checked;
   });
+  // 初始化popup
+  设置面板战斗面板外战斗信息.popup({
+    content: '在战斗面板外时，在右上角显示战斗信息。',
+    inline: true,
+    delay: {
+      show: 20,
+      hide: 80,
+    },
+  });
 };
 
 addToWindow('setHTMLInterval', setHTMLInterval);
