@@ -189,6 +189,10 @@ const registerEvents = () => {
     }
 
     const { damager, damaged, damage, damageDistribution } = params;
+    // 注意：这里的攻击已经被伤害事件修改过，因为传入了params给事件，然后解构的params。
+    if (damage <= 0) {
+      return;
+    }
 
     // 攻击被闪避就不造成伤害
     const 闪避率 = damaged.getStat2(StatType.闪避率, true);
@@ -244,8 +248,12 @@ const registerEvents = () => {
       }
       // 计算防御力对伤害的影响（后加算）
       const defensePartition = damaged.getStat2(StatType.防御力) * mult;
-      totalDamage += damagePartition - defensePartition;
-      eventData.damages[type] = damagePartition;
+      const damageDealt = Math.max(
+        ((100 - gameConfig.防御值最多减少伤害百分比) / 100) * damagePartition,
+        damagePartition - defensePartition,
+      );
+      totalDamage += damageDealt;
+      eventData.damages[type] = damageDealt;
     });
 
     // 生命偷取
