@@ -68,23 +68,29 @@ class 玩家存档 {
       return;
     }
     try {
-      // 用读取的职业信息为玩家设置职业
-      if (this.data.职业) {
-        player.设置职业(new 职业(this.data.职业));
-      }
-      // 将存档里背包的内容添加到玩家背包
-      if (this.data.背包) {
-        console.log('存档-背包', this.data.背包);
-        player.背包.loadSavedItems(this.data.背包);
-      }
+      const rest = _.omit(this.data, '职业', '背包', '装备');
+      Object.assign(player, rest);
+      // 用读取的装备信息为玩家设置装备
       if (this.data.装备) {
         console.log('存档-装备', this.data.装备);
         _.forEach(this.data.装备, (typeEquipments, key) => {
           player.装备[key] = typeEquipments.map((e) => new 装备(e));
         });
       }
-      const rest = _.omit(this.data, '职业', '背包', '装备');
-      Object.assign(player, rest);
+      // 将存档里背包的内容添加到玩家背包
+      if (this.data.背包) {
+        console.log('存档-背包', this.data.背包);
+        player.背包.loadSavedItems(this.data.背包);
+      }
+      // 用读取的职业信息为玩家设置职业
+      if (this.data.职业) {
+        player.设置职业(new 职业(this.data.职业));
+      } else {
+        console.error('玩家存档或默认存档中没有职业信息，无法为玩家设置职业。');
+        // 设置职业会更新玩家属性，所以只有没有职业信息时才更新。理论上玩家不可能没有职业，因为默认存档里有职业信息，除非传入的默认存档有问题。
+        player.updateStats();
+      }
+
       console.log('玩家存档已应用', player);
     } catch (error) {
       console.error('应用存档失败', error);
