@@ -1,0 +1,18 @@
+// {
+//   "compilerOptions": {
+//     "module": "ESNext",
+//     "target": "ESNext",
+//     "baseUrl": ".",
+//     "paths": {
+//       "*": ["*", "types/*"]
+//     },
+//     "checkJs": true,
+//     "allowJs": true,
+//     "typeRoots": [
+//       "./node_modules/@types",
+//       "C:/Users/Zhao Jin/AppData/Local/Microsoft/TypeScript/5.4/node_modules/@types" // 添加 VSCode 默认的类型路径
+//     ],
+//   },
+//   "include": ["src/**/*", "types/**/*"],
+//   "exclude": ["node_modules"]
+// }
