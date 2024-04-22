@@ -3,10 +3,13 @@ import { ItemType } from '../enums.js';
 import { EventType, generalEvents } from '../events/事件管理器.js';
 import 物品 from './物品.js';
 import 装备 from './装备.js';
+import 背包界面 from './背包界面.js';
 
 class 背包 {
   /** @type {import('./物品.js').default[]} */
   items = [];
+
+  ui = new 背包界面(this);
 
   hasItem(item) {
     return this.items.includes(item);
@@ -37,14 +40,13 @@ class 背包 {
   addItem(item, count = 1) {
     const prevLength = this.items.length;
     if (!item.stackable) {
-      _.times(count, this.items.push(new item.constructor(item.config)));
-      generalEvents.emit(EventType.获得物品, {
-        config: item.config,
-        stack: count,
-        startIndex: this.items.length - count,
-        endIndex: this.items.length - 1,
-        prevLength,
-      });
+      _.times(count, () => {
+        const index = this.items.push(new item.constructor(item.config)) - 1;
+        generalEvents.emit(EventType.获得物品, {
+          index,
+          prevLength,
+        });
+      });      
       return;
     }
     const existingItem = this.items.find((other) => other.name === item.name);
