@@ -42,7 +42,7 @@ window.onload = () => {
   setupHTML();
   registerHTMLEvents();
   // Initial HTML update
-  updateHTML({ player });
+  updateHTML({ player }, 0);
 
   // 设置update loop
   // Ideally 200 ticks per second

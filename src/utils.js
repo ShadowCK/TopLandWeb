@@ -1,5 +1,6 @@
 import _ from 'lodash';
 import { config } from './settings.js';
+import { StatType } from './combat/战斗属性.js';
 
 const getDecimalPrecision = (num) => {
   if (!_.isFinite(num)) {
@@ -63,4 +64,29 @@ const deepMapObject = (obj, callback, settings, path = [], result = {}) => {
 
 window.deepMapObject = deepMapObject;
 
-export { getDecimalPrecision, getMaxLevel, template, templateFromElement, deepMapObject };
+const calcHealing = (entity, value) => {
+  if (value <= 0) {
+    return 0;
+  }
+  const 原始生命值 = entity.生命值;
+  const 最大生命值 = entity.getStat2(StatType.最大生命值);
+  const 生命回复效率 = entity.getStat2(StatType.生命回复效率);
+  const 新生命值 = Math.min(最大生命值, entity.生命值 + value * 生命回复效率);
+  return 新生命值 - 原始生命值;
+};
+
+const randomCoordinate = (min, max) => {
+  const magnitude = _.random(min, max, true);
+  const sign = Math.random() < 0.5 ? -1 : 1;
+  return magnitude * sign;
+};
+
+export {
+  getDecimalPrecision,
+  getMaxLevel,
+  template,
+  templateFromElement,
+  deepMapObject,
+  calcHealing,
+  randomCoordinate,
+};

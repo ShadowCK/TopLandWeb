@@ -572,6 +572,16 @@ const genEquipments = () => {
   });
 };
 
+const getPositionData = (element) => {
+  const $element = $(element);
+  const offset = $element.offset(); // 返回 { top: value, left: value }
+  const width = $element.width();
+  const height = $element.height();
+  const centerX = offset.left + width / 2;
+  const centerY = offset.top + height / 2;
+  return { offset, width, height, centerX, centerY };
+};
+
 export {
   Format,
   changeTab,
@@ -589,4 +599,5 @@ export {
   loadAndRenderMarkdown,
   isItemInPage,
   randomColor,
+  getPositionData,
 };

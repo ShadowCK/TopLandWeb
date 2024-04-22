@@ -4,7 +4,7 @@ import { getBuffedStat } from './buff管理器.js';
 import { DamageType, StatType } from './战斗属性.js';
 import * as settings from '../settings.js';
 import { EventType, combatEvents } from '../events/事件管理器.js';
-import { deepMapObject } from '../utils.js';
+import { calcHealing, deepMapObject } from '../utils.js';
 
 class 实体 {
   uuid = uuidv4();
@@ -130,12 +130,19 @@ class 实体 {
     }
   }
 
+  addHealth = (value) => {
+    if (value < 0) {
+      this.takeDamage(-value);
+      return;
+    }
+    this.生命值 = Math.min(this.getStat2(StatType.最大生命值), this.生命值 + value);
+  };
+
   heal(value) {
-    const 原始生命值 = this.生命值;
-    const 最大生命值 = this.getStat2(StatType.最大生命值);
-    const 生命回复效率 = this.getStat2(StatType.生命回复效率);
-    this.生命值 = Math.min(最大生命值, this.生命值 + value * 生命回复效率);
-    return this.生命值 - 原始生命值;
+    if (value <= 0) {
+      return;
+    }
+    this.生命值 += calcHealing(this, value);
   }
 
   restoreMana(value) {

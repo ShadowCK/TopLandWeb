@@ -27,7 +27,9 @@ import { templateFromElement, getMaxLevel } from '../utils.js';
 import { 可以提升专精等级, 可以转生, 转生 } from '../reincarnate/转生.js';
 import { addToWindow } from '../debug.js';
 import { GameSettingName } from '../enums.js';
+import { update as 更新战斗信息, 生成伤害信息, 生成治疗信息 } from '../战斗信息管理器.js';
 
+let lastUpdate = performance.now();
 let htmlWorkerId = null;
 
 const isUpdatingHTML = () => htmlWorkerId != null;
@@ -35,7 +37,7 @@ const isUpdatingHTML = () => htmlWorkerId != null;
 /**
  * @param {{player:玩家}} params
  */
-const updateHTML = (params) => {
+const updateHTML = (params, dt) => {
   const { player } = params;
   const { 职业: 玩家职业 } = player;
 
@@ -100,6 +102,8 @@ const updateHTML = (params) => {
   enemies.forEach((enemy) =>
     updateCombatLayout(getCombatLayout(战斗面板实体列表, enemy), enemy, { isEnemy: true }),
   );
+
+  更新战斗信息(dt);
 };
 
 // 可以根据玩家的需求，重置UI更新频率
@@ -107,7 +111,12 @@ const setHTMLInterval = (delay) => {
   if (isUpdatingHTML()) {
     clearInterval(htmlWorkerId);
   }
-  htmlWorkerId = setInterval(() => updateHTML({ player: 玩家管理器.getPlayer() }), delay);
+  htmlWorkerId = setInterval(() => {
+    const now = performance.now();
+    const dt = (now - lastUpdate) / 1000;
+    lastUpdate = now;
+    updateHTML({ player: 玩家管理器.getPlayer() }, dt);
+  }, delay);
 };
 
 const clearHTMLInterval = () => {
@@ -562,31 +571,66 @@ const registerEvents = () => {
     genEquipments();
   });
 
-  HTMLEvents.on(EventType.渲染战斗信息, ({ damager, damaged, damages, heal }) => {
+  // TODO：以后改成战斗信息区分治疗和伤害。
+  HTMLEvents.on(EventType.渲染战斗信息, ({ damager, damaged, damages, healing }) => {
     if (!isUpdatingHTML()) {
       return;
     }
+    const playerInCombatTab = $('#战斗面板').hasClass('active');
     const player = 玩家管理器.getPlayer();
     const playerName = '<span class="ui large red text">你</span>';
     const damagername = damager === player ? playerName : damager.职业.name;
     const damagedname = damaged === player ? playerName : damaged.职业.name;
+    // 不用filter damage<=0，因为无效伤害没有传进来
+    // TODO：这个popup的信息会包括伤害0~0.5的伤害，但是round为0的伤害没必要显示。
+    // 下面的伤害信息就round了。记得改一下，_.pickBy（不能filter因为返回的是数组）一下再_.map
     const damageMsg = _.map(damages, (damage, type) => `${_.round(damage)}点${type}伤害`).join(
       '，',
     );
-    $.toast({
-      message: `<span>${damagername}</span>对${damagedname}造成了${damageMsg}。`,
-      class: 'chinese',
-      displayTime: 1000,
-      showProgress: 'bottom',
-    });
-    const roundedHeal = _.round(heal);
-    if (roundedHeal > 0) {
-      $.toast({
-        message: `${damagername}通过伤害${damagedname}恢复了${roundedHeal}点生命值。`,
-        class: 'chinese',
-        displayTime: 1000,
-        showProgress: 'bottom',
-      });
+    if (damageMsg !== '') {
+      if (playerInCombatTab) {
+        _.forEach(damages, (damage, type) => {
+          const roundedDamage = _.round(damage);
+          if (roundedDamage > 0) {
+            生成伤害信息({
+              damaged,
+              damage: roundedDamage,
+              damageType: type,
+              velocityScale: 1.5,
+              gravityFactor: 1,
+              offset: { x: 0, y: -0.3 },
+            });
+          }
+        });
+      } else {
+        $.toast({
+          message: `<span>${damagername}</span>对${damagedname}造成了${damageMsg}。`,
+          class: 'chinese',
+          displayTime: 1000,
+          showProgress: 'bottom',
+        });
+      }
+    }
+
+    const roundedHealing = _.round(healing);
+    // 需要检测，因为造成伤害不一定有治疗
+    if (roundedHealing > 0) {
+      if (playerInCombatTab) {
+        生成治疗信息({
+          healed: damager,
+          healing: roundedHealing,
+          velocityScale: 1.5,
+          gravityFactor: 1,
+          offset: { x: 0, y: -0.3 },
+        });
+      } else {
+        $.toast({
+          message: `${damagername}通过伤害${damagedname}恢复了${roundedHealing}点生命值。`,
+          class: 'chinese',
+          displayTime: 1000,
+          showProgress: 'bottom',
+        });
+      }
     }
   });
 };
