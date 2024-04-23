@@ -156,7 +156,7 @@ class 实体 {
 
   /**
    * 获取伤害分布、抗性穿透、伤害抗性等多级属性的数值，返回一个同样结构的对象
-   * @param {string[]} path
+   * @param {string[] | string} path
    * @param {boolean} calcBuffs
    */
   getStat3(path, calcBuffs = true, applyRange = true) {

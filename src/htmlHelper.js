@@ -7,6 +7,7 @@ import { StatType } from './combat/战斗属性.js';
 import 装备 from './items/装备.js';
 import { settings as gameSettings } from './settings.js';
 import { SemanticUIColor } from './enums.js';
+import { 计算伤害分布 } from './combat/战斗管理器.js';
 
 const Format = {
   生命条格式: '生命值: {value} / {total}',
@@ -262,7 +263,7 @@ const genElementForStats = (entity, parent, value, key, labelClass = '', path = 
   // 属性成长是一个数组，且不受Buff影响
   // 这里我们断言数组是属性成长，否则是当前属性
   if (Array.isArray(value)) {
-    formatted = value.map((v) => _.round(v, 2)).join('+');
+    formatted = `<span>${value[0]}<i class="angle double up icon"></i>${value[1]}</span>`;
   } else {
     const isStat = _.get(entity.stats, path) !== undefined;
     // 如果是实体属性，不要用原始数值。显示buff加成后的数值
@@ -279,6 +280,24 @@ const genElementForStats = (entity, parent, value, key, labelClass = '', path = 
       precision = 2; // 默认精确到小数点后两位
     }
     formatted = _.round(valueToUse, precision);
+    if (isStat) {
+      const parentKey = path[path.length - 2];
+      if (parentKey !== undefined && parentKey === StatType.伤害分布) {
+        const damageDistributionData = 计算伤害分布(entity.getStat3(StatType.伤害分布))[key];
+        if (damageDistributionData) {
+          formatted = /* html */ `${formatted}(${_.round(
+            damageDistributionData.mult * 100,
+            2,
+          )}%) <span class="ui grey text">+${_.round(
+            damageDistributionData.singleBonus * 100,
+            2,
+          )}%</span> <span class="ui red text">+${_.round(
+            damageDistributionData.totalBonus * 100,
+            2,
+          )}%</span>`;
+        }
+      }
+    }
   }
   const html = `
     <div class="item">
