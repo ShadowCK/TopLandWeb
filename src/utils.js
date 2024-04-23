@@ -1,6 +1,7 @@
 import _ from 'lodash';
 import { config } from './settings.js';
 import { StatType } from './combat/战斗属性.js';
+import { addToWindow } from './debug.js';
 
 const getDecimalPrecision = (num) => {
   if (!_.isFinite(num)) {
@@ -46,8 +47,8 @@ const templateFromElement = (element, data, apply = true) => {
  * @param {Object} obj
  * @param {Function} callback (path: string[], settings) => {...}
  * @param {Object} settings
- * @param {string} path 递归用，不要传入
- * @param {Ojbect} result 递归用，不要传入
+ * @param {string[]} path 递归用，不要传入
+ * @param {Object} result 递归用，不要传入
  * @returns
  */
 const deepMapObject = (obj, callback, settings, path = [], result = {}) => {
@@ -62,7 +63,7 @@ const deepMapObject = (obj, callback, settings, path = [], result = {}) => {
   return result;
 };
 
-window.deepMapObject = deepMapObject;
+addToWindow('deepMapObject', deepMapObject, true);
 
 const calcHealing = (entity, value) => {
   if (value <= 0) {

@@ -54,7 +54,6 @@ class 玩家存档 {
 
   /**
    * 创建存档会自动读档，但是为了代码的灵活性，要手动应用存档。
-   * @param {import('./玩家.js').default} player
    */
   应用存档() {
     const { player } = this;
