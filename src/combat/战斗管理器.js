@@ -67,7 +67,7 @@ const 计算伤害分布 = (damageDistribution) => {
 };
 
 const _计算伤害分布 = (damageDistribution) =>
-  计算伤害分布(damageDistribution).mapValues((v) => v.mult);
+  _.mapValues(计算伤害分布(damageDistribution), (v) => v.mult);
 
 const 获取伤害分布 = (damageDistribution, damageType, defaultDamageType) => {
   let trueDamageDistribution;
