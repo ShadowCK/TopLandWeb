@@ -3,6 +3,8 @@ import { genItem as genItemElement } from '../htmlHelper.js';
 import { EventType, generalEvents } from '../events/事件管理器.js';
 import { settings } from '../settings.js';
 
+
+
 // TODO: 生成html而不是hard code在index.html
 class 背包界面 {
   背包 = null;
@@ -72,7 +74,7 @@ class 背包界面 {
     }
 
     const newItemElement = genItemElement(item);
-    this.getItemSlots().eq(index).replaceWith(newItemElement);
+    this.locElement(index).replaceWith(newItemElement);
   }
 
   removeItem(inventoryIndex) {
