@@ -43,25 +43,36 @@ const getTarget = (实体) => {
   return player;
 };
 
+/**
+ * @returns {Object<string, {mult: number, totalBonus: number, singleBonus: number}>}}
+ */
 const 计算伤害分布 = (damageDistribution) => {
   // 去掉伤害分布中值小于等于0的项。理论上可以有负值，但会让机制太过复杂且对玩家不友好
   // 比如，敌人有一个-200%物理伤害分布的技能，玩家的伤害分布是100%物理，50%奥术，那么总伤害直接为负，打不出伤害了。
   // 可以加额外的保护机制，比如totalMult不小于1，也就是伤害分布不会减少总伤害。但这样会让伤害计算过于复杂。而且这样负值就等效于0了。
   const filtered = _.pickBy(damageDistribution, (v) => v > 0);
   const total = _.sum(_.values(filtered));
-  const totalMult =
-    (total > 100 ? 100 + (total - 100) * gameConfig.伤害分布总伤害加成 : total) / 100;
+  const totalBonus = (total > 100 ? (total - 100) * gameConfig.伤害分布总伤害加成 : 0) / 100;
   return _.mapValues(filtered, (v) => {
     // 伤害分布首先会被标准化到100%，然后再计算加成
-    const singleMult = (v > 100 ? (v - 100) * gameConfig.伤害分布单体伤害加成 : 0) / 100;
-    return (v / total) * totalMult + singleMult;
+    const proportion = v / total;
+    const singleBonus =
+      (v > 100 ? (v - 100) * gameConfig.伤害分布单体伤害加成 : 0) / 100 / proportion;
+    return {
+      mult: proportion * (1 + totalBonus + singleBonus),
+      totalBonus,
+      singleBonus,
+    };
   });
 };
+
+const _计算伤害分布 = (damageDistribution) =>
+  计算伤害分布(damageDistribution).mapValues((v) => v.mult);
 
 const 获取伤害分布 = (damageDistribution, damageType, defaultDamageType) => {
   let trueDamageDistribution;
   if (damageDistribution) {
-    trueDamageDistribution = 计算伤害分布(damageDistribution);
+    trueDamageDistribution = _计算伤害分布(damageDistribution);
   } else if (damageType) {
     trueDamageDistribution = { [damageType]: 1 };
   } else {
@@ -312,6 +323,7 @@ export {
   getTarget,
   registerEvents,
   isPlayerInCombat,
+  计算伤害分布,
 };
 
 window.当前战斗区域 = () => 当前战斗区域;
