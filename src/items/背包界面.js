@@ -1,5 +1,5 @@
 import _ from 'lodash';
-import { genItem as genItemElement ,paginationHTML} from '../htmlHelper.js';
+import { genItem as genItemElement } from '../htmlHelper.js';
 import { EventType, generalEvents } from '../events/事件管理器.js';
 import { settings } from '../settings.js';
 
