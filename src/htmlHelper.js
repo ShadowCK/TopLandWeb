@@ -491,101 +491,6 @@ const paginationHTML = (totalPages, maxPages, activePageIndex = 1) => {
   return { html, startPageIndex, endPageIndex, totalPages };
 };
 
-const genInventoryItems = (itemsPerPage, pageIndex) => {
-  const player = 玩家管理器.getPlayer();
-  const totalPages = Math.ceil(player.背包.items.length / itemsPerPage);
-  // 防止页数越界
-  const trueActivePageIndex = _.clamp(pageIndex, 1, totalPages);
-  player.背包.ui.setActivePageIndex(trueActivePageIndex);
-};
-
-let _genPagination;
-
-const pageButtonClicked = (parent, itemsPerPage, items, maxPages, activePageIndex, callback) => {
-  _genPagination(parent, itemsPerPage, items, maxPages, activePageIndex, callback);
-  callback({ parent, itemsPerPage, items, maxPages, activePageIndex });
-};
-
-const genPagination = (parent, itemsPerPage, items, maxPages, activePageIndex, callback) => {
-  // 就算没有物品，也应该有一页。
-  const totalPages = Math.max(1, Math.ceil(items.length / itemsPerPage));
-  // 防止页数越界
-  const trueActivePageIndex = _.clamp(activePageIndex, 1, totalPages);
-  // 生成分页栏
-  const data = paginationHTML(totalPages, maxPages, trueActivePageIndex);
-  parent.html(data.html);
-  parent
-    .attr('data-start-page-index', data.startPageIndex)
-    .attr('data-end-page-index', data.endPageIndex)
-    .attr('data-total-pages', data.totalPages)
-    .attr('data-active-page-index', trueActivePageIndex)
-    .attr('data-items-per-page', itemsPerPage);
-  // 为每个按钮添加事件
-  parent.find('[data-index]').each((_index, element) => {
-    const pageIndex = parseInt($(element).attr('data-index'), 10);
-    $(element).on('click', () => {
-      if (pageIndex === trueActivePageIndex) {
-        $.toast({ message: '已经在这一页了。', displayTime: 1000, class: 'error chinese' });
-        return;
-      }
-      pageButtonClicked(parent, itemsPerPage, items, maxPages, pageIndex, callback);
-    });
-  });
-  parent.find('.prev-button').on('click', () => {
-    if (trueActivePageIndex === 1) {
-      $.toast({ message: '已经是第一页了。', displayTime: 1000, class: 'error chinese' });
-      return;
-    }
-    pageButtonClicked(parent, itemsPerPage, items, maxPages, trueActivePageIndex - 1, callback);
-  });
-  parent.find('.next-button').on('click', () => {
-    if (trueActivePageIndex === totalPages) {
-      $.toast({ message: '已经是最后一页了。', displayTime: 1000, class: 'error chinese' });
-      return;
-    }
-    pageButtonClicked(parent, itemsPerPage, items, maxPages, trueActivePageIndex + 1, callback);
-  });
-};
-
-_genPagination = genPagination;
-
-const genInventory = (activePageIndex = 1, refreshMenu = true) => {
-  const player = 玩家管理器.getPlayer();
-  const itemsPerPage = gameSettings.背包物品每页数量;
-
-  if (refreshMenu) {
-    const 选择背包分页 = $('#背包面板-选择背包分页');
-    选择背包分页.empty();
-    genPagination(
-      选择背包分页,
-      itemsPerPage,
-      player.背包.items,
-      gameSettings.背包页面最大数量,
-      activePageIndex,
-      ({ activePageIndex: _activePageIndex }) => genInventoryItems(itemsPerPage, _activePageIndex),
-    );
-  }
-  genInventoryItems(itemsPerPage, activePageIndex);
-};
-
-/**
- * 检测分页菜单对应的数组中被操作的物品是否在当前页，index和startIndex、endIndex可以同时存在。
- * TODO: 以后换成更好的检测，应该是indices和startIndex和endIndex。
- * 目前用index（单数）是因为只给一个已经存在的物品堆叠，然后多出来的直接添加到背包末尾……应该循环添加给已经存在的物品，再将剩下的添加到末尾。
- * @param {JQuery<HTMLElement>} paginationMenu
- * @param {number} index 被操作物品在数组中的索引
- * @param {number} startIndex 被操作的多个物品的起始索引
- * @param {number} endIndex 被操作的多个物品的结束索引
- * @returns
- */
-const isItemInPage = (paginationMenu, index, startIndex, endIndex) => {
-  const activePageIndex = paginationMenu.attr('data-active-page-index');
-  const itemsPerPage = paginationMenu.attr('data-items-per-page');
-  const start = (activePageIndex - 1) * itemsPerPage;
-  const end = activePageIndex * itemsPerPage - 1;
-  return _.inRange(index, start, end) || (startIndex <= end && endIndex >= start);
-};
-
 const genEquipments = () => {
   const player = 玩家管理器.getPlayer();
   const 背包面板装备 = $('#背包面板-装备');
@@ -620,9 +525,8 @@ export {
   updateCombatLayout,
   genItem,
   genEquipments,
-  genInventory,
   loadAndRenderMarkdown,
-  isItemInPage,
   randomColor,
   getPositionData,
+  paginationHTML,
 };

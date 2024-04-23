@@ -12,7 +12,6 @@ import {
   genCombatLayout,
   updateCombatLayout,
   Format,
-  genInventory,
   genEquipments,
   loadAndRenderMarkdown,
 } from '../htmlHelper.js';
@@ -341,7 +340,6 @@ const setupHTML = () => {
     e.preventDefault();
   });
   genEquipments();
-  genInventory();
 
   // 设置面板
   // 初始化每个设置标题的内容
@@ -556,34 +554,6 @@ const registerEvents = () => {
     $('#战斗面板-区域信息').hide();
   });
 
-  generalEvents.on(EventType.获得物品, ({ index, startIndex, endIndex, prevLength }) => {
-    const 选择背包分页 = $('#背包面板-选择背包分页');
-    const activePageIndex = 选择背包分页.attr('data-active-page-index');
-    // 如果获得物品后总页数增加，刷新背包分页
-    const player = 玩家管理器.getPlayer();
-    const itemsPerPage = 选择背包分页.attr('data-items-per-page');
-    const previousTotalPages = Math.ceil(prevLength / itemsPerPage);
-    const totalPages = Math.ceil(player.背包.items.length / itemsPerPage);
-    if (totalPages > previousTotalPages) {
-      console.log('最大页数增加，刷新背包分页');
-      genInventory(activePageIndex, true);
-    }
-  });
-
-  generalEvents.on(EventType.失去物品, ({ index, prevLength }) => {
-    const 选择背包分页 = $('#背包面板-选择背包分页');
-    const activePageIndex = 选择背包分页.attr('data-active-page-index');
-
-    const player = 玩家管理器.getPlayer();
-    const itemsPerPage = 选择背包分页.attr('data-items-per-page');
-    const previousTotalPages = Math.ceil(prevLength / itemsPerPage);
-    const totalPages = Math.ceil(player.背包.items.length / itemsPerPage);
-    // 如果失去物品后总页数减少，刷新背包分页。
-    if (totalPages < previousTotalPages) {
-      console.log('最大页数减少，刷新背包分页');
-      genInventory(activePageIndex, true);
-    }
-  });
 
   generalEvents.on(EventType.穿上装备, ({ entity, _equipment }) => {
     if (entity !== 玩家管理器.getPlayer()) {
