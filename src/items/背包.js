@@ -8,6 +8,10 @@ class 背包 {
   /** @type {import('./物品.js').default[]} */
   items = [];
 
+  hasItem(item) {
+    return this.items.includes(item);
+  }
+
   loadSavedItems(items, doClear = true) {
     if (doClear) {
       this.items.length = 0;

@@ -356,8 +356,10 @@ const genItem = (item, parent) => {
       const player = 玩家管理器.getPlayer();
       if (player.拥有装备(item)) {
         item.脱下(player);
-      } else {
+      } else if (player.背包.hasItem(item)) {
         item.穿上(player);
+      } else {
+        console.error('玩家没有这个装备');
       }
     });
   }

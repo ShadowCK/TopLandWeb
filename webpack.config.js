@@ -9,7 +9,6 @@ const __dirname = dirname(__filename);
 
 const config = JSON.parse(fs.readFileSync(resolve(__dirname, './package.json')));
 const { version } = config;
-console.log(version);
 
 export default (env, argv) => {
   const mode = argv.mode || 'development';

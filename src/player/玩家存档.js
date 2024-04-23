@@ -2,6 +2,7 @@ import LZString from 'lz-string';
 import _ from 'lodash';
 import 职业 from '../classes/职业.js';
 import 装备 from '../items/装备.js';
+import { genEquipments } from '../htmlHelper.js';
 
 class 玩家存档 {
   /** @type {import('./玩家.js').default} */
@@ -75,6 +76,7 @@ class 玩家存档 {
         _.forEach(this.data.装备, (typeEquipments, key) => {
           player.装备[key] = typeEquipments.map((e) => new 装备(e));
         });
+        genEquipments();
       }
       // 将存档里背包的内容添加到玩家背包
       if (this.data.背包) {
