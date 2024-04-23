@@ -15,7 +15,6 @@ import {
   genInventory,
   genEquipments,
   loadAndRenderMarkdown,
-  isItemInPage,
 } from '../htmlHelper.js';
 import * as 玩家管理器 from '../player/玩家管理器.js';
 import * as 战斗管理器 from '../combat/战斗管理器.js';
@@ -536,11 +535,6 @@ const registerEvents = () => {
   generalEvents.on(EventType.获得物品, ({ index, startIndex, endIndex, prevLength }) => {
     const 选择背包分页 = $('#背包面板-选择背包分页');
     const activePageIndex = 选择背包分页.attr('data-active-page-index');
-    // 如果获得物品在当前页，刷新背包物品
-    if (isItemInPage(选择背包分页, index, startIndex, endIndex)) {
-      console.log('当前页面获得物品，刷新背包物品');
-      genInventory(activePageIndex, false, true);
-    }
     // 如果获得物品后总页数增加，刷新背包分页
     const player = 玩家管理器.getPlayer();
     const itemsPerPage = 选择背包分页.attr('data-items-per-page');
@@ -548,7 +542,7 @@ const registerEvents = () => {
     const totalPages = Math.ceil(player.背包.items.length / itemsPerPage);
     if (totalPages > previousTotalPages) {
       console.log('最大页数增加，刷新背包分页');
-      genInventory(activePageIndex, true, false);
+      genInventory(activePageIndex, true);
     }
   });
 
@@ -558,24 +552,12 @@ const registerEvents = () => {
 
     const player = 玩家管理器.getPlayer();
     const itemsPerPage = 选择背包分页.attr('data-items-per-page');
-    const activePageStart = (activePageIndex - 1) * itemsPerPage;
     const previousTotalPages = Math.ceil(prevLength / itemsPerPage);
     const totalPages = Math.ceil(player.背包.items.length / itemsPerPage);
     // 如果失去物品后总页数减少，刷新背包分页。
     if (totalPages < previousTotalPages) {
       console.log('最大页数减少，刷新背包分页');
-      genInventory(activePageIndex, true, false);
-    }
-    // 如果失去物品在当前页，刷新背包物品
-    if (isItemInPage(选择背包分页, index)) {
-      // 如果当前页（最后一页）没有物品了，刷新背包物品到上一页
-      if (activePageStart > player.背包.items.length - 1) {
-        console.log('当前页面失去物品，且没有剩余物品，刷新背包物品到上一页');
-        genInventory(activePageIndex - 1, false, true);
-        return;
-      }
-      console.log('当前页面失去物品，刷新背包物品');
-      genInventory(activePageIndex, false, true);
+      genInventory(activePageIndex, true);
     }
   });
 

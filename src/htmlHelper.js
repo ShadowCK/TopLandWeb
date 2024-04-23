@@ -364,9 +364,8 @@ const genItemHTML = (name) => {
 
 /**
  * @param {物品} item
- * @param {HTMLElement} parent
  */
-const genItem = (item, parent) => {
+const genItem = (item) => {
   const isEquipment = item instanceof 装备;
   const element = $(genItemHTML(item.name));
   if (isEquipment) {
@@ -402,10 +401,10 @@ const genItem = (item, parent) => {
   element.attr('data-variation', 'multiline flowing');
   element.attr('data-html', compressHTML(tempParent.html()));
   element.popup({
-    hoverable: true,
+    hoverable: false,
     delay: {
-      show: 30,
-      hide: 100,
+      show: 0,
+      hide: 0,
     },
     onCreate: function onCreate() {
       this.find('.button[data-use="丢弃"]').on('click', () => {
@@ -417,8 +416,8 @@ const genItem = (item, parent) => {
       });
     },
     // inline可以apply local CSS rules，让它看起来更对，但是不会在关闭时自动移除
-    // TODO: 在父元素被删除时移除popup
-    inline: true,
+    // TODO: 设为true, 在父元素被删除时移除popup
+    inline: false,
     lastResort: true,
   });
   // 右键也可以丢弃物品
@@ -439,7 +438,8 @@ const genItem = (item, parent) => {
       message: `你丢掉了${item.name}。`,
     });
   });
-  $(parent).append(element);
+  
+  return element;
 };
 
 const paginationHTML = (totalPages, maxPages, activePageIndex = 1) => {
@@ -496,15 +496,7 @@ const genInventoryItems = (itemsPerPage, pageIndex) => {
   const totalPages = Math.ceil(player.背包.items.length / itemsPerPage);
   // 防止页数越界
   const trueActivePageIndex = _.clamp(pageIndex, 1, totalPages);
-  const 背包面板背包 = $('#背包面板-背包');
-  背包面板背包.empty();
-  const itemsToRender = player.背包.items.slice(
-    (trueActivePageIndex - 1) * itemsPerPage,
-    trueActivePageIndex * itemsPerPage,
-  );
-  _.forEach(itemsToRender, (item) => {
-    genItem(item, 背包面板背包);
-  });
+  player.背包.ui.setActivePageIndex(trueActivePageIndex);
 };
 
 let _genPagination;
@@ -557,7 +549,7 @@ const genPagination = (parent, itemsPerPage, items, maxPages, activePageIndex, c
 
 _genPagination = genPagination;
 
-const genInventory = (activePageIndex = 1, refreshMenu = true, refreshPage = true) => {
+const genInventory = (activePageIndex = 1, refreshMenu = true) => {
   const player = 玩家管理器.getPlayer();
   const itemsPerPage = gameSettings.背包物品每页数量;
 
@@ -573,9 +565,7 @@ const genInventory = (activePageIndex = 1, refreshMenu = true, refreshPage = tru
       ({ activePageIndex: _activePageIndex }) => genInventoryItems(itemsPerPage, _activePageIndex),
     );
   }
-  if (refreshPage) {
-    genInventoryItems(itemsPerPage, activePageIndex);
-  }
+  genInventoryItems(itemsPerPage, activePageIndex);
 };
 
 /**
@@ -602,7 +592,7 @@ const genEquipments = () => {
   背包面板装备.empty();
   _.forEach(player.装备, (typeEquipments) => {
     typeEquipments.forEach((equipment) => {
-      genItem(equipment, 背包面板装备);
+      背包面板装备.append(genItem(equipment));
     });
   });
 };
