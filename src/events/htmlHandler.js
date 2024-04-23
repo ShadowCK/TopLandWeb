@@ -145,8 +145,10 @@ const setupHTML = () => {
       }
       const 可转生职业 = $('#转生面板-可转生职业');
       可转生职业.empty();
+      const 不能转生职业 = [];
       _.forEach(classConfigs, (classConfig) => {
         if (!可以转生(player, classConfig.name)) {
+          不能转生职业.push(classConfig);
           return;
         }
         const 专精等级 = player.专精等级[classConfig.name] || 0;
@@ -155,6 +157,28 @@ const setupHTML = () => {
         button.on('click', () => {
           $.modal('确认转生', classConfig);
         });
+      });
+      // 显示不能转生职业
+      不能转生职业.forEach((classConfig) => {
+        const button = $(
+          `<div class="ui button" style="opacity:.45!important;cursor:auto;">？？？</div>`,
+        );
+        const html = /* html */ `
+        <div class="ui large header">解锁条件</div> 
+        ${_.map(classConfig.requirements, (expertise, className) =>
+          labelHTML(className, `${expertise} 专精等级`, null, false),
+        ).join('')}
+          `;
+        button.popup({
+          inline: true,
+          html,
+          hoverable: true,
+          delay: {
+            show: 20,
+            hide: 80,
+          },
+        });
+        可转生职业.append(button);
       });
     }
   };

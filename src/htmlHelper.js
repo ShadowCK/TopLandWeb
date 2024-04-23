@@ -398,14 +398,18 @@ const genItem = (item) => {
   _.forEach(item.stats, (value, key) => {
     genElementForEquipmentStat(grid, value, key, 'small');
   });
-  element.attr('data-variation', 'multiline flowing');
-  element.attr('data-html', compressHTML(tempParent.html()));
+  element.attr('data-variation', 'flowing');
   element.popup({
+    // inline可以apply local CSS rules，让它看起来更对，但是不会在关闭时自动移除
+    // TODO: 设为true, 在父元素被删除时移除popup
+    inline: false,
+    lastResort: true,
     hoverable: false,
     delay: {
       show: 0,
       hide: 0,
     },
+    html: compressHTML(tempParent.html()),
     onCreate: function onCreate() {
       this.find('.button[data-use="丢弃"]').on('click', () => {
         玩家管理器.getPlayer().dropItem(item);
@@ -415,10 +419,6 @@ const genItem = (item) => {
         });
       });
     },
-    // inline可以apply local CSS rules，让它看起来更对，但是不会在关闭时自动移除
-    // TODO: 设为true, 在父元素被删除时移除popup
-    inline: false,
-    lastResort: true,
   });
   // 右键也可以丢弃物品
   element.on('contextmenu', (e) => {
@@ -438,7 +438,7 @@ const genItem = (item) => {
       message: `你丢掉了${item.name}。`,
     });
   });
-  
+
   return element;
 };
 
