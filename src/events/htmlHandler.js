@@ -395,9 +395,11 @@ const setupHTML = () => {
   });
   // 导入存档
   $('#设置面板-导入存档').on('change', (event) => {
-    event.target.value = ''; // 清空file input的值（缓存的文件路径，C:\\fakepath\\存档名称.txt），否则连续导入同一个文件不会触发change事件
     // 获取到用户选中的文件
     const file = event.target.files[0];
+    // 清空file input的值（缓存的文件路径，C:\\fakepath\\存档名称.txt），否则连续导入同一个文件不会触发change事件
+    // 注意清空value会导致files为空，所以先获取file再清空value。
+    event.target.value = '';
     if (!file) {
       console.warn('没有存档文件被选择.');
       return;
