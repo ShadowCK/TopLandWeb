@@ -1,9 +1,7 @@
 import _ from 'lodash';
-import { genItem as genItemElement } from '../htmlHelper.js';
+import { paginationHTML, genItem as genItemElement } from '../htmlHelper.js';
 import { EventType, generalEvents } from '../events/事件管理器.js';
 import { settings } from '../settings.js';
-
-
 
 // TODO: 生成html而不是hard code在index.html
 class 背包界面 {
@@ -11,7 +9,7 @@ class 背包界面 {
 
   背包物品每页数量 = 0;
 
-  activePageIndex = 1;
+  activePageIndex = -1;
 
   // eslint-disable-next-line class-methods-use-this
   getHtml() {
@@ -40,10 +38,7 @@ class 背包界面 {
   // Display items in [start, end)
   getStartEnd() {
     const start = this.getInventoryIndex(0);
-    const end = Math.min(
-      this.getInventoryIndex(this.背包物品每页数量),
-      this.背包.items.length,
-    );
+    const end = Math.min(this.getInventoryIndex(this.背包物品每页数量), this.背包.items.length);
     return [start, end];
   }
 
@@ -86,7 +81,63 @@ class 背包界面 {
     this.locElement(index).remove();
   }
 
+  resetPaginationNav(activePageIndex) {
+    const totalPages = Math.max(Math.ceil(this.背包.items.length / this.背包物品每页数量), 1);
+    if (activePageIndex > totalPages || activePageIndex < 1) {
+      throw new Error();
+    }
+    const 选择背包分页 = $('#背包面板-选择背包分页');
+    选择背包分页.empty();
+
+    // 生成分页栏
+    const data = paginationHTML(totalPages, settings.背包页面最大数量, activePageIndex);
+    选择背包分页.html(data.html);
+    选择背包分页
+      .attr('data-start-page-index', data.startPageIndex)
+      .attr('data-end-page-index', data.endPageIndex)
+      .attr('data-total-pages', data.totalPages)
+      .attr('data-active-page-index', activePageIndex);
+    // 为每个按钮添加事件
+    选择背包分页.find('[data-index]').each((_index, element) => {
+      const pageIndex = parseInt($(element).attr('data-index'), 10);
+      $(element).on('click', () => {
+        if (pageIndex === activePageIndex) {
+          $.toast({ message: '已经在这一页了。', displayTime: 1000, class: 'error chinese' });
+          return;
+        }
+        this.resetPaginationNav(pageIndex);
+        this.setActivePageIndex(pageIndex);
+      });
+    });
+    选择背包分页.find('.prev-button').on('click', () => {
+      if (activePageIndex === 1) {
+        $.toast({ message: '已经是第一页了。', displayTime: 1000, class: 'error chinese' });
+        return;
+      }
+      this.resetPaginationNav(activePageIndex - 1);
+      this.setActivePageIndex(activePageIndex - 1);
+    });
+    选择背包分页.find('.next-button').on('click', () => {
+      if (activePageIndex === totalPages) {
+        $.toast({ message: '已经是最后一页了。', displayTime: 1000, class: 'error chinese' });
+        return;
+      }
+      this.resetPaginationNav(activePageIndex + 1);
+      this.setActivePageIndex(activePageIndex + 1);
+
+    });
+  }
+
   addItemCallback({ index: inventoryIndex, prevLength }) {
+    const activePageIndex = parseInt($('#背包面板-选择背包分页').attr('data-active-page-index'), 10);
+    const previousTotalPages = Math.ceil(prevLength / this.背包物品每页数量);
+    const totalPages = Math.ceil(this.背包.items.length / this.背包物品每页数量);
+
+    // 如果获得物品后总页数增加，刷新
+    if (totalPages > previousTotalPages) {
+      this.resetPaginationNav(activePageIndex);
+    }
+
     const [start, end] = this.getStartEnd();
     if (prevLength !== this.背包.items.length) {
       // 增加slot
@@ -106,6 +157,20 @@ class 背包界面 {
   }
 
   removeItemCallback({ index: inventoryIndex, prevLength }) {
+    const activePageIndex = parseInt($('#背包面板-选择背包分页').attr('data-active-page-index'), 10);
+    const previousTotalPages = Math.ceil(prevLength / this.背包物品每页数量);
+    const totalPages = Math.max(Math.ceil(this.背包.items.length / this.背包物品每页数量), 1);
+
+    // 如果获得物品后总页数减少，刷新
+    if (totalPages < previousTotalPages) {
+      const trueActivePageIndex = _.clamp(activePageIndex, 1, totalPages);
+      this.resetPaginationNav(trueActivePageIndex);
+      if (trueActivePageIndex !== activePageIndex) {
+        this.setActivePageIndex(trueActivePageIndex);
+        return;
+      }
+    }
+
     const [start, end] = this.getStartEnd();
     if (prevLength !== this.背包.items.length) {
       // 删除slot
@@ -125,6 +190,13 @@ class 背包界面 {
   }
 
   setActivePageIndex(index) {
+    const totalPages = Math.max(1, Math.ceil(this.背包.items.length / this.背包物品每页数量));
+    if (index < 1 || index > totalPages) {
+      throw new Error();
+    }
+    if (this.activePageIndex === index) {
+      return;
+    }
     this.activePageIndex = index;
     this.getHtml().empty();
     const [start, end] = this.getStartEnd();
@@ -134,13 +206,10 @@ class 背包界面 {
     }
   }
 
-  constructor(
-    背包,
-    背包物品每页数量 = settings.背包物品每页数量,
-    activePageIndex = 1,
-  ) {
+  constructor(背包, 背包物品每页数量 = settings.背包物品每页数量, activePageIndex = 1) {
     this.背包 = 背包;
     this.背包物品每页数量 = 背包物品每页数量;
+    this.resetPaginationNav(activePageIndex);
     this.setActivePageIndex(activePageIndex);
 
     generalEvents.on(EventType.获得物品, this.addItemCallback.bind(this));
