@@ -26,6 +26,8 @@ import { 可以提升专精等级, 可以转生, 转生 } from '../reincarnate/�
 import { addToWindow } from '../debug.js';
 import { GameSettingName } from '../enums.js';
 import { update as 更新战斗信息, 生成伤害信息, 生成治疗信息 } from '../战斗信息管理器.js';
+import 背包界面 from '../items/背包界面.js';
+
 
 let lastUpdate = performance.now();
 let htmlWorkerId = null;
@@ -340,6 +342,7 @@ const setupHTML = () => {
     e.preventDefault();
   });
   genEquipments();
+  player.背包.ui = new 背包界面(player.背包);
 
   // 设置面板
   // 初始化每个设置标题的内容

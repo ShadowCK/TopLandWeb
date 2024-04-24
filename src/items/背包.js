@@ -3,13 +3,13 @@ import { ItemType } from '../enums.js';
 import { EventType, generalEvents } from '../events/事件管理器.js';
 import 物品 from './物品.js';
 import 装备 from './装备.js';
-import 背包界面 from './背包界面.js';
 
 class 背包 {
   /** @type {import('./物品.js').default[]} */
   items = [];
-
-  ui = new 背包界面(this);
+  
+  // a shortcut only for debugging
+  ui = null;
 
   hasItem(item) {
     return this.items.includes(item);
