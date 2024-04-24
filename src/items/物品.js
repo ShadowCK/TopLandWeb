@@ -15,10 +15,13 @@ class 物品 {
 
   config = null;
 
-  constructor(itemConfig, count) {
+  constructor(itemConfig, stackOverride = null) {
     this.config = itemConfig;
     Object.assign(this, itemConfig);
-    this.stack = count;
+    if (stackOverride) {
+      this.stack = stackOverride;
+      this.config.stack = stackOverride;
+    }
   }
 }
 

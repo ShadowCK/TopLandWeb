@@ -1,4 +1,5 @@
 import { equipConfigs } from '../items/装备信息.js';
+import { itemConfigs } from '../items/物品信息.js';
 
 const enemyConfigs = {
   训练木桩: {
@@ -79,6 +80,11 @@ const enemyConfigs = {
         chance: 3,
         count: 1,
       },
+      // {
+      //   config: itemConfigs.测试物品,
+      //   chance: 100,
+      //   count: 1,
+      // },
     ],
     金钱: 0,
     经验值: 10,
