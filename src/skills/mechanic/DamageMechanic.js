@@ -10,7 +10,7 @@ class DamageMechanic extends MechanicComponent {
   static #DAMAGE_TYPE = 'damage-type';
 
   getKey() {
-    return 'Damage';
+    return 'damage';
   }
 
   /**

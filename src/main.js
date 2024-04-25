@@ -19,13 +19,13 @@ import * as debug from './debug.js';
 const update = (dt) => {
   战斗管理器.update(dt);
   const player = 玩家管理器.getPlayer();
-  const enemies = 战斗管理器.getEnemiesInCombat();
+  const entities = 战斗管理器.getEntitiesInCombat(false);
   // 先回复生命值，血量（玩家在战斗外也能回复，怪物没有脱战一说）
   player.update(dt);
-  enemies.forEach((enemy) => enemy.update(dt));
+  entities.forEach((enemy) => enemy.update(dt));
   // 再进行战斗动作
   战斗管理器.updateCombat(player, dt);
-  enemies.forEach((enemy) => 战斗管理器.updateCombat(enemy, dt));
+  entities.forEach((enemy) => 战斗管理器.updateCombat(enemy, dt));
 };
 
 window.onload = async () => {
@@ -63,9 +63,6 @@ window.onload = async () => {
 
   // 20 ticks per second
   setHTMLInterval(settings.HTML更新间隔);
-
-  // TODO: remove this debug function
-  player.addSkill(技能管理器.getSkill('普通一拳'));
 
   console.log('游戏加载完成');
   console.log('玩家信息：', player);

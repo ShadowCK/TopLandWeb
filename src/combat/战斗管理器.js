@@ -5,6 +5,8 @@ import { 战斗区域, configs } from './战斗区域.js';
 import { EventType, HTMLEvents, combatEvents } from '../events/事件管理器.js';
 import { gameConfig } from '../settings.js';
 import { calcHealing } from '../utils.js';
+import 敌人 from './敌人.js';
+import 队友 from './队友.js';
 
 /** @type {import('./战斗区域.js').战斗区域} */
 let 当前战斗区域 = null;
@@ -12,15 +14,22 @@ let 当前战斗区域 = null;
 const isPlayerInCombat = () => 当前战斗区域 !== null;
 
 /**
- * @returns {import('./敌人.js').default[]} 战斗区域中敌人的array的copy
+ * @returns {敌人[]} 战斗区域中敌人的array的copy
  */
 const getEnemiesInCombat = () => (isPlayerInCombat() ? [...当前战斗区域.敌人] : []);
 
-const getEntitiesInCombat = () => {
+/**
+ * @returns {队友[]} 战斗区域中队友的array的copy
+ */
+const getAlliesInCombat = () => (isPlayerInCombat() ? [...当前战斗区域.队友] : []);
+
+const getEntitiesInCombat = (includePlayer = true) => {
   if (!isPlayerInCombat()) {
     return [];
   }
-  return [getPlayer(), ...当前战斗区域.敌人];
+  return includePlayer
+    ? [getPlayer(), ...当前战斗区域.敌人, ...当前战斗区域.队友]
+    : [...当前战斗区域.敌人, ...当前战斗区域.队友];
 };
 
 /** @type {Object<string, 战斗区域>} */
@@ -35,14 +44,46 @@ const get战斗区域 = (name) => 所有战斗区域[name];
 
 const isInCombat = (实体) => getEntitiesInCombat().includes(实体);
 
+/**
+ * @param {实体} 实体
+ * @returns {实体}
+ */
 const getTarget = (实体) => {
+  if (!isPlayerInCombat()) {
+    return null;
+  }
   const player = getPlayer();
-  if (实体 === player) {
+  if (实体 === player || 实体 instanceof 队友) {
     return 当前战斗区域.敌人[0];
   }
-  return player;
+  if (实体 instanceof 敌人) {
+    return _.sample([player, ...当前战斗区域.队友]);
+  }
+  throw new Error('Unknown entity type', 实体);
 };
 
+/**
+ * 判断两个实体是否为盟友
+ * @param {实体} caster 施法者
+ * @param {实体} target 目标实体
+ */
+const isAlly = (caster, target) => {
+  // 直接返回者和自己是盟友
+  if (caster === target) {
+    return true;
+  }
+
+  // 获取当前玩家实体，避免多次调用
+  const player = getPlayer();
+
+  // 检查是否属于同一类或者与玩家是盟友的关系
+  return (
+    (caster instanceof 敌人 && target instanceof 敌人) ||
+    (caster instanceof 队友 && target instanceof 队友) ||
+    (caster instanceof 队友 && target === player) ||
+    (caster === player && target instanceof 队友)
+  );
+};
 /**
  * @returns {Object<string, {mult: number, totalBonus: number, singleBonus: number}>}}
  */
@@ -291,20 +332,25 @@ const registerEvents = () => {
       entity.复活();
       return;
     }
-    // 给予金钱和经验
-    /** @type {import('./敌人.js').default} */
-    const 敌人 = entity;
-    player.addExp(敌人.经验值 || 0);
-    player.金钱 += 敌人.金钱 || 0;
-    const 幸运值 = player.getStat2(StatType.幸运值);
-    const 掉落倍率 = 1 + (gameConfig.每点幸运值增加掉落率百分比 * 幸运值) / 100;
-    敌人.config.掉落.forEach((dropConfig) => {
-      if (Math.random() * 100 >= dropConfig.chance * 掉落倍率) {
-        return;
-      }
-      player.背包.addItemFromConfig(dropConfig.config, dropConfig.count);
-    });
-    当前战斗区域.removeEnemy(entity);
+    if (entity instanceof 队友) {
+      // TODO
+      return;
+    }
+    if (entity instanceof 敌人) {
+      // 给予金钱和经验
+      const enemy = entity;
+      player.addExp(enemy.经验值 || 0);
+      player.金钱 += enemy.金钱 || 0;
+      const 幸运值 = player.getStat2(StatType.幸运值);
+      const 掉落倍率 = 1 + (gameConfig.每点幸运值增加掉落率百分比 * 幸运值) / 100;
+      enemy.config.掉落.forEach((dropConfig) => {
+        if (Math.random() * 100 >= dropConfig.chance * 掉落倍率) {
+          return;
+        }
+        player.背包.addItemFromConfig(dropConfig.config, dropConfig.count);
+      });
+      当前战斗区域.removeEnemy(entity);
+    }
   });
 };
 
@@ -315,6 +361,7 @@ export {
   get战斗区域,
   update,
   getEnemiesInCombat,
+  getAlliesInCombat,
   getEntitiesInCombat,
   updateCombat,
   basicAttack,
@@ -324,6 +371,5 @@ export {
   registerEvents,
   isPlayerInCombat,
   计算伤害分布,
+  isAlly,
 };
-
-window.当前战斗区域 = () => 当前战斗区域;

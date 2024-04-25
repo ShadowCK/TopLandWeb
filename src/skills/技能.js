@@ -81,7 +81,7 @@ class 技能 {
     );
     this.key = this.name;
     // 读取其他属性，比如蓝耗，冷却时间，等级需求
-    this.settings = new Settings(skillConfig.attributes);
+    this.settings.load(skillConfig.attributes);
 
     // 读取组件
     const triggers = skillConfig.components;
@@ -219,13 +219,6 @@ class 技能 {
    */
   cast(user, level) {
     return this.trigger(user, user, level, this.castTrigger);
-  }
-
-  /**
-   * @param {string} key
-   */
-  getAttrName(key) {
-    // TODO
   }
 
   /**

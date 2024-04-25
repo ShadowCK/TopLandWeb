@@ -1,9 +1,9 @@
-const 普通一拳 = {
-  name: '普通一拳',
+const 爆裂斩 = {
+  name: '爆裂斩',
   type: '主动 物理',
   maxLevel: 5,
   message: '{caster} 使用了{skill}。',
-  description: '对目标造成500%攻击力物理伤害',
+  description: '对目标造成1000%攻击力的物理伤害',
   attributes: {
     'level-base': 0,
     'level-scale': 5,
@@ -20,9 +20,9 @@ const 普通一拳 = {
         'Value Stat': {
           type: '效果',
           data: {
-            key: '普通一拳-攻击力',
+            key: '爆裂斩-攻击力',
             stat: '攻击力',
-            formula: 'v*(5+l*0.2)',
+            formula: 'v*10',
           },
         },
         First: {
@@ -37,7 +37,7 @@ const 普通一拳 = {
                 counts: 'True',
                 type: 'damage',
                 'damage-type': '物理',
-                'damage-base': '普通一拳-攻击力',
+                'damage-base': '爆裂斩-攻击力',
                 'damage-scale': '0',
               },
             },
@@ -48,4 +48,4 @@ const 普通一拳 = {
   },
 };
 
-export default 普通一拳;
+export default 爆裂斩;

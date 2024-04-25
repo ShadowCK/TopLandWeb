@@ -44,10 +44,11 @@ const 转生 = (player, 新职业名称) => {
       player.最高专精等级 = 新专精等级;
     }
   }
+  player.技能 = {};
   // 清除玩家属性，否则旧职业有，新职业没有的属性会保留
   player.stats = {};
   退出战斗区域();
-  // TODO: 以后还要清除技能等。考虑给玩家类加一个reset方法
+  // TODO: 以后还要清除技能等。考虑给实体类加一个reset方法
   const 新职业配置 = classConfigs[新职业名称];
   新职业配置.expertiseLevel = _.get(player, `专精等级.${新职业名称}`, 0);
   player.设置职业(new 职业(新职业配置));

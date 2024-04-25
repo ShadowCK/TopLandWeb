@@ -161,6 +161,9 @@ class EffectComponent {
       return;
     }
     // Read settings
+    if (config.data == null) {
+      throw new Error('Invalid component config - data cannot be null');
+    }
     this.settings.load(config.data);
     if (this.settings.has(EffectComponent.#ICON_KEY)) {
       const key = this.settings.getString(EffectComponent.#ICON_KEY);
