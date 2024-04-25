@@ -268,7 +268,7 @@ class 背包界面 {
       return;
     }
 
-    const filter = (item) => item.name === searchText;
+    const filter = (item) => item.name.includes(searchText);
     if (prevSearchText === '') {
       // 全新搜索，创建背包视图
       this.getHtml().empty();
