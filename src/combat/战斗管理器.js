@@ -100,7 +100,7 @@ const basicAttack = (params) => {
 };
 
 /**
- * @param {{damager, damaged, damage, damageType, damageDistribution}} params
+ * @param {{damager: 实体, damaged: 实体, damage: Number, damageType: string, damageDistribution: Object<string, Number>}} params
  */
 const skillDamage = (params) => {
   const { damager, damaged, damage, damageType, damageDistribution } = params;

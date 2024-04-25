@@ -1,10 +1,12 @@
 import _ from 'lodash';
 import { v4 as uuidv4 } from 'uuid';
 import { getBuffedStat } from './buff管理器.js';
-import { DamageType, StatType } from './战斗属性.js';
+import { StatType } from './战斗属性.js';
 import * as settings from '../settings.js';
 import { EventType, combatEvents } from '../events/事件管理器.js';
 import { calcHealing, deepMapObject } from '../utils.js';
+import * as debug from '../debug.js';
+import 实体技能 from '../skills/实体技能.js';
 
 class 实体 {
   uuid = uuidv4();
@@ -13,7 +15,8 @@ class 实体 {
 
   buffs = {};
 
-  技能 = [];
+  /** @type {Object<string, 实体技能>} */
+  技能 = {};
 
   /** @type {import('../classes/职业.js').default} */
   职业 = null;
@@ -146,6 +149,10 @@ class 实体 {
       return;
     }
     this.生命值 += calcHealing(this, value);
+  }
+
+  useMana(value) {
+    this.魔法值 = Math.max(0, this.魔法值 - value);
   }
 
   restoreMana(value) {
@@ -298,6 +305,74 @@ class 实体 {
     const typeEquipments = this.装备[equipment.slot];
     // 如果实体已经装备了这个装备，就不再装备
     return typeEquipments && typeEquipments.includes(equipment);
+  }
+
+  castBySkillName(skillName) {
+    const found = this.技能[skillName];
+    if (!found) {
+      debug.error(`技能 ${skillName} 不存在`);
+      return;
+    }
+    this.cast(found);
+  }
+
+  /**
+   * @param {实体技能} skill
+   */
+  cast(skill) {
+    if (skill == null) {
+      debug.error(`技能不能为null`);
+      return false;
+    }
+    const { level } = skill;
+    if (level <= 0) {
+      return false;
+    }
+    if (skill.isOnCooldown()) {
+      return false;
+    }
+    if (this.魔法值 < skill.getManaCost()) {
+      return false;
+    }
+    if (this.isDead) {
+      return false;
+    }
+    try {
+      skill.getData().cast(this, level);
+      skill.startCooldown();
+      this.魔法值 -= skill.getManaCost();
+    } catch (error) {
+      debug.error(`技能${skill}释放失败`, error);
+      return false;
+    }
+    return true;
+  }
+
+  /**
+   * @param {技能} skill
+   */
+  addSkill(skill) {
+    const key = skill.name;
+    if (this.技能[key]) {
+      // TODO 允许拥有不同来源的重复技能（独立存在）
+      debug.error(`技能${key}已经存在`);
+      return;
+    }
+    this.技能[key] = new 实体技能(this, skill);
+    // TODO: remove this debug line
+    this.技能[key].level = 1;
+
+    this.autoLevel(skill);
+  }
+
+  /**
+   * @param {技能} skill
+   * @returns
+   */
+  autoLevel(skill) {
+    const data = this.技能[skill.name];
+    if (data == null) return;
+    // TODO
   }
 }
 
