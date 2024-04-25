@@ -36,4 +36,17 @@ const GameSettingName = {
   游戏倍速: '游戏倍速',
 };
 
-export { ItemType, EquipSlot, SemanticUIColor, GameSettingName };
+const ComponentType = {
+  触发: '触发',
+  目标: '目标',
+  条件: '条件',
+  效果: '效果',
+};
+
+const SkillAttribute = {
+  COOLDOWN: 'cooldown',
+  MANA: 'mana',
+  LEVEL: 'level',
+};
+
+export { ItemType, EquipSlot, SemanticUIColor, GameSettingName, ComponentType, SkillAttribute };

@@ -12,6 +12,9 @@ import {
 } from './events/htmlHandler.js';
 import { settings } from './settings.js';
 import * as settingsHandler from './settingsHandler.js';
+import * as 组件管理器 from './skills/组件管理器.js';
+import * as 技能管理器 from './skills/技能管理器.js';
+import * as debug from './debug.js';
 
 const update = (dt) => {
   战斗管理器.update(dt);
@@ -25,8 +28,12 @@ const update = (dt) => {
   enemies.forEach((enemy) => 战斗管理器.updateCombat(enemy, dt));
 };
 
-window.onload = () => {
+window.onload = async () => {
   // Setup game
+  await 组件管理器.registerComponents();
+  技能管理器.initialize();
+  debug.log('加载的技能', 技能管理器.getSkills());
+
   const player = new 玩家();
   addToWindow('player', player);
   玩家管理器.init(player);
@@ -56,6 +63,9 @@ window.onload = () => {
 
   // 20 ticks per second
   setHTMLInterval(settings.HTML更新间隔);
+
+  // TODO: remove this debug function
+  player.addSkill(技能管理器.getSkill('普通一拳'));
 
   console.log('游戏加载完成');
   console.log('玩家信息：', player);
