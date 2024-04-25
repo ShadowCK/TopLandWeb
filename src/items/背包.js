@@ -38,7 +38,6 @@ class 背包 {
    * @param {物品} item
    */
   addItem(item, count = 1) {
-    debugger;
     const prevLength = this.items.length;
     if (!item.stackable) {
       _.times(count, () => {
@@ -47,7 +46,7 @@ class 背包 {
         generalEvents.emit(EventType.获得物品, {
           container: this,
           index,
-          newItem,
+          item: newItem,
           stack: 1,
           prevLength,
         });
@@ -109,7 +108,6 @@ class 背包 {
   removeItem(item) {
     const index = this.items.indexOf(item);
     if (index === -1) {
-      debugger;
       console.error('Trying to remove an item that is not in the bag');
       return;
     }
