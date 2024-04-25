@@ -2,14 +2,51 @@ import _ from 'lodash';
 import { paginationHTML, genItem as genItemElement } from '../htmlHelper.js';
 import { EventType, generalEvents } from '../events/事件管理器.js';
 import { settings } from '../settings.js';
+import 背包视图 from './背包视图.js';
 
 // TODO: 生成html而不是hard code在index.html
 class 背包界面 {
   背包 = null;
 
+  主背包备份 = null;
+
   背包物品每页数量 = 0;
 
   activePageIndex = -1;
+
+  addItemHandle = this.addItemCallback.bind(this);
+
+  removeItemHandle= this.removeItemCallback.bind(this)
+
+  constructor(背包, 背包物品每页数量 = settings.背包物品每页数量, activePageIndex = 1) {
+    this.背包 = 背包;
+    this.主背包备份 = 背包;
+    this.背包物品每页数量 = 背包物品每页数量;
+    this.resetPaginationNav(activePageIndex);
+    this.setActivePageIndex(activePageIndex);
+
+    // 监听搜索按钮的点击事件
+    this.getSearchButton().on('click', () => {
+      this.performSearch();
+    });
+
+    // 监听输入框的键盘按键事件
+    this.getSearchInputElement().on('keyup', (event) => {
+      // 检查是否按下了回车键 (keyCode 为 13)
+      if (event.keyCode === 13) {
+        this.performSearch();
+      }
+    });
+
+    generalEvents.on(EventType.获得物品, this.addItemHandle);
+    generalEvents.on(EventType.失去物品, this.removeItemHandle);
+  }
+  
+  // 不注销handler的话object永远被EventEmitter引用着，object就gc不掉
+  unregisterHandlers() {
+    generalEvents.off(EventType.获得物品, this.addItemHandle);
+    generalEvents.off(EventType.失去物品, this.removeItemHandle);
+  }
 
   // eslint-disable-next-line class-methods-use-this
   getHtml() {
@@ -124,12 +161,18 @@ class 背包界面 {
       }
       this.resetPaginationNav(activePageIndex + 1);
       this.setActivePageIndex(activePageIndex + 1);
-
     });
   }
 
-  addItemCallback({ index: inventoryIndex, prevLength }) {
-    const activePageIndex = parseInt($('#背包面板-选择背包分页').attr('data-active-page-index'), 10);
+  addItemCallback({ container, index: inventoryIndex, prevLength }) {
+    if(this.背包 !== container) {
+      return;
+    }
+
+    const activePageIndex = parseInt(
+      $('#背包面板-选择背包分页').attr('data-active-page-index'),
+      10,
+    );
     const previousTotalPages = Math.ceil(prevLength / this.背包物品每页数量);
     const totalPages = Math.ceil(this.背包.items.length / this.背包物品每页数量);
 
@@ -156,8 +199,15 @@ class 背包界面 {
     }
   }
 
-  removeItemCallback({ index: inventoryIndex, prevLength }) {
-    const activePageIndex = parseInt($('#背包面板-选择背包分页').attr('data-active-page-index'), 10);
+  removeItemCallback({ container, index: inventoryIndex, prevLength }) {
+    if(this.背包 !== container) {
+      return;
+    }
+
+    const activePageIndex = parseInt(
+      $('#背包面板-选择背包分页').attr('data-active-page-index'),
+      10,
+    );
     const previousTotalPages = Math.ceil(prevLength / this.背包物品每页数量);
     const totalPages = Math.max(Math.ceil(this.背包.items.length / this.背包物品每页数量), 1);
 
@@ -194,9 +244,6 @@ class 背包界面 {
     if (index < 1 || index > totalPages) {
       throw new Error();
     }
-    if (this.activePageIndex === index) {
-      return;
-    }
     this.activePageIndex = index;
     this.getHtml().empty();
     const [start, end] = this.getStartEnd();
@@ -206,14 +253,42 @@ class 背包界面 {
     }
   }
 
-  constructor(背包, 背包物品每页数量 = settings.背包物品每页数量, activePageIndex = 1) {
-    this.背包 = 背包;
-    this.背包物品每页数量 = 背包物品每页数量;
-    this.resetPaginationNav(activePageIndex);
-    this.setActivePageIndex(activePageIndex);
+  getSearchInputElement() {
+    return $(`#背包面板-背包容器`).find('.搜索输入');
+  }
 
-    generalEvents.on(EventType.获得物品, this.addItemCallback.bind(this));
-    generalEvents.on(EventType.失去物品, this.removeItemCallback.bind(this));
+  getSearchButton() {
+    return $(`#背包面板-背包容器`).find('.搜索按钮');
+  }
+
+  performSearch() {
+    const searchText = this.getSearchInputElement().val();
+    const prevSearchText = this.getSearchInputElement().data('prev-input');
+    if (prevSearchText === searchText) {
+      return;
+    }
+
+    const filter = (item) => item.name === searchText;
+    if (prevSearchText === '') {
+      // 全新搜索，创建背包视图
+      this.getHtml().empty();
+      this.背包 =new 背包视图(this.主背包备份, filter);
+    } else if(searchText !== '') {
+      // 搜索变化，设置filter
+      this.背包.setFilter(filter);
+    } else {
+      // 搜索变为空，回到主背包
+      if(this.背包 === this.主背包备份) {
+        throw new Error("之前搜索过，怎么能是一样的？？");
+      }
+      this.getHtml().empty();
+      this.背包.unregisterHandlers();
+      this.背包 = this.主背包备份;
+    }
+    this.resetPaginationNav(1);
+    this.setActivePageIndex(1);
+
+    this.getSearchInputElement().data('prev-input', searchText);
   }
 }
 

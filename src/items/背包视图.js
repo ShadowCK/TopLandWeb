@@ -8,21 +8,41 @@ class 背包视图 extends 背包类 {
 
   filter = null;
 
+  addItemHandle = this.addItemCallback.bind(this);
+
+  removeItemHandle= this.removeItemCallback.bind(this)
+
   constructor(背包, filter) {
     super();
     this.背包 = 背包;
     this.setFilter(filter);
 
-    generalEvents.on(EventType.获得物品, this.addItemCallback.bind(this));
-    generalEvents.on(EventType.失去物品, this.removeItemCallback.bind(this));
+    generalEvents.on(EventType.获得物品, this.addItemHandle);
+    generalEvents.on(EventType.失去物品, this.removeItemHandle);
   }
 
-  setFilter(filter) {
+  // 不注销handler的话object永远被EventEmitter引用着，object就gc不掉
+  unregisterHandlers() {
+    generalEvents.off(EventType.获得物品, this.addItemHandle);
+    generalEvents.off(EventType.失去物品, this.removeItemHandle);
+  }
+
+  setFilter(filter, emitEvent = false) {
     this.filter = filter;
     this.removeAll();
     this.背包.items.forEach((item) => {
       if (filter(item)) {
-        this.addItemAt(item, this.items.length);
+        this.items.push(item);
+        // this.addItemAt(item, this.items.length);
+        if (emitEvent) {
+          generalEvents.emit(EventType.获得物品, {
+            container: this,
+            index: this.items.length - 1,
+            item,
+            stack: item.stack,
+            prevLength: this.items.length - 1,
+          });
+        }
       }
     });
   }

@@ -17,7 +17,7 @@ class 背包 {
 
   loadSavedItems(items, doClear = true) {
     if (doClear) {
-      this.removeAll();
+      this.removeAll(true);
     }
     items.forEach((itemConfig) => {
       this.addItemFromConfig(itemConfig);
@@ -38,14 +38,16 @@ class 背包 {
    * @param {物品} item
    */
   addItem(item, count = 1) {
+    debugger;
     const prevLength = this.items.length;
     if (!item.stackable) {
       _.times(count, () => {
-        const index = this.items.push(new item.constructor(item.config)) - 1;
+        const newItem = new item.constructor(item.config);
+        const index = this.items.push(newItem) - 1;
         generalEvents.emit(EventType.获得物品, {
           container: this,
           index,
-          item,
+          newItem,
           stack: 1,
           prevLength,
         });
@@ -107,6 +109,7 @@ class 背包 {
   removeItem(item) {
     const index = this.items.indexOf(item);
     if (index === -1) {
+      debugger;
       console.error('Trying to remove an item that is not in the bag');
       return;
     }
@@ -122,9 +125,12 @@ class 背包 {
     this.removeItemAt(index);
   }
 
-  removeAll() {
+  removeAll(emitEvent) {
     for (let i = this.items.length - 1; i >= 0; i--) {
-      this.removeItemAt(i);
+      const item = this.items.pop();
+      if (emitEvent) {
+        generalEvents.emit(EventType.失去物品, { container: this, index:i, item, prevLength: i });
+      }
     }
   }
 }
