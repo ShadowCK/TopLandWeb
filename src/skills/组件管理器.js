@@ -1,6 +1,4 @@
-import { ComponentType } from '../enums.js';
-import Trigger from './trigger/Trigger.js';
-
+/* eslint-disable import/no-cycle */
 /** @type {Object<string, Object<string, Function>} */
 const components = {};
 
@@ -66,17 +64,20 @@ const register = (component) => {
 };
 
 const registerComponents = async () => {
-  // eslint-disable-next-line import/no-cycle
+  const { default: FirstTarget } = await import('./target/FirstTarget.js');
   const { default: DamageMechanic } = await import('./mechanic/DamageMechanic.js');
+  const { default: ValueStatMechanic } = await import('./mechanic/ValueStatMechanic.js');
 
   // Triggers
 
-  // CONDITIONS
-
   // TARGETS
+  register(new FirstTarget());
+
+  // CONDITIONS
 
   // Mechanics
   register(new DamageMechanic());
+  register(new ValueStatMechanic());
 };
 
 export { getTrigger, registerComponents, getComponent, getListener };

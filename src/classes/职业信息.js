@@ -3,6 +3,7 @@
 
 const classConfigs = {
   初心者: {
+    ultimate: '普通一拳',
     requirements: {},
     name: '初心者',
     description: '初入神域的无名小卒，喜欢用小拳拳暴打敌人。也许会成为一名伟大的英雄。',
@@ -260,6 +261,7 @@ const classConfigs = {
     },
   },
   狂战士: {
+    ultimate: '爆裂斩',
     requirements: { 剑士: 10 },
     name: '狂战士',
     description: '起源于新大陆原住民阵营的战斗流派，舍弃了防御，专注于疯狂的攻击。',

@@ -41,8 +41,7 @@ class 职业 {
 
   constructor(classConfig) {
     // 使用deep copy防止class config被修改
-    const copy = JSON.parse(JSON.stringify(classConfig));
-    Object.assign(this, copy);
+    Object.assign(this, _.cloneDeep(classConfig));
   }
 
   getMaxLevel = () => getMaxLevel(this.maxLevel, this.expertiseLevel);

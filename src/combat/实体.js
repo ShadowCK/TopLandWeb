@@ -7,6 +7,7 @@ import { EventType, combatEvents } from '../events/事件管理器.js';
 import { calcHealing, deepMapObject } from '../utils.js';
 import * as debug from '../debug.js';
 import 实体技能 from '../skills/实体技能.js';
+import { getSkill } from '../skills/技能管理器.js';
 
 class 实体 {
   uuid = uuidv4();
@@ -283,6 +284,11 @@ class 实体 {
     职业.setLevel(职业.level);
     this.生命值 = this.getStat2(StatType.最大生命值, true);
     this.魔法值 = this.getStat2(StatType.最大魔法值, true);
+
+    // 添加大招
+    if (职业.ultimate != null) {
+      this.addSkill(getSkill(职业.ultimate));
+    }
   }
 
   // * 只是为了进度条显示，跟实际攻击间隔同比例增长。数值上没有实际意义
@@ -338,9 +344,11 @@ class 实体 {
       return false;
     }
     try {
-      skill.getData().cast(this, level);
-      skill.startCooldown();
-      this.魔法值 -= skill.getManaCost();
+      const result = skill.getData().cast(this, level);
+      if (result) {
+        skill.startCooldown();
+        this.魔法值 -= skill.getManaCost();
+      }
     } catch (error) {
       debug.error(`技能${skill}释放失败`, error);
       return false;

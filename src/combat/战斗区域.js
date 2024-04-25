@@ -135,7 +135,11 @@ class 战斗区域 {
 
   敌人 = [];
 
+  队友 = [];
+
   最大敌人数 = settings.config.最大敌人数;
+
+  最大队友数 = settings.config.最大队友数;
 
   刷怪间隔 = settings.config.刷怪间隔;
 
