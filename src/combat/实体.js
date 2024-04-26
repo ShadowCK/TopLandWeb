@@ -313,6 +313,14 @@ class 实体 {
     return typeEquipments && typeEquipments.includes(equipment);
   }
 
+  hasSkill(skillName) {
+    return this.技能[skillName] != null;
+  }
+
+  getSkill(skillName) {
+    return this.技能[skillName];
+  }
+
   castBySkillName(skillName) {
     const found = this.技能[skillName];
     if (!found) {

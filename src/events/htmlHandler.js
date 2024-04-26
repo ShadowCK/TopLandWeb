@@ -27,7 +27,7 @@ import { addToWindow } from '../debug.js';
 import { GameSettingName } from '../enums.js';
 import { update as 更新战斗信息, 生成伤害信息, 生成治疗信息 } from '../战斗信息管理器.js';
 import 背包界面 from '../items/背包界面.js';
-
+import 技能栏界面 from '../skills/技能栏界面.js';
 
 let lastUpdate = performance.now();
 let htmlWorkerId = null;
@@ -104,6 +104,9 @@ const updateHTML = (params, dt) => {
   );
 
   更新战斗信息(dt);
+
+  // 更新技能栏
+  $('#技能栏').get(0).ui?.update();
 };
 
 // 可以根据玩家的需求，重置UI更新频率
@@ -405,7 +408,9 @@ const setupHTML = () => {
     const url = URL.createObjectURL(blob);
     // 创建一个下载链接，指定下载文件名，模拟点击以触发下载
     const date = new Date();
-    const 存档名称 = `巅峰神域-v${VERSION}-${date.getFullYear()}-${date.getMonth()}-${date.getDate()}-${date.getHours()}-${date.getMinutes()}-${date.getSeconds()}.txt`;
+    const 存档名称 = `巅峰神域-v${VERSION}-${date.getFullYear()}-${
+      date.getMonth() + 1
+    }-${date.getDate()}-${date.getHours()}-${date.getMinutes()}-${date.getSeconds()}.txt`;
     $('<a></a>').attr('href', url).attr('download', 存档名称).get(0).click();
     // 清理创建的URL，以释放资源
     URL.revokeObjectURL(url);
@@ -473,6 +478,9 @@ const setupHTML = () => {
       hide: 80,
     },
   });
+
+  // 生成技能栏
+  new 技能栏界面($('#技能栏')).refresh();
 };
 
 addToWindow('setHTMLInterval', setHTMLInterval);
@@ -556,7 +564,6 @@ const registerEvents = () => {
   combatEvents.on(EventType.退出战斗区域, (_combatArea) => {
     $('#战斗面板-区域信息').hide();
   });
-
 
   generalEvents.on(EventType.穿上装备, ({ entity, _equipment }) => {
     if (entity !== 玩家管理器.getPlayer()) {

@@ -36,7 +36,7 @@ class 技能 {
     delete this.casterData[caster.uuid];
   }
 
-  // TODO: use this as a unique identifier of a duplicate skill
+  // TODO: use this as a unique identifier of a duplicate skill in 实体技能，不要在这里使用
   key;
 
   name;

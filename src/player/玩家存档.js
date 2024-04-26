@@ -27,8 +27,8 @@ class 玩家存档 {
       // 实体属性
       '魔典',
       '装备',
-      '技能',
       '职业',
+      // '技能', // 技能不需要存档
     );
     needed.职业 = needed.职业.toSaveData();
     needed.背包 = needed.背包.items;
