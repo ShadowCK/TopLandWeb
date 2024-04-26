@@ -18,7 +18,6 @@ class 玩家存档 {
   打包存档数据() {
     const needed = _.pick(
       this.player,
-      '职业',
       // 玩家属性
       '背包',
       '金钱',
@@ -31,7 +30,19 @@ class 玩家存档 {
       // '技能', // 技能不需要存档
     );
     needed.职业 = needed.职业.toSaveData();
-    needed.背包 = needed.背包.items;
+    // 只保存物品的config，而不保存物品实例的额外信息。
+    // 这有效防止了loadSavedItems时用物品作为config创建新物品，会叠加一层config（item.config = itemConfig）的问题。
+    needed.背包 = needed.背包.items.map((item) => {
+      delete item.config.config; // 删掉以前老存档里嵌套的config
+      return item.config;
+    });
+    // 同理
+    needed.装备 = _.mapValues(needed.装备, (equipments) =>
+      equipments.map((e) => {
+        delete e.config.config; // 删掉以前老存档里嵌套的config
+        return e.config;
+      }),
+    );
     return JSON.stringify(needed);
   }
 
