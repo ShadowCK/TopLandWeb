@@ -165,6 +165,7 @@ class 背包界面 {
   }
 
   addItemCallback({ container, index: inventoryIndex, prevLength }) {
+    // 如果背包是背包视图，让背包视图处理；只处理主背包/玩家背包，即搜索栏为空的情况。
     if (this.背包 !== container) {
       return;
     }
