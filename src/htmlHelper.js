@@ -110,36 +110,52 @@ const genLabel = (title, content, className = '') => {
   return label;
 };
 
-const progressBarHTML = ({ id, className = '', color = '', label = '', value = 0, maxValue = 1 }) =>
+const progressBarHTML = ({
+  id,
+  className = '',
+  color = '',
+  label = '',
+  value = 0,
+  maxValue = 1,
+  centered = false,
+}) =>
   `
-  <div ${id ? `id="${id}"` : ''} class="ui ${color} progress active ${className}" data-percent="${
+  <div ${id ? `id="${id}" ` : ''}class="ui ${color} progress active ${className}" data-percent="${
     (value / maxValue) * 100
   }">
     <div class="bar">
-      <div class="progress"></div>
+      <div class="${centered ? 'centered ' : ''}progress"></div>
     </div>
     <div class="label">${label}</div>
   </div>
   `;
 
 const genProgressBar = ({
+  parent,
+  format,
   id,
   className = '',
-  parent,
   color = '',
   label = '', // 默认标签。可忽略。只在被更新前（或更新时没有format）有用。
   value = 0,
   maxValue = 1,
-  format,
+  centered = false,
 }) => {
-  const bar = $(progressBarHTML({ id, className, color, label, value, maxValue }));
+  const bar = $(progressBarHTML({ id, className, color, label, value, maxValue, centered }));
   // 初始化进度条
   bar.progress(format ? { text: { active: format } } : {});
   parent.append(bar);
   return bar;
 };
 
-const updateProgressBar = (bar, value, maxValue, format = '{value} / {total}', precision = 0) => {
+const updateProgressBar = (
+  bar,
+  value,
+  maxValue,
+  format = '{value} / {total}',
+  precision = 0,
+  useRatio = false,
+) => {
   const element = _.isString(bar) ? $(bar) : bar;
   let percent = (value / maxValue) * 100;
   // 边缘情况： 0/0 或 Infinity/Infinity显示100%
@@ -155,14 +171,25 @@ const updateProgressBar = (bar, value, maxValue, format = '{value} / {total}', p
   }
   // fomantic-ui自带的精度只影响百分比显示，显示value精度是固定的，total却又保留原数值（不round），很混乱。
   // 这里直接将value和total都round，然后替换format中的{value}和{total}。
-  const active = format
+  const parsedFormat = format
     .replace(/{value}/g, value === Infinity ? '∞' : _.round(value, precision))
     .replace(/{total}/g, maxValue === Infinity ? '∞' : _.round(maxValue, precision));
+  if (useRatio) {
+    element.progress({
+      total: maxValue,
+      percent,
+      label: 'ratio',
+      text: {
+        ratio: parsedFormat,
+      },
+    });
+    return;
+  }
   element.progress({
     total: maxValue,
     percent,
     text: {
-      active,
+      active: parsedFormat,
     },
   });
 };
@@ -524,6 +551,7 @@ export {
   genCombatLayout,
   updateCombatLayout,
   genItem,
+  genItemHTML,
   genEquipments,
   loadAndRenderMarkdown,
   randomColor,

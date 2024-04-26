@@ -40,6 +40,14 @@ class 实体技能 {
     return this.cooldown > performance.now();
   }
 
+  cooldownLeft() {
+    // 技能还没有被释放过，cooldown为undefined
+    if (this.cooldown === undefined) {
+      return 0;
+    }
+    return Math.max(0, this.cooldown - performance.now()) / 1000;
+  }
+
   isMaxed() {
     return this.level >= this.skill.maxLevel();
   }
