@@ -3,6 +3,8 @@ import _ from 'lodash';
 import 职业 from '../classes/职业.js';
 import 装备 from '../items/装备.js';
 import { genEquipments } from '../htmlHelper.js';
+import { equipConfigs } from '../items/装备信息.js';
+import { itemConfigs } from '../items/物品信息.js';
 
 class 玩家存档 {
   /** @type {import('./玩家.js').default} */
@@ -30,18 +32,10 @@ class 玩家存档 {
       // '技能', // 技能不需要存档
     );
     needed.职业 = needed.职业.toSaveData();
-    // 只保存物品的config，而不保存物品实例的额外信息。
-    // 这有效防止了loadSavedItems时用物品作为config创建新物品，会叠加一层config（item.config = itemConfig）的问题。
-    needed.背包 = needed.背包.items.map((item) => {
-      delete item.config.config; // 删掉以前老存档里嵌套的config
-      return item.config;
-    });
-    // 同理
+    // 只保存名称、种类等必要内容（如品阶，等级，稀有度），不保存具体内容
+    needed.背包 = needed.背包.items.map((item) => _.pick(item, 'name', 'type'));
     needed.装备 = _.mapValues(needed.装备, (equipments) =>
-      equipments.map((e) => {
-        delete e.config.config; // 删掉以前老存档里嵌套的config
-        return e.config;
-      }),
+      equipments.map((e) => _.pick(e, 'name', 'type')),
     );
     return JSON.stringify(needed);
   }
@@ -84,15 +78,24 @@ class 玩家存档 {
       // 用读取的装备信息为玩家设置装备
       if (this.data.装备) {
         console.log('存档-装备', this.data.装备);
+        // 由于只保存了必要信息，需要获取对应装备名的装备配置，而不是像以前一样用将该装备数据作为config
+        // 需要注意的是，如果配置文件里没有该装备（比如历史遗留导致的绝版装备，不再在配置列表里），玩家会丢失该装备。
         _.forEach(this.data.装备, (typeEquipments, key) => {
-          player.装备[key] = typeEquipments.map((e) => new 装备(e));
+          player.装备[key] = _.map(typeEquipments, (data) => equipConfigs[data.name])
+            .filter((config) => config != null)
+            .map((config) => new 装备(config));
         });
         genEquipments();
       }
       // 将存档里背包的内容添加到玩家背包
       if (this.data.背包) {
         console.log('存档-背包', this.data.背包);
-        player.背包.loadSavedItems(this.data.背包);
+        // 同理，只保存了必要信息，需要获取对应物品名的物品配置，而不是像以前一样用将该物品数据作为config
+        const mappedItems = _.map(this.data.背包, (data) => {
+          const configs = data.type === '装备' ? equipConfigs : itemConfigs;
+          return configs[data.name];
+        }).filter((config) => config != null);
+        player.背包.loadSavedItems(mappedItems);
       }
       // 用读取的职业信息为玩家设置职业
       if (this.data.职业) {
