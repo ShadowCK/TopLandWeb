@@ -565,22 +565,28 @@ const registerEvents = () => {
     $('#战斗面板-区域信息').hide();
   });
 
-  generalEvents.on(EventType.穿上装备, ({ entity, _equipment }) => {
+  generalEvents.on(EventType.穿上装备, ({ entity, equipment, updateUI = true }) => {
     if (entity !== 玩家管理器.getPlayer()) {
       return;
     }
+    entity.背包.removeItem(equipment);
     // TODO: 更新指定装备栏。等装备栏布局完善后再实现，目前显示所有装备，并不理想。
     // 无脑刷新！太无脑了！
-    genEquipments();
+    if (updateUI) {
+      genEquipments();
+    }
   });
 
-  generalEvents.on(EventType.脱下装备, ({ entity, _equipment }) => {
+  generalEvents.on(EventType.脱下装备, ({ entity, equipment, updateUI = true }) => {
     if (entity !== 玩家管理器.getPlayer()) {
       return;
     }
+    entity.背包.addItem(equipment);
     // TODO: 更新指定装备栏。等装备栏布局完善后再实现，目前显示所有装备，并不理想。
     // 无脑刷新！太无脑了！
-    genEquipments();
+    if (updateUI) {
+      genEquipments();
+    }
   });
 
   // TODO：以后改成战斗信息区分治疗和伤害。
