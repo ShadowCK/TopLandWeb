@@ -16,7 +16,7 @@ class 背包界面 {
 
   addItemHandle = this.addItemCallback.bind(this);
 
-  removeItemHandle= this.removeItemCallback.bind(this)
+  removeItemHandle = this.removeItemCallback.bind(this);
 
   constructor(背包, 背包物品每页数量 = settings.背包物品每页数量, activePageIndex = 1) {
     this.背包 = 背包;
@@ -32,8 +32,8 @@ class 背包界面 {
 
     // 监听输入框的键盘按键事件
     this.getSearchInputElement().on('keyup', (event) => {
-      // 检查是否按下了回车键 (keyCode 为 13)
-      if (event.keyCode === 13) {
+      // 检查是否按下了回车键
+      if (event.key === 'Enter') {
         this.performSearch();
       }
     });
@@ -41,7 +41,7 @@ class 背包界面 {
     generalEvents.on(EventType.获得物品, this.addItemHandle);
     generalEvents.on(EventType.失去物品, this.removeItemHandle);
   }
-  
+
   // 不注销handler的话object永远被EventEmitter引用着，object就gc不掉
   unregisterHandlers() {
     generalEvents.off(EventType.获得物品, this.addItemHandle);
@@ -165,7 +165,7 @@ class 背包界面 {
   }
 
   addItemCallback({ container, index: inventoryIndex, prevLength }) {
-    if(this.背包 !== container) {
+    if (this.背包 !== container) {
       return;
     }
 
@@ -200,7 +200,7 @@ class 背包界面 {
   }
 
   removeItemCallback({ container, index: inventoryIndex, prevLength }) {
-    if(this.背包 !== container) {
+    if (this.背包 !== container) {
       return;
     }
 
@@ -272,14 +272,14 @@ class 背包界面 {
     if (prevSearchText === '') {
       // 全新搜索，创建背包视图
       this.getHtml().empty();
-      this.背包 =new 背包视图(this.主背包备份, filter);
-    } else if(searchText !== '') {
+      this.背包 = new 背包视图(this.主背包备份, filter);
+    } else if (searchText !== '') {
       // 搜索变化，设置filter
       this.背包.setFilter(filter);
     } else {
       // 搜索变为空，回到主背包
-      if(this.背包 === this.主背包备份) {
-        throw new Error("之前搜索过，怎么能是一样的？？");
+      if (this.背包 === this.主背包备份) {
+        throw new Error('之前搜索过，怎么能是一样的？？');
       }
       this.getHtml().empty();
       this.背包.unregisterHandlers();
