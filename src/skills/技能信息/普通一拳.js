@@ -20,6 +20,7 @@ const 普通一拳 = {
         'Value Stat': {
           type: '效果',
           data: {
+            counts: 'False',
             key: '普通一拳-攻击力',
             stat: '攻击力',
             formula: 'v*(5+l*0.2)',

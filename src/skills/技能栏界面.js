@@ -44,14 +44,30 @@ class 技能栏界面 {
       if (count >= settings.技能栏每行技能数量) {
         return true; // 返回 true 停止迭代
       }
-      if (!skill.getData().canCast()) {
+      const data = skill.getData();
+      if (!data.canCast()) {
         return false;
       }
       count += 1;
-      const container = $(this.genSkillIconHTML(skill.getData().name));
+      const container = $(this.genSkillIconHTML(data.name));
       const skillIcon = container.find('.ui.card');
       skillIcon.on('click', () => {
         player.cast(skill);
+      });
+      skillIcon.popup({
+        inline: true,
+        lastResort: true,
+        hoverable: true,
+        // html是暂时的格式，以后会加入lore并实现"filter"方法，自动将里面的attr:mana, attr:...转换为对应数值。
+        html: /* html */ `
+        <div>${data.name}</div>
+        <div>魔法值: ${data.getManaCost(skill.level)}</div>
+        <div>${data.description}</div>
+        `,
+        delay: {
+          show: 20,
+          hide: 100,
+        },
       });
       skillIcon.css('cursor', 'pointer');
       const 进度条容器 = $('<div class="技能图标-进度条"></div>').css({
