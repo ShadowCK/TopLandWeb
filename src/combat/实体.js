@@ -274,7 +274,7 @@ class 实体 {
 
   /**
    * @param {import('../classes/职业.js').default} 职业
-   * @param {Number} level
+   * @param {number} level
    */
   设置职业(职业) {
     职业.parent = this;

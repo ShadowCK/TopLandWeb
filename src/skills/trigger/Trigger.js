@@ -14,7 +14,7 @@ class Trigger {
 
   /**
    * @param {Object<string, any>} eventData
-   * @param {Number} level
+   * @param {number} level
    * @param {Settings} settings
    */
   shouldTrigger(eventData, level, settings) {

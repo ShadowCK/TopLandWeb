@@ -166,8 +166,8 @@ class 技能 {
 
   /**
    * @param {实体} user
-   * @param {Number} prevLevel
-   * @param {Number} newLevel
+   * @param {number} prevLevel
+   * @param {number} newLevel
    */
   update(user, prevLevel, newLevel) {
     this.active[user.uuid] = newLevel;
@@ -178,7 +178,7 @@ class 技能 {
 
   /**
    * @param {实体} user
-   * @param {Number} level
+   * @param {number} level
    */
   initialize(user, level) {
     this.trigger(user, user, level, this.initializeTrigger);
@@ -190,7 +190,7 @@ class 技能 {
 
   /**
    * @param {实体} user
-   * @param {Number} level
+   * @param {number} level
    */
   stopEffects(user, level) {
     delete this.active[user.uuid];
@@ -215,7 +215,7 @@ class 技能 {
 
   /**
    * @param {实体} user
-   * @param {Number} level
+   * @param {number} level
    */
   cast(user, level) {
     return this.trigger(user, user, level, this.castTrigger);
@@ -224,7 +224,7 @@ class 技能 {
   /**
    * @param {实体} caster
    * @param {string} key
-   * @param {Number} level
+   * @param {number} level
    */
   getAttr(caster, key, level) {
     // 返回拥有icon-key组件的属性
@@ -245,7 +245,7 @@ class 技能 {
   /**
    * @param {实体} user
    * @param {实体} target
-   * @param {Number} level
+   * @param {number} level
    * @param {TriggerComponent} component
    */
   trigger(user, target, level, component) {

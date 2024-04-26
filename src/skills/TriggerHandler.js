@@ -43,7 +43,7 @@ class TriggerHandler {
 
   /**
    * @param {实体} entity
-   * @param {Number} level
+   * @param {number} level
    */
   init(entity, level) {
     this.active[entity.uuid] = level;
