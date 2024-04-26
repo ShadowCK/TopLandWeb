@@ -31,8 +31,10 @@ class 玩家存档 {
       '职业',
       // '技能', // 技能不需要存档
     );
+    // TODO: 和下面一样，toSaveData只保存名称等必要信息。
     needed.职业 = needed.职业.toSaveData();
     // 只保存名称、种类等必要内容（如品阶，等级，稀有度），不保存具体内容
+    // TODO: 和上面一样，给物品添加toSaveData，只保存必要信息。
     needed.背包 = needed.背包.items.map((item) => _.pick(item, 'name', 'type'));
     needed.装备 = _.mapValues(needed.装备, (equipments) =>
       equipments.map((e) => _.pick(e, 'name', 'type')),
@@ -80,6 +82,7 @@ class 玩家存档 {
         console.log('存档-装备', this.data.装备);
         // 由于只保存了必要信息，需要获取对应装备名的装备配置，而不是像以前一样用将该装备数据作为config
         // 需要注意的是，如果配置文件里没有该装备（比如历史遗留导致的绝版装备，不再在配置列表里），玩家会丢失该装备。
+        // TODO：应该给玩家一一装上，而不是假设玩家可以穿存档里的装备
         _.forEach(this.data.装备, (typeEquipments, key) => {
           player.装备[key] = _.map(typeEquipments, (data) => equipConfigs[data.name])
             .filter((config) => config != null)
@@ -95,6 +98,7 @@ class 玩家存档 {
           const configs = data.type === '装备' ? equipConfigs : itemConfigs;
           return configs[data.name];
         }).filter((config) => config != null);
+        // TODO: 将上面的逻辑放到loadSavedItems
         player.背包.loadSavedItems(mappedItems);
       }
       // 用读取的职业信息为玩家设置职业

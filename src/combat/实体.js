@@ -388,7 +388,14 @@ class 实体 {
   autoLevel(skill) {
     const data = this.技能[skill.name];
     if (data == null) return;
-    // TODO
+    // TODO：没写完
+  }
+
+  reset() {
+    this.stats = {};
+    this.buffs = {};
+    this.技能 = {};
+    // TODO: 添加更多...
   }
 }
 

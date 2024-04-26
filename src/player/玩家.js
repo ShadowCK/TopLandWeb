@@ -2,6 +2,7 @@ import 实体 from '../combat/实体.js';
 import 背包 from '../items/背包.js';
 import 装备 from '../items/装备.js';
 import { get最高专精等级经验倍率 } from '../settings.js';
+import { 退出战斗区域 } from '../combat/战斗管理器.js';
 
 class 玩家 extends 实体 {
   /** @type {import('../player/玩家存档.js').default} */
@@ -28,6 +29,12 @@ class 玩家 extends 实体 {
       item.脱下(this);
     }
     this.背包.removeItem(item);
+  }
+
+  reset() {
+    退出战斗区域();
+    super.reset();
+    // TODO: 添加更多...
   }
 }
 

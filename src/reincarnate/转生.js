@@ -1,7 +1,6 @@
 import _ from 'lodash';
 import 职业 from '../classes/职业.js';
 import classConfigs from '../classes/职业信息.js';
-import { 退出战斗区域 } from '../combat/战斗管理器.js';
 
 /**
  * @param {import('../player/玩家').default} player
@@ -44,11 +43,9 @@ const 转生 = (player, 新职业名称) => {
       player.最高专精等级 = 新专精等级;
     }
   }
-  player.技能 = {};
   // 清除玩家属性，否则旧职业有，新职业没有的属性会保留
-  player.stats = {};
-  退出战斗区域();
-  // TODO: 以后还要清除技能等。考虑给实体类加一个reset方法
+  // 同时清除其他不应该保留的东西。
+  player.reset();
   const 新职业配置 = classConfigs[新职业名称];
   新职业配置.expertiseLevel = _.get(player, `专精等级.${新职业名称}`, 0);
   player.设置职业(new 职业(新职业配置));

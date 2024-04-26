@@ -9,8 +9,8 @@ const 爆裂斩 = {
     'level-scale': 5,
     'cooldown-base': 5,
     'cooldown-scale': 0,
-    'mana-base': 40,
-    'mana-scale': 8,
+    'mana-base': 100,
+    'mana-scale': 10,
   },
   components: {
     Cast: {
@@ -20,6 +20,7 @@ const 爆裂斩 = {
         'Value Stat': {
           type: '效果',
           data: {
+            counts: 'False',
             key: '爆裂斩-攻击力',
             stat: '攻击力',
             formula: 'v*10',
