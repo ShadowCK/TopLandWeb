@@ -41,7 +41,10 @@ class 职业 {
 
   constructor(classConfig) {
     // 使用deep copy防止class config被修改
-    Object.assign(this, _.cloneDeep(classConfig));
+    const clone = _.cloneDeep(classConfig);
+    Object.assign(this, _.omit(clone, '装备槽'));
+    // 如果职业的装备槽配置是 {武器:2}, 那么merge后装备槽会变成 {..., 武器:2}，而不是像object.assign那样直接替换
+    _.merge(this.装备槽, clone.装备槽);
   }
 
   getMaxLevel = () => getMaxLevel(this.maxLevel, this.expertiseLevel);

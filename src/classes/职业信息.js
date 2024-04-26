@@ -1,6 +1,8 @@
 // Note: 同一阶级的职业攻击、防御的基础和成长应该相同。
 // 具体的分化在于抗性、穿透和其他属性。
 
+import { EquipSlot } from '../enums.js';
+
 const classConfigs = {
   初心者: {
     ultimate: '普通一拳',
@@ -266,6 +268,10 @@ const classConfigs = {
     name: '狂战士',
     description: '起源于新大陆原住民阵营的战斗流派，舍弃了防御，专注于疯狂的攻击。',
     maxLevel: 50,
+    装备槽: {
+      [EquipSlot.武器]: 2,
+      [EquipSlot.副手]: 0,
+    },
     statGrowth: {
       最大生命值: [400, 10],
       最大魔法值: [100, 3],
