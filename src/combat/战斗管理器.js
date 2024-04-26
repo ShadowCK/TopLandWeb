@@ -85,7 +85,7 @@ const isAlly = (caster, target) => {
   );
 };
 /**
- * @returns {Object<string, {mult: number, totalBonus: number, singleBonus: number}>}}
+ * @returns {Object<string, {proportion:number, mult: number, totalBonus: number, singleBonus: number}>}}
  */
 const 计算伤害分布 = (damageDistribution) => {
   // 去掉伤害分布中值小于等于0的项。理论上可以有负值，但会让机制太过复杂且对玩家不友好
@@ -100,6 +100,7 @@ const 计算伤害分布 = (damageDistribution) => {
     const singleBonus =
       (v > 100 ? (v - 100) * gameConfig.伤害分布单体伤害加成 : 0) / 100 / proportion;
     return {
+      proportion,
       mult: proportion * (1 + totalBonus + singleBonus),
       totalBonus,
       singleBonus,

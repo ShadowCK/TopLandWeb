@@ -15,7 +15,7 @@ class DamageMechanic extends MechanicComponent {
 
   /**
    * @param {实体} caster
-   * @param {Number} level
+   * @param {number} level
    * @param {实体[]} targets
    * @returns
    */

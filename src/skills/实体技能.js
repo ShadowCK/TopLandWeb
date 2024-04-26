@@ -5,10 +5,10 @@ class 实体技能 {
   /** @type {实体} */
   entity;
 
-  /** @type {Number} */
+  /** @type {number} */
   cooldown;
 
-  /** @type {Number} */
+  /** @type {number} */
   level;
 
   /**

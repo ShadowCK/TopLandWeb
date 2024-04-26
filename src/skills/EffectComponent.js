@@ -47,8 +47,8 @@ class EffectComponent {
   /**
    * @param {实体} caster
    * @param {string} key
-   * @param {Number} level
-   * @param {Number} fallback
+   * @param {number} level
+   * @param {number} fallback
    */
   parseValues = (caster, key, level, fallback) => {
     const base = this.getNum(caster, key + Settings.BASE, fallback);
@@ -60,7 +60,7 @@ class EffectComponent {
   /**
    * @param {实体} caster
    * @param {string} key
-   * @param {Number} fallback
+   * @param {number} fallback
    */
   getNum(caster, key, fallback) {
     const val = this.settings.getString(key);
@@ -96,7 +96,7 @@ class EffectComponent {
 
   /**
    * @param {实体} caster
-   * @param {Number} level
+   * @param {number} level
    * @param {实体[]} targets
    */
   executeChildren(caster, level, targets = []) {
@@ -144,7 +144,7 @@ class EffectComponent {
 
   /**
    * @param {实体} caster
-   * @param {Number} level
+   * @param {number} level
    * @param {实体[]} targets
    */
   execute(caster, level, targets) {

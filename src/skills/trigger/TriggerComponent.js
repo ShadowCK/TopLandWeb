@@ -11,7 +11,7 @@ class TriggerComponent extends EffectComponent {
   /**
    * @param {实体} caster
    * @param {实体} target
-   * @param {Number} level
+   * @param {number} level
    */
   trigger(caster, target, level) {
     return this.execute(caster, level, [target]);

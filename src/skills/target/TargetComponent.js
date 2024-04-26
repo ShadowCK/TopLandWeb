@@ -25,7 +25,7 @@ class TargetComponent extends EffectComponent {
 
   /**
    * @param {实体} caster
-   * @param {Number} level
+   * @param {number} level
    * @param {实体[]} targets
    */
   execute(caster, level, targets) {
@@ -44,7 +44,7 @@ class TargetComponent extends EffectComponent {
 
   /**
    * @param {实体} caster
-   * @param {Number} level
+   * @param {number} level
    * @param {实体[]} targets
    */
   getTargets(caster, level, targets) {
@@ -53,7 +53,7 @@ class TargetComponent extends EffectComponent {
 
   /**
    * @param {实体} caster
-   * @param {Number} level
+   * @param {number} level
    * @param {实体[]} from
    * @param {Function<实体, 实体[]>} conversion
    */

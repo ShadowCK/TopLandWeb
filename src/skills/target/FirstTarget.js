@@ -8,7 +8,7 @@ class FirstTarget extends TargetComponent {
 
   /**
    * @param {实体} caster
-   * @param {Number} level
+   * @param {number} level
    * @param {实体[]} targets
    */
   getTargets(caster, level, targets) {

@@ -295,7 +295,7 @@ const genElementForStats = (entity, parent, value, key, labelClass = '', path = 
     const isStat = _.get(entity.stats, path) !== undefined;
     // 如果是实体属性，不要用原始数值。显示buff加成后的数值
     // FIXME: 这里会浪费一些性能，因为已经有base了。getBuffedStat会更好。
-    // TODO: 还有，要把getStat的clamp放到getBuffedStat里面，让getBuffStat也接受range参数。
+    // TODO: 还有，要把getStat的clamp放到getBuffedStat里面，让getBuffedStat也接受range参数。
     const valueToUse = isStat ? entity.getStat2(path) : value; // TODO: 可以切换显示模式，显示原始值。目前显示的是有效范围内的。但是BUFF可以让他超出范围。
     // 如果是实体属性，精确到成长的小数位数
     let precision;
@@ -313,7 +313,7 @@ const genElementForStats = (entity, parent, value, key, labelClass = '', path = 
         const damageDistributionData = 计算伤害分布(entity.getStat3(StatType.伤害分布))[key];
         if (damageDistributionData) {
           formatted = /* html */ `${formatted}(${_.round(
-            damageDistributionData.mult * 100,
+            damageDistributionData.proportion * 100,
             2,
           )}%) <span class="ui grey text">+${_.round(
             damageDistributionData.singleBonus * 100,
