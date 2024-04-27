@@ -302,7 +302,10 @@ const genElementForStats = (entity, parent, value, key, labelClass = '', path = 
     if (isStat) {
       const statGrowth = entity.getStatGrowth(path);
       // 成长是0，精确到基础值的小数位数后一位（比如1.5精确到1.50，否则精确到成长值的小数位数
-      precision = getDecimalPrecision(statGrowth[1] === 0 ? statGrowth[0] / 10 : statGrowth[1]);
+      precision =
+        statGrowth[1] === 0
+          ? getDecimalPrecision(statGrowth[0]) + 1
+          : getDecimalPrecision(statGrowth[1]);
     } else {
       precision = 2; // 默认精确到小数点后两位
     }
