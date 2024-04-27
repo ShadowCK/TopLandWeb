@@ -590,26 +590,34 @@ const registerEvents = () => {
   });
 
   // TODO：以后改成战斗信息区分治疗和伤害。
-  HTMLEvents.on(EventType.渲染战斗信息, ({ damager, damaged, damages, healing }) => {
-    if (!isUpdatingHTML()) {
-      return;
-    }
-    const playerInCombatTab = $('#战斗面板').hasClass('active');
-    const player = 玩家管理器.getPlayer();
-    const playerName = '<span class="ui large red text">你</span>';
-    const damagername = damager === player ? playerName : damager.职业.name;
-    const damagedname = damaged === player ? playerName : damaged.职业.name;
-    // 不用filter damage<=0，因为无效伤害没有传进来
-    // TODO：这个popup的信息会包括伤害0~0.5的伤害，但是round为0的伤害没必要显示。
-    // 下面的伤害信息就round了。记得改一下，_.pickBy（不能filter因为返回的是数组）一下再_.map
-    const damageMsg = _.map(damages, (damage, type) => `${_.round(damage)}点${type}伤害`).join(
-      '，',
-    );
-    if (damageMsg !== '') {
+  HTMLEvents.on(
+    EventType.渲染战斗信息,
+    ({ damager, damaged, damages, healing, isBlocked, blockRate, isCrit, isDodged }) => {
+      if (!isUpdatingHTML()) {
+        return;
+      }
+      const playerInCombatTab = $('#战斗面板').hasClass('active');
+      const player = 玩家管理器.getPlayer();
+      const playerName = '<span class="ui large red text">你</span>';
+      const damagerName = damager === player ? playerName : damager.职业.name;
+      const damagedName = damaged === player ? playerName : damaged.职业.name;
+      // 不用filter damage<=0，因为无效伤害没有传进来
       if (playerInCombatTab) {
-        _.forEach(damages, (damage, type) => {
-          const roundedDamage = _.round(damage);
-          if (roundedDamage > 0) {
+        if (isDodged) {
+          生成伤害信息({
+            damaged,
+            velocityScale: 1.5,
+            gravityFactor: 1,
+            offset: { x: 0, y: -0.3 },
+            isDodged,
+          });
+        } else {
+          _.forEach(damages, (damage, type) => {
+            const roundedDamage = _.round(damage);
+            // 伤害为0~0.5就不显示。
+            if (roundedDamage <= 0) {
+              return;
+            }
             生成伤害信息({
               damaged,
               damage: roundedDamage,
@@ -617,40 +625,60 @@ const registerEvents = () => {
               velocityScale: 1.5,
               gravityFactor: 1,
               offset: { x: 0, y: -0.3 },
+              isBlocked,
+              blockRate,
+              isCrit,
+              isDodged,
+            });
+          });
+        }
+      } else if (settings.战斗面板外战斗信息) {
+        if (isDodged) {
+          $.toast({
+            message: `<span>${damagedName}闪避了${damagerName}的伤害。`,
+            class: 'chinese',
+            displayTime: 1000,
+            showProgress: 'bottom',
+          });
+        } else {
+          const damageMsg = _.chain(damages)
+            .pickBy((damage) => damage > 0.5)
+            .map((damage, type) => `${_.round(damage)}点${type}伤害`)
+            .join('，');
+          if (damageMsg !== '') {
+            $.toast({
+              // 战斗外信息不显示暴击和格挡，不然太长了。（真的不是我懒）
+              message: `<span>${damagerName}</span>对${damagedName}造成了${damageMsg}。`,
+              class: 'chinese',
+              displayTime: 1000,
+              showProgress: 'bottom',
             });
           }
-        });
-      } else if (settings.战斗面板外战斗信息) {
-        $.toast({
-          message: `<span>${damagername}</span>对${damagedname}造成了${damageMsg}。`,
-          class: 'chinese',
-          displayTime: 1000,
-          showProgress: 'bottom',
-        });
+        }
       }
-    }
 
-    const roundedHealing = _.round(healing);
-    // 需要检测，因为造成伤害不一定有治疗
-    if (roundedHealing > 0) {
-      if (playerInCombatTab) {
-        生成治疗信息({
-          healed: damager,
-          healing: roundedHealing,
-          velocityScale: 1.5,
-          gravityFactor: 1,
-          offset: { x: 0, y: -0.3 },
-        });
-      } else if (settings.战斗面板外战斗信息) {
-        $.toast({
-          message: `${damagername}通过伤害${damagedname}恢复了${roundedHealing}点生命值。`,
-          class: 'chinese',
-          displayTime: 1000,
-          showProgress: 'bottom',
-        });
+      const roundedHealing = _.round(healing);
+      // 需要检测，因为造成伤害不一定有治疗
+      if (roundedHealing > 0) {
+        if (playerInCombatTab) {
+          生成治疗信息({
+            healed: damager,
+            healing: roundedHealing,
+            velocityScale: 1.5,
+            gravityFactor: 1,
+            offset: { x: 0, y: -0.3 },
+          });
+        } else if (settings.战斗面板外战斗信息) {
+          $.toast({
+            message: `${damagerName}通过伤害${damagedName}恢复了${roundedHealing}点生命值。`,
+            class: 'chinese',
+            displayTime: 1000,
+            showProgress: 'bottom',
+          });
+        }
       }
-    }
-  });
+    },
+  );
 };
 
 export {

@@ -250,6 +250,11 @@ const registerEvents = () => {
     // 攻击被闪避就不造成伤害
     const 闪避率 = damaged.getStat2(StatType.闪避率, true);
     if (Math.random() < 闪避率 / 100) {
+      HTMLEvents.emit(EventType.渲染战斗信息, {
+        damager,
+        damaged,
+        isDodged: true,
+      });
       return;
     }
 
@@ -264,7 +269,16 @@ const registerEvents = () => {
     const 触发格挡 = Math.random() < 格挡率 / 100;
     const 格挡倍率 = 1 - damaged.getStat2(StatType.格挡伤害, true) / 100;
 
-    const eventData = { damager, damaged, damages: {}, healing: null };
+    const eventData = {
+      damager,
+      damaged,
+      damages: {},
+      healing: null,
+      isBlocked: false,
+      blockRate: 0,
+      isCrit: false,
+      isDodged: false,
+    };
 
     // 遍历伤害分布，根据不同的伤害类型计算总伤害
     let totalDamage = 0;
@@ -301,9 +315,12 @@ const registerEvents = () => {
       }
       if (造成暴击) {
         damagePartition *= 暴击倍率;
+        eventData.isCrit = true;
       }
       if (触发格挡) {
         damagePartition *= 格挡倍率;
+        eventData.isBlocked = true;
+        eventData.blockRate = 格挡率;
       }
       // 计算防御力对伤害的影响（后加算）
       const defensePartition = damaged.getStat2(StatType.防御力) * mult;

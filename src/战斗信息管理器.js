@@ -1,3 +1,4 @@
+import _ from 'lodash';
 import BounceMessage from './BounceMessage.js';
 import { getCombatLayout } from './htmlHelper.js';
 
@@ -13,13 +14,26 @@ const 生成伤害信息 = ({
   gravityFactor = 1,
   velocityScale = 1,
   offset,
+  isBlocked,
+  blockRate,
+  isCrit,
+  isDodged,
 }) => {
   const combatLayout = getCombatLayout($('#战斗面板-实体列表'), damaged);
   // 实体可能已经死亡并且战斗UI被移除。
   if (!combatLayout) {
     return;
   }
-  const messageHTML = `<span class="ui red text">-${damage}</span> ${damageType}`;
+  const shieldIcon = '<i class="shield alternate icon" style="margin:0"></i>';
+  const messageHTML = isDodged
+    ? `<span class="ui grey text"><i class="eye slash outline icon"></i></span>`
+    : `<span class="ui red text">-${damage}</span> ${damageType}${
+        isCrit
+          ? '<span class="ui red text"><i class="exclamation icon" style="margin:0"></i></span>'
+          : ''
+      }${
+        isBlocked ? `<span class="ui brown text">${shieldIcon}${_.round(blockRate)}%</span>` : ''
+      }`;
   messages.push(
     new BounceMessage({
       parent: combatLayout,
