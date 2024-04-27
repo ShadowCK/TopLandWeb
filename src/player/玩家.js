@@ -31,6 +31,11 @@ class 玩家 extends 实体 {
     this.背包.removeItem(item);
   }
 
+  dropItems(items) {
+    this.背包.removeItems(items);
+  }
+
+
   reset() {
     退出战斗区域();
     super.reset();
