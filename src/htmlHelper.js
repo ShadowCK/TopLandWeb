@@ -510,7 +510,7 @@ const genItem = (item) => {
       this.find('[data-use="丢弃同名物品"]').on('click', () => {
         const 同名物品数量 = player.背包.countItem(item.name);
         const 同名物品 = player.背包.items.filter((i) => i.name === item.name);
-        同名物品.forEach((i) => player.dropItem(i));
+        player.dropItems(同名物品);
         $.toast({
           class: 'chinese',
           message: `你丢掉了${item.name} X${同名物品数量}。`,
@@ -531,8 +531,8 @@ const genItem = (item) => {
           const 原装备等级 = _.round(item.获取合成等级());
           可合成装备.forEach((other) => {
             item.合成(other);
-            player.背包.removeItem(other);
           });
+          player.dropItems(可合成装备);
           $.toast({
             class: 'chinese',
             message: `吸收了${可合成装备.length}件装备。装备等级: ${原装备等级} => ${_.round(

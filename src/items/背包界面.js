@@ -18,6 +18,8 @@ class 背包界面 {
 
   removeItemHandle = this.removeItemCallback.bind(this);
 
+  itemElements = new Map();
+
   constructor(背包, 背包物品每页数量 = settings.背包物品每页数量, activePageIndex = 1) {
     this.背包 = 背包;
     this.主背包备份 = 背包;
@@ -40,6 +42,41 @@ class 背包界面 {
 
     generalEvents.on(EventType.获得物品, this.addItemHandle);
     generalEvents.on(EventType.失去物品, this.removeItemHandle);
+  }
+
+  refresh() {
+    const [start, end] = this.getStartEnd();
+    const items = new Set(this.背包.items.slice(start, end));
+
+    const exisitingElementsKey = Array.from(this.itemElements.keys());
+    exisitingElementsKey.forEach((item) => {
+      if (!items.has(item)) {
+        this.itemElements.get(item).remove();
+        this.itemElements.delete(item);
+      }
+    });
+
+    let index = -1;
+    items.forEach((item) => {
+      index++;
+      let itemElement = this.itemElements.get(item);
+      if (!itemElement) {
+        itemElement = genItemElement(item);
+        this.itemElements.set(item, itemElement);
+      } else if (itemElement.index() !== index) {
+        itemElement.remove();
+        itemElement = genItemElement(item);
+        this.itemElements.set(item, itemElement);
+      } else {
+        return;
+      }
+      const nextElement = this.getHtml().children().eq(index);
+      if (nextElement.length !== 0) {
+        itemElement.insertBefore(nextElement);
+      } else {
+        this.getHtml().append(itemElement);
+      }
+    });
   }
 
   // 不注销handler的话object永远被EventEmitter引用着，object就gc不掉
@@ -164,7 +201,7 @@ class 背包界面 {
     });
   }
 
-  addItemCallback({ container, index: inventoryIndex, prevLength }) {
+  addItemCallback({ container, item, index: inventoryIndex, prevLength }) {
     // 如果背包是背包视图，让背包视图处理；只处理主背包/玩家背包，即搜索栏为空的情况。
     if (this.背包 !== container) {
       return;
@@ -182,17 +219,22 @@ class 背包界面 {
       this.resetPaginationNav(activePageIndex);
     }
 
+    if (Object.prototype.hasOwnProperty.call(item, 'length')) {
+      this.refresh();
+      return;
+    }
+
     const [start, end] = this.getStartEnd();
     if (prevLength !== this.背包.items.length) {
       // 增加slot
       if (inventoryIndex < start) {
         // 前
-        const item = this.背包.items[start - 1];
-        this.addItem(item, start);
+        const newItem = this.背包.items[start - 1];
+        this.addItem(newItem, start);
       } else if (inventoryIndex < end) {
         // 中
-        const item = this.背包.items[inventoryIndex];
-        this.addItem(item, inventoryIndex);
+        const newItem = this.背包.items[inventoryIndex];
+        this.addItem(newItem, inventoryIndex);
       }
     } else if (_.inRange(inventoryIndex, start, end)) {
       // 增加stack
@@ -200,7 +242,7 @@ class 背包界面 {
     }
   }
 
-  removeItemCallback({ container, index: inventoryIndex, prevLength }) {
+  removeItemCallback({ container, item, index: inventoryIndex, prevLength }) {
     if (this.背包 !== container) {
       return;
     }
@@ -220,6 +262,12 @@ class 背包界面 {
         this.setActivePageIndex(trueActivePageIndex);
         return;
       }
+    }
+
+    
+    if (Object.prototype.hasOwnProperty.call(item, 'length')) {
+      this.refresh();
+      return;
     }
 
     const [start, end] = this.getStartEnd();
@@ -247,11 +295,7 @@ class 背包界面 {
     }
     this.activePageIndex = index;
     this.getHtml().empty();
-    const [start, end] = this.getStartEnd();
-    for (let i = start; i < end; i++) {
-      const item = this.背包.items[i];
-      this.addItem(item, i);
-    }
+    this.refresh();
   }
 
   getSearchInputElement() {

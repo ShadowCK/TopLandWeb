@@ -120,6 +120,19 @@ class 背包 {
     this.removeItemAt(index);
   }
 
+  removeItems(items) {
+    const prevLength = this.items.length;
+    items.forEach(item => {
+      const index = this.items.indexOf(item);
+      if (index === -1) {
+        console.error('Trying to remove an item that is not in the bag');
+        return;
+      }
+      this.items.splice(index, 1);
+    });
+    generalEvents.emit(EventType.失去物品, { container: this, index: -1, item: items, prevLength });
+  }
+
   removeByName(itemName) {
     const index = this.items.findIndex((other) => other.name === itemName);
     if (index === -1) {
@@ -130,12 +143,9 @@ class 背包 {
   }
 
   removeAll(emitEvent) {
-    for (let i = this.items.length - 1; i >= 0; i--) {
-      const item = this.items.pop();
-      if (emitEvent) {
-        generalEvents.emit(EventType.失去物品, { container: this, index: i, item, prevLength: i });
-      }
-    }
+    const items = Array.from(this.items);
+    this.items.length = 0;
+    generalEvents.emit(EventType.失去物品, { container: this, item :items, prevLength: items.length});
   }
 
   /**
