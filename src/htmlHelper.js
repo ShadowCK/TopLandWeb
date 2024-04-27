@@ -415,7 +415,7 @@ const genItem = (item) => {
   // popup content
   const tempParent = $(/* html */ `
     <div>
-      <h3 class="ui header">${item.name}</h3>
+      <h3 class="ui header">${item.name}<span class="装备等级"></span></h3>
       ${labelHTML(item.type)}${isEquipment ? labelHTML(item.slot) : ''}
       <div class="ui message">
         <p>${item.description}</p>
@@ -440,6 +440,16 @@ const genItem = (item) => {
       hide: 0,
     },
     html: compressHTML(tempParent.html()),
+    onShow: function onShow() {
+      if (isEquipment) {
+        this.find('.装备等级').text(` LV.${_.round(item.获取合成等级())}`);
+      }
+    },
+    onCreate: function onCreate() {
+      if (!isEquipment) {
+        this.find('.装备等级').remove();
+      }
+    },
   });
   // 右键打开物品的context menu
   // 创建一个新的隐藏div绑定到右键菜单的popup，好处是不会影响原来的popup（一个元素只能有一个popup）
@@ -460,7 +470,7 @@ const genItem = (item) => {
           <div class="ui label">0</div>
         </a>
         <a class="item" data-use="合成">
-        合成
+        合成（升级）
         <div class="ui label">0</div>
       </a>
       </div>
@@ -476,11 +486,9 @@ const genItem = (item) => {
     onShow: function onShow() {
       const 同名物品数量 = player.背包.countItem(item.name);
       this.find('[data-use="丢弃同名物品"] .ui.label').text(同名物品数量);
-      const 合成按钮 = this.find('[data-use="合成"]');
       if (isEquipment) {
-        合成按钮.find('.ui.label').text(同名物品数量);
-      } else {
-        合成按钮.remove();
+        const 可合成装备数量 = player.背包.获取可合成装备(item).length;
+        this.find('[data-use="合成"] .ui.label').text(可合成装备数量);
       }
       return true;
     },
@@ -508,9 +516,31 @@ const genItem = (item) => {
           message: `你丢掉了${item.name} X${同名物品数量}。`,
         });
       });
-      this.find('a[data-use="合成"]').on('click', () => {
-        // TODO: 合成
-      });
+      if (!isEquipment) {
+        this.find('[data-use="合成"]').remove();
+      } else {
+        this.find('[data-use="合成"]').on('click', () => {
+          const 可合成装备 = player.背包.获取可合成装备(item);
+          if (可合成装备.length === 0) {
+            $.toast({
+              class: 'chinese',
+              message: '没有可合成的装备。',
+            });
+            return;
+          }
+          const 原装备等级 = _.round(item.获取合成等级());
+          可合成装备.forEach((other) => {
+            item.合成(other);
+            player.背包.removeItem(other);
+          });
+          $.toast({
+            class: 'chinese',
+            message: `吸收了${可合成装备.length}件装备。装备等级: ${原装备等级} => ${_.round(
+              item.获取合成等级(),
+            )}`,
+          });
+        });
+      }
       this.on('mouseenter', () => {
         hoveredContextMenu = true;
       });

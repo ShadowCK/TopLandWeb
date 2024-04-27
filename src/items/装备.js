@@ -1,8 +1,9 @@
 import _ from 'lodash';
 import 物品 from './物品.js';
-import { EquipSlot, ItemType } from '../enums.js';
+import { EquipRarity, EquipSlot, ItemType } from '../enums.js';
 import { EventType, generalEvents } from '../events/事件管理器.js';
-import { getPlayer } from '../player/玩家管理器.js';
+import { config as gameConfig, 计算合成等级 } from '../settings.js';
+import { applyStats } from '../utils.js';
 
 class 装备 extends 物品 {
   // 改写继承自物品类的属性
@@ -19,20 +20,17 @@ class 装备 extends 物品 {
 
   stats = {};
 
+  品阶 = 0;
+
+  品质 = EquipRarity.普通;
+
+  合成次数 = 0;
+
   constructor(config) {
-    super(_.omit(config, 'stats', 'slot', 'requirements'));
+    const arr = ['品阶', '品质', '合成次数', 'stats', 'requirements', 'slot'];
+    super(_.omit(config, arr));
     this.config = config;
-    // 避免修改config原始数据
-    Object.assign(
-      this,
-      JSON.parse(
-        JSON.stringify({
-          stats: config.stats,
-          slot: config.slot,
-          requirements: config.requirements,
-        }),
-      ),
-    );
+    Object.assign(this, _.pick(config, arr));
   }
 
   // TODO: 穿上和脱下转到实体类中
@@ -81,6 +79,50 @@ class 装备 extends 物品 {
     }
     entity.updateStats();
     generalEvents.emit(EventType.脱下装备, { entity, equipment: this });
+  }
+
+  /**
+   * @param {装备} other
+   */
+  可以合成(other) {
+    if (other.name !== this.name) {
+      return false;
+    }
+    if (!(other instanceof 装备)) {
+      return false;
+    }
+    if (other.品阶 < this.品阶) {
+      return false;
+    }
+    return true;
+  }
+
+  /**
+   * @param {装备} other
+   */
+  合成(other) {
+    if (!this.可以合成(other)) {
+      return false;
+    }
+    // 品质为合成物品中的最高者
+    this.品质 = Math.max(this.品质, other.品质);
+    this.合成次数 += other.合成次数 > 0 ? other.合成次数 : 1;
+    return true;
+  }
+
+  获取合成等级() {
+    return 计算合成等级(this.合成次数);
+  }
+
+  获取实际属性() {
+    // TODO: 品质...
+    // TODO: 品阶...
+    const 合成等级 = this.获取合成等级();
+    const stats = _.cloneDeep(this.stats);
+    applyStats(stats, ({ value, currentPath }) => {
+      _.set(stats, currentPath, value * (1 + 合成等级 * gameConfig.合成等级加成));
+    });
+    return stats;
   }
 }
 

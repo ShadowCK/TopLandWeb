@@ -4,7 +4,7 @@ import { getBuffedStat } from './buff管理器.js';
 import { StatType } from './战斗属性.js';
 import * as settings from '../settings.js';
 import { EventType, combatEvents } from '../events/事件管理器.js';
-import { calcHealing, deepMapObject } from '../utils.js';
+import { applyStats, calcHealing, deepMapObject } from '../utils.js';
 import * as debug from '../debug.js';
 import 实体技能 from '../skills/实体技能.js';
 import { getSkill } from '../skills/技能管理器.js';
@@ -88,40 +88,27 @@ class 实体 {
     // 清空所有属性
     this.stats = {};
 
+    // 添加职业的属性
     const { statGrowth, level } = this.职业;
-    // 递归函数来处理statGrowth
-    const applyStatGrowth = (stats, path = []) => {
-      _.forEach(stats, (value, key) => {
-        const currentPath = path.concat(key);
-        if (Array.isArray(value)) {
-          // 如果是数组（statGrowth），计算值并设置。
-          const [base, scale] = value;
-          _.set(this.stats, currentPath, base + scale * (level - 1) * multiplier);
-        } else if (_.isObject(value)) {
-          // 如果是对象，递归处理
-          applyStatGrowth(value, currentPath);
+    applyStats(
+      statGrowth,
+      ({ value, currentPath }) => {
+        if (!Array.isArray(value)) {
+          return;
         }
-      });
-    };
-    // 调用递归函数，根据属性成长重新设置当前等级的属性。
-    applyStatGrowth(statGrowth);
-
-    const applyEquipmentBonus = (stats, path = []) => {
-      _.forEach(stats, (value, key) => {
-        const currentPath = path.concat(key);
-        if (_.isObject(value)) {
-          // 如果是对象，递归处理
-          applyEquipmentBonus(value, currentPath);
-        } else {
-          _.set(this.stats, currentPath, this.getStat2(currentPath, false) + value);
-        }
-      });
-    };
+        const [base, scale] = value;
+        _.set(this.stats, currentPath, base + scale * (level - 1) * multiplier);
+      },
+      (value) => _.isObject(value) && !Array.isArray(value),
+    );
 
     // 添加装备的属性
     _.forEach(this.装备, (typeEquipments) => {
       typeEquipments.forEach((item) => {
-        applyEquipmentBonus(item.stats);
+        const stats = item.获取实际属性();
+        applyStats(stats, ({ value, currentPath }) => {
+          _.set(this.stats, currentPath, this.getStat2(currentPath, false) + value);
+        });
       });
     });
 

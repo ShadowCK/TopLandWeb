@@ -3,6 +3,16 @@ const ItemType = {
   装备: '装备',
 };
 
+const EquipRarity = {
+  粗糙: 0,
+  普通: 1,
+  优良: 2,
+  稀有: 3,
+  史诗: 4,
+  传说: 5,
+  神器: 6,
+};
+
 const EquipSlot = {
   武器: '武器',
   副手: '副手',
@@ -49,4 +59,12 @@ const SkillAttribute = {
   LEVEL: 'level',
 };
 
-export { ItemType, EquipSlot, SemanticUIColor, GameSettingName, ComponentType, SkillAttribute };
+export {
+  ItemType,
+  EquipSlot,
+  SemanticUIColor,
+  GameSettingName,
+  ComponentType,
+  SkillAttribute,
+  EquipRarity,
+};

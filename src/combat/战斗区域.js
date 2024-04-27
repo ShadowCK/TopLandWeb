@@ -3,6 +3,7 @@ import 敌人信息 from './敌人信息.js';
 import * as settings from '../settings.js';
 import 敌人 from './敌人.js';
 import { EventType, combatEvents } from '../events/事件管理器.js';
+import { sampleWeighted } from '../utils.js';
 
 const configs = {
   训练场: {
@@ -218,13 +219,7 @@ class 战斗区域 {
       this.clearEnemies();
       enemyLiteral = boss;
     } else {
-      const totalWeight = enemies.reduce((acc, enemy) => acc + enemy.weight, 0);
-      const rand = Math.random() * totalWeight;
-      let sum = 0;
-      enemyLiteral = enemies.find((enemy) => {
-        sum += enemy.weight;
-        return rand < sum;
-      });
+      enemyLiteral = sampleWeighted(enemies);
     }
     return {
       instance: new 敌人(enemyLiteral.config, !!enemyLiteral.isBoss, this.statMultiplier),
