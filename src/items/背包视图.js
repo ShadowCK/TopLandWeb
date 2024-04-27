@@ -96,7 +96,21 @@ class 背包视图 extends 背包类 {
   }
 
   removeItemCallback({ container, item, prevLength }) {
-    if (container !== this.背包 || !this.filter(item)) {
+    if (container !== this.背包 ) {
+      return;
+    }
+
+    if (Object.prototype.hasOwnProperty.call(item, 'length')) {
+      const toRemoveItems = item.filter(i => this.filter(i));
+      toRemoveItems.forEach(toRemoveItem => {
+        this.items.splice(this.items.indexOf(toRemoveItem), 1);
+      })
+      generalEvents.emit(EventType.失去物品, {
+        container: this,
+        index: -1,
+        item: toRemoveItems,
+        prevLength: this.items.length + toRemoveItems.length,
+      });
       return;
     }
 
