@@ -55,7 +55,7 @@ class 技能栏界面 {
         player.cast(skill);
       });
       skillIcon.popup({
-        inline: true,
+        inline: false,
         lastResort: true,
         hoverable: true,
         // html是暂时的格式，以后会加入lore并实现"filter"方法，自动将里面的attr:mana, attr:...转换为对应数值。
