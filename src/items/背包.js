@@ -7,7 +7,7 @@ import 装备 from './装备.js';
 class 背包 {
   /** @type {import('./物品.js').default[]} */
   items = [];
-  
+
   // a shortcut only for debugging
   ui = null;
 
@@ -23,7 +23,7 @@ class 背包 {
       this.addItemFromConfig(itemConfig);
     });
   }
-  
+
   addItemFromConfig(itemConfig, count = 1) {
     if (itemConfig.type === ItemType.装备) {
       this.addItem(new 装备(itemConfig), count);
@@ -127,9 +127,13 @@ class 背包 {
     for (let i = this.items.length - 1; i >= 0; i--) {
       const item = this.items.pop();
       if (emitEvent) {
-        generalEvents.emit(EventType.失去物品, { container: this, index:i, item, prevLength: i });
+        generalEvents.emit(EventType.失去物品, { container: this, index: i, item, prevLength: i });
       }
     }
+  }
+
+  countItem(name) {
+    return this.items.reduce((acc, item) => (item.name === name ? acc + item.stack : acc), 0);
   }
 }
 

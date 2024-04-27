@@ -1,11 +1,11 @@
 import _ from 'lodash';
+import { setTimeout } from 'worker-timers';
 import showdown from 'showdown';
 
 import * as 玩家管理器 from './player/玩家管理器.js';
 import { getDecimalPrecision } from './utils.js';
 import { StatType } from './combat/战斗属性.js';
 import 装备 from './items/装备.js';
-import { settings as gameSettings } from './settings.js';
 import { SemanticUIColor } from './enums.js';
 import { 计算伤害分布 } from './combat/战斗管理器.js';
 
@@ -394,10 +394,11 @@ const genItemHTML = (name) => {
  */
 const genItem = (item) => {
   const isEquipment = item instanceof 装备;
-  const element = $(genItemHTML(item.name));
+  const wrapper = $(genItemHTML(item.name));
+  const card = wrapper.find('.ui.card');
   if (isEquipment) {
-    element.css('cursor', 'pointer');
-    element.on('click', () => {
+    card.css('cursor', 'pointer');
+    card.on('click', () => {
       const player = 玩家管理器.getPlayer();
       if (player.拥有装备(item)) {
         item.脱下(player);
@@ -417,16 +418,15 @@ const genItem = (item) => {
         <p>${item.description}</p>
       </div>
       <div class="ui horizontal wrapping segments"></div>
-      <div class="ui divider"></div>
-      <button class="ui button" data-use="丢弃">丢弃</button>
     </div>
     `);
   const grid = tempParent.find('.ui.segments');
   _.forEach(item.stats, (value, key) => {
     genElementForEquipmentStat(grid, value, key, 'small');
   });
-  element.attr('data-variation', 'flowing');
-  element.popup({
+  card.attr('data-variation', 'flowing');
+  card.popup({
+    on: 'hover',
     // inline可以apply local CSS rules，让它看起来更对，但是不会在关闭时自动移除
     // TODO: 设为true, 在父元素被删除时移除popup
     inline: false,
@@ -437,36 +437,105 @@ const genItem = (item) => {
       hide: 0,
     },
     html: compressHTML(tempParent.html()),
+  });
+  // 右键打开物品的context menu
+  // 创建一个新的隐藏div绑定到右键菜单的popup，好处是不会影响原来的popup（一个元素只能有一个popup）
+  const hidden = card.append('<div></div>').children().last(); // TODO: 为什么先创建再append就不会有效，上面的明明可以
+  hidden.css({
+    visibility: 'hidden',
+    position: 'absolute',
+    top: '0',
+    left: '0',
+    width: '100%',
+    height: '100%',
+  });
+  const contextHTML = /* html */ `
+      <div class="ui vertical menu">
+        <a class="item" data-use="丢弃">丢弃</a>
+        <a class="item" data-use="丢弃同名物品">
+          丢弃同名物品
+          <div class="ui label">0</div>
+        </a>
+        <a class="item" data-use="合成">
+        合成
+        <div class="ui label">0</div>
+      </a>
+      </div>
+      `;
+  const player = 玩家管理器.getPlayer();
+  let hoveredContextMenu = false;
+  hidden.popup({
+    on: 'manual', // 注意：设置为manual后fomantic-ui不会有任何事件监听，要手动控制。
+    html: contextHTML,
+    inline: true,
+    lastResort: true,
+    exclusive: true,
+    onShow: function onShow() {
+      const 同名物品数量 = player.背包.countItem(item.name);
+      this.find('[data-use="丢弃同名物品"] .ui.label').text(同名物品数量);
+      const 合成按钮 = this.find('[data-use="合成"]');
+      if (isEquipment) {
+        合成按钮.find('.ui.label').text(同名物品数量);
+      } else {
+        合成按钮.remove();
+      }
+      return true;
+    },
     onCreate: function onCreate() {
-      this.find('.button[data-use="丢弃"]').on('click', () => {
-        玩家管理器.getPlayer().dropItem(item);
+      this.on('click', (e) => {
+        e.stopPropagation();
+      });
+      this.on('mouseenter', (e) => {
+        e.stopPropagation();
+      });
+      this.addClass('context-menu');
+      this.find('[data-use="丢弃"]').on('click', () => {
+        player.dropItem(item);
         $.toast({
           class: 'chinese',
           message: `你丢掉了${item.name}。`,
         });
       });
+      this.find('[data-use="丢弃同名物品"]').on('click', () => {
+        const 同名物品数量 = player.背包.countItem(item.name);
+        const 同名物品 = player.背包.items.filter((i) => i.name === item.name);
+        同名物品.forEach((i) => player.dropItem(i));
+        $.toast({
+          class: 'chinese',
+          message: `你丢掉了${item.name} X${同名物品数量}。`,
+        });
+      });
+      this.find('a[data-use="合成"]').on('click', () => {
+        // TODO: 合成
+      });
+      this.on('mouseenter', () => {
+        hoveredContextMenu = true;
+      });
+      this.on('mouseleave', () => {
+        hoveredContextMenu = false;
+      });
     },
   });
-  // 右键也可以丢弃物品
-  element.on('contextmenu', (e) => {
+  card.on('contextmenu', (e) => {
     e.preventDefault();
-    const player = 玩家管理器.getPlayer();
+    // 已经装备的装备需要先脱下，避免执行丢弃同名物品、合成等操作时考虑太多情况
     if (isEquipment && player.拥有装备(item)) {
       $.toast({
-        title: '危险！',
         class: 'red chinese',
-        message: `我禁止了右键丢弃已经穿戴的装备，防止误操作。`,
+        message: `请先脱下装备再进行操作。`,
       });
       return;
     }
-    player.dropItem(item);
-    $.toast({
-      class: 'chinese',
-      message: `你丢掉了${item.name}。`,
-    });
+    hidden.popup('show');
   });
-
-  return element;
+  card.on('mouseleave', () => {
+    setTimeout(() => {
+      if (!hoveredContextMenu) {
+        hidden.popup('hide');
+      }
+    }, 100);
+  });
+  return wrapper;
 };
 
 const paginationHTML = (totalPages, maxPages, activePageIndex = 1) => {
