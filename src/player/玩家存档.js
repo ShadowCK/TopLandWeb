@@ -5,6 +5,10 @@ import 装备 from '../items/装备.js';
 import { genEquipments } from '../htmlHelper.js';
 import { equipConfigs } from '../items/装备信息.js';
 import { itemConfigs } from '../items/物品信息.js';
+import { ItemType } from '../enums.js';
+
+const 物品存档数据 = ['name', 'type', 'stack'];
+const 装备存档数据 = ['name', 'type', 'stack', '品阶', '品质', '合成次数'];
 
 class 玩家存档 {
   /** @type {import('./玩家.js').default} */
@@ -35,9 +39,9 @@ class 玩家存档 {
     needed.职业 = needed.职业.toSaveData();
     // 只保存名称、种类等必要内容（如品阶，等级，稀有度），不保存具体内容
     // TODO: 和上面一样，给物品添加toSaveData，只保存必要信息。
-    needed.背包 = needed.背包.items.map((item) => _.pick(item, 'name', 'type'));
+    needed.背包 = needed.背包.items.map((item) => _.pick(item, 装备存档数据));
     needed.装备 = _.mapValues(needed.装备, (equipments) =>
-      equipments.map((e) => _.pick(e, 'name', 'type')),
+      equipments.map((e) => _.pick(e, 装备存档数据)),
     );
     return JSON.stringify(needed);
   }
@@ -84,7 +88,13 @@ class 玩家存档 {
         // 需要注意的是，如果配置文件里没有该装备（比如历史遗留导致的绝版装备，不再在配置列表里），玩家会丢失该装备。
         // TODO：应该给玩家一一装上，而不是假设玩家可以穿存档里的装备
         _.forEach(this.data.装备, (typeEquipments, key) => {
-          player.装备[key] = _.map(typeEquipments, (data) => equipConfigs[data.name])
+          player.装备[key] = _.map(typeEquipments, (data) => {
+            const config = equipConfigs[data.name];
+            if (config == null) {
+              return null;
+            }
+            return _.merge(_.cloneDeep(config), _.pick(data, 装备存档数据));
+          })
             .filter((config) => config != null)
             .map((config) => new 装备(config));
         });
@@ -95,8 +105,12 @@ class 玩家存档 {
         console.log('存档-背包', this.data.背包);
         // 同理，只保存了必要信息，需要获取对应物品名的物品配置，而不是像以前一样用将该物品数据作为config
         const mappedItems = _.map(this.data.背包, (data) => {
-          const configs = data.type === '装备' ? equipConfigs : itemConfigs;
-          return configs[data.name];
+          const configs = data.type === ItemType.装备 ? equipConfigs : itemConfigs;
+          const config = _.cloneDeep(configs[data.name]);
+          return _.merge(
+            config,
+            _.pick(data, data.type === ItemType.装备 ? 装备存档数据 : 物品存档数据),
+          );
         }).filter((config) => config != null);
         // TODO: 将上面的逻辑放到loadSavedItems
         player.背包.loadSavedItems(mappedItems);
@@ -118,3 +132,4 @@ class 玩家存档 {
 }
 
 export default 玩家存档;
+export { 玩家存档, 物品存档数据, 装备存档数据 };

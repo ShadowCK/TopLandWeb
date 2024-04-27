@@ -3,6 +3,7 @@ import { ItemType } from '../enums.js';
 import { EventType, generalEvents } from '../events/事件管理器.js';
 import 物品 from './物品.js';
 import 装备 from './装备.js';
+import { 装备存档数据 } from '../player/玩家存档.js';
 
 class 背包 {
   /** @type {import('./物品.js').default[]} */
@@ -38,10 +39,14 @@ class 背包 {
    * @param {物品} item
    */
   addItem(item, count = 1) {
+    const config = _.cloneDeep(item.config);
+    if (item instanceof 装备) {
+      _.merge(config, _.pick(item, 装备存档数据));
+    }
     const prevLength = this.items.length;
-    if (!item.stackable) {
-      _.times(count, () => {
-        const newItem = new item.constructor(item.config);
+    const addOne = () => {
+      if (!item.stackable) {
+        const newItem = new item.constructor(config);
         const index = this.items.push(newItem) - 1;
         generalEvents.emit(EventType.获得物品, {
           container: this,
@@ -50,45 +55,46 @@ class 背包 {
           stack: 1,
           prevLength,
         });
-      });
-      return;
-    }
-
-    const stacksToAdd = item.stack * count;
-    let stackLeft = stacksToAdd;
-    // 堆叠在已有物品
-    for (let i = 0; i < this.items.length; i++) {
-      if (stackLeft <= 0) {
-        break;
+        return;
       }
-      const existingItem = this.items[i];
-      if (existingItem.name === item.name) {
-        const added = Math.min(stackLeft, existingItem.maxStack - existingItem.stack);
-        existingItem.stack += added;
-        stackLeft -= added;
+
+      const stacksToAdd = item.stack * count;
+      let stackLeft = stacksToAdd;
+      // 堆叠在已有物品
+      for (let i = 0; i < this.items.length; i++) {
+        if (stackLeft <= 0) {
+          break;
+        }
+        const existingItem = this.items[i];
+        if (existingItem.name === item.name) {
+          const added = Math.min(stackLeft, existingItem.maxStack - existingItem.stack);
+          existingItem.stack += added;
+          stackLeft -= added;
+          generalEvents.emit(EventType.获得物品, {
+            container: this,
+            index: i,
+            item: existingItem,
+            stack: added,
+            prevLength,
+          });
+        }
+      }
+      // 作为新物品
+      while (stackLeft > 0) {
+        const newItem = new item.constructor(config);
+        newItem.stack = Math.min(stackLeft, newItem.maxStack);
+        stackLeft -= newItem.stack;
+        this.items.push(newItem);
         generalEvents.emit(EventType.获得物品, {
           container: this,
-          index: i,
-          item: existingItem,
-          stack: added,
+          index: this.items.length - 1,
+          item: newItem,
+          stack: newItem.stack,
           prevLength,
         });
       }
-    }
-    // 作为新物品
-    while (stackLeft > 0) {
-      const newItem = new item.constructor(item.config);
-      newItem.stack = Math.min(stackLeft, newItem.maxStack);
-      stackLeft -= newItem.stack;
-      this.items.push(newItem);
-      generalEvents.emit(EventType.获得物品, {
-        container: this,
-        index: this.items.length - 1,
-        item: newItem,
-        stack: newItem.stack,
-        prevLength,
-      });
-    }
+    };
+    _.times(count, () => addOne());
   }
 
   removeItemAt(index) {
@@ -132,8 +138,22 @@ class 背包 {
     }
   }
 
+  /**
+   * @param {string} name
+   * @returns {number}
+   */
   countItem(name) {
     return this.items.reduce((acc, item) => (item.name === name ? acc + item.stack : acc), 0);
+  }
+
+  /**
+   * @param {装备} equipment
+   * @returns {装备[]}
+   */
+  获取可合成装备(equipment) {
+    const 可合成装备 = this.items.filter((other) => equipment.可以合成(other));
+    _.remove(可合成装备, (other) => other === equipment);
+    return 可合成装备;
   }
 }
 

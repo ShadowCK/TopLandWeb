@@ -1,3 +1,4 @@
+import _ from 'lodash';
 import { ItemType } from '../enums.js';
 
 class 物品 {
@@ -17,7 +18,7 @@ class 物品 {
 
   constructor(itemConfig, stackOverride = null) {
     this.config = itemConfig;
-    Object.assign(this, itemConfig);
+    Object.assign(this, this.config);
     if (stackOverride) {
       this.stack = stackOverride;
       this.config.stack = stackOverride;

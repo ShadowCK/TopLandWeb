@@ -82,6 +82,40 @@ const randomCoordinate = (min, max) => {
   return magnitude * sign;
 };
 
+const applyStats = (stats, setValueCallback, recurConditional) => {
+  let callback = setValueCallback;
+  if (callback == null || !(callback instanceof Function)) {
+    callback = ({ value, currentPath }) => {
+      _.set(stats, currentPath, value);
+    };
+  }
+  let conditional = recurConditional;
+  if (conditional == null || !(conditional instanceof Function)) {
+    conditional = (value) => _.isObject(value);
+  }
+  const recur = (obj, path = []) => {
+    _.forEach(obj, (value, key) => {
+      const currentPath = path.concat(key);
+      if (conditional(value)) {
+        recur(value, currentPath);
+      } else {
+        callback({ value, currentPath, obj });
+      }
+    });
+  };
+  return recur(stats);
+};
+
+const sampleWeighted = (array) => {
+  const totalWeight = array.reduce((acc, element) => acc + element.weight, 0);
+  const rand = Math.random() * totalWeight;
+  let sum = 0;
+  return array.find((element) => {
+    sum += element.weight;
+    return rand < sum;
+  });
+};
+
 export {
   getDecimalPrecision,
   getMaxLevel,
@@ -90,4 +124,6 @@ export {
   deepMapObject,
   calcHealing,
   randomCoordinate,
+  applyStats,
+  sampleWeighted,
 };
