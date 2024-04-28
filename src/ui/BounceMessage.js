@@ -1,5 +1,5 @@
-import { getPositionData } from './htmlHelper.js';
-import { randomCoordinate } from './utils.js';
+import { getPositionData } from '../htmlHelper.js';
+import { randomCoordinate } from '../utils.js';
 
 class BounceMessage {
   element;
