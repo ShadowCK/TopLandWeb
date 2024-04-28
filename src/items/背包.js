@@ -1,4 +1,4 @@
-import _ from 'lodash';
+import _, { at } from 'lodash';
 import { ItemType } from '../enums.js';
 import { EventType, generalEvents } from '../events/事件管理器.js';
 import 物品 from './物品.js';
@@ -37,17 +37,20 @@ class 背包 {
 
   /**
    * @param {物品} item
+   * @param {number} count
+   * @param {number} atIndex
    */
-  addItem(item, count = 1) {
+  addItem(item, count = 1, atIndex = null) {
     const config = _.cloneDeep(item.config);
     if (item instanceof 装备) {
       _.merge(config, _.pick(item, 装备存档数据));
     }
     const prevLength = this.items.length;
-    const addOne = () => {
-      if (!item.stackable) {
+    if (!item.stackable) {
+      let index = atIndex != null && atIndex !== -1 ? atIndex : this.items.length;
+      _.times(count, () => {
         const newItem = new item.constructor(config);
-        const index = this.items.push(newItem) - 1;
+        this.items.splice(index, 0, newItem);
         generalEvents.emit(EventType.获得物品, {
           container: this,
           index,
@@ -55,46 +58,52 @@ class 背包 {
           stack: 1,
           prevLength,
         });
-        return;
-      }
+        index += 1;
+      });
+      return;
+    }
 
-      const stacksToAdd = item.stack * count;
-      let stackLeft = stacksToAdd;
-      // 堆叠在已有物品
-      for (let i = 0; i < this.items.length; i++) {
-        if (stackLeft <= 0) {
-          break;
-        }
-        const existingItem = this.items[i];
-        if (existingItem.name === item.name) {
-          const added = Math.min(stackLeft, existingItem.maxStack - existingItem.stack);
-          existingItem.stack += added;
-          stackLeft -= added;
-          generalEvents.emit(EventType.获得物品, {
-            container: this,
-            index: i,
-            item: existingItem,
-            stack: added,
-            prevLength,
-          });
-        }
-      }
-      // 作为新物品
+    const stacksToAdd = item.stack * count;
+    let stackLeft = stacksToAdd;
+    const addToIndex = (index) => {
+      let _index = atIndex != null && atIndex !== -1 ? index : this.items.length;
+      // TODO：优化性能，不要用while，直接计算出要插入几个元素（N个最大堆叠+1剩余堆叠）并用splice插入
       while (stackLeft > 0) {
         const newItem = new item.constructor(config);
         newItem.stack = Math.min(stackLeft, newItem.maxStack);
         stackLeft -= newItem.stack;
-        this.items.push(newItem);
+        this.items.splice(_index, 0, newItem);
         generalEvents.emit(EventType.获得物品, {
           container: this,
-          index: this.items.length - 1,
+          index: _index,
           item: newItem,
           stack: newItem.stack,
           prevLength,
         });
+        _index += 1;
       }
     };
-    _.times(count, () => addOne());
+    // 堆叠在已有物品
+    for (let i = 0; i < this.items.length; i++) {
+      if (stackLeft <= 0) {
+        break;
+      }
+      const existingItem = this.items[i];
+      if (existingItem.name === item.name) {
+        const added = Math.min(stackLeft, existingItem.maxStack - existingItem.stack);
+        existingItem.stack += added;
+        stackLeft -= added;
+        generalEvents.emit(EventType.获得物品, {
+          container: this,
+          index: i,
+          item: existingItem,
+          stack: added,
+          prevLength,
+        });
+      }
+    }
+    // 放置在指定位置或末尾
+    addToIndex(atIndex);
   }
 
   removeItemAt(index) {
@@ -122,7 +131,7 @@ class 背包 {
 
   removeItems(items) {
     const prevLength = this.items.length;
-    items.forEach(item => {
+    items.forEach((item) => {
       const index = this.items.indexOf(item);
       if (index === -1) {
         console.error('Trying to remove an item that is not in the bag');
@@ -145,7 +154,11 @@ class 背包 {
   removeAll(emitEvent) {
     const items = Array.from(this.items);
     this.items.length = 0;
-    generalEvents.emit(EventType.失去物品, { container: this, item :items, prevLength: items.length});
+    generalEvents.emit(EventType.失去物品, {
+      container: this,
+      item: items,
+      prevLength: items.length,
+    });
   }
 
   /**
