@@ -160,11 +160,13 @@ class 背包 {
   removeAll(emitEvent) {
     const items = Array.from(this.items);
     this.items.length = 0;
-    generalEvents.emit(EventType.失去物品, {
-      container: this,
-      item: items,
-      prevLength: items.length,
-    });
+    if (emitEvent) {
+      generalEvents.emit(EventType.失去物品, {
+        container: this,
+        item: items,
+        prevLength: items.length,
+      });
+    }
   }
 
   /**
