@@ -41,12 +41,15 @@ class 装备 extends 物品 {
     if (!entity.装备[this.slot]) {
       entity.装备[this.slot] = [];
     }
+    const 装备槽数量 = entity.职业.装备槽[this.slot] || 0;
+    if (装备槽数量 <= 0) {
+      return false;
+    }
     const typeEquipments = entity.装备[this.slot];
     // 如果实体已经装备了这个装备，就不再装备
     if (entity.拥有装备(this)) {
-      return;
+      return false;
     }
-    const 装备槽数量 = entity.职业.装备槽[this.slot] || 0;
     if (typeEquipments.length >= 装备槽数量 && 装备槽数量 > 0) {
       // 脱下第一件装备。不用让玩家选择脱哪一件，他们可以手动脱。
       typeEquipments[0].脱下(entity, true);
@@ -55,6 +58,7 @@ class 装备 extends 物品 {
     typeEquipments.unshift(this);
     entity.updateStats();
     generalEvents.emit(EventType.穿上装备, { entity, equipment: this });
+    return true;
   }
 
   /**
