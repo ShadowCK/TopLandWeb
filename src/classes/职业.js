@@ -7,7 +7,7 @@ import { EquipSlot } from '../enums.js';
 class 职业 {
   requirements = {};
 
-  /** @type {import('../combat/实体.js').default} */
+  /** @type {实体} */
   parent = null;
 
   name = '无名氏';
@@ -94,6 +94,14 @@ class 职业 {
 
   toSaveData() {
     return _.omit(this, 'parent');
+  }
+
+  /**
+   * @param {string} slot
+   * @returns {number}
+   */
+  获取装备槽数量(slot) {
+    return this.装备槽[slot] || 0;
   }
 }
 

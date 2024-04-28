@@ -19,12 +19,12 @@ class 实体 {
   /** @type {Object<string, 实体技能>} */
   技能 = {};
 
-  /** @type {import('../classes/职业.js').default} */
+  /** @type {职业} */
   职业 = null;
 
   魔典 = [];
 
-  /** @type {Object<string, import('../items/装备.js').default[]>} */
+  /** @type {Object<string, 装备[]>} */
   装备 = {};
 
   生命值 = 100;
@@ -382,7 +382,18 @@ class 实体 {
     this.stats = {};
     this.buffs = {};
     this.技能 = {};
+    this.updateStats();
     // TODO: 添加更多...
+  }
+
+  /**
+   * @param {string} slot
+   * @returns {boolean}
+   */
+  装备槽未满(slot) {
+    const 装备槽数量 = this.职业.获取装备槽数量(slot);
+    const typeEquipments = this.装备[this.slot];
+    return typeEquipments.length < 装备槽数量;
   }
 }
 
