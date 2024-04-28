@@ -577,11 +577,11 @@ const registerEvents = () => {
     }
   });
 
-  generalEvents.on(EventType.脱下装备, ({ entity, equipment, updateUI = true }) => {
+  generalEvents.on(EventType.脱下装备, ({ entity, equipment, updateUI = true, toIndex }) => {
     if (entity !== 玩家管理器.getPlayer()) {
       return;
     }
-    entity.背包.addItem(equipment);
+    entity.背包.addItem(equipment, 1, toIndex);
     // TODO: 更新指定装备栏。等装备栏布局完善后再实现，目前显示所有装备，并不理想。
     // 无脑刷新！太无脑了！
     if (updateUI) {

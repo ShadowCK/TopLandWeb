@@ -131,7 +131,7 @@ class 背包界面 {
     }
 
     // 超出大小则清理末尾一格
-    if (length > this.背包物品每页数量) {
+    if (this.getLength() > this.背包物品每页数量) {
       this.locElement(-1).remove();
     }
   }

@@ -4,6 +4,7 @@ import { EquipRarity, EquipSlot, ItemType } from '../enums.js';
 import { EventType, generalEvents } from '../events/事件管理器.js';
 import { config as gameConfig, 计算合成等级 } from '../settings.js';
 import { applyStats } from '../utils.js';
+import { getPlayer } from '../player/玩家管理器.js';
 
 class 装备 extends 物品 {
   // 改写继承自物品类的属性
@@ -52,7 +53,13 @@ class 装备 extends 物品 {
     }
     if (typeEquipments.length >= 装备槽数量 && 装备槽数量 > 0) {
       // 脱下第一件装备。不用让玩家选择脱哪一件，他们可以手动脱。
-      typeEquipments[0].脱下(entity, true);
+      const player = getPlayer();
+      if (entity === player) {
+        const index = player.背包.items.findIndex((item) => item === this);
+        typeEquipments[0].脱下(entity, true, index);
+      } else {
+        typeEquipments[0].脱下(entity, true);
+      }
     }
     // 将装备放到第一个装备槽
     typeEquipments.unshift(this);
@@ -64,10 +71,10 @@ class 装备 extends 物品 {
   /**
    * @param {import('../combat/实体.js').default} entity
    */
-  脱下(entity, 换装备 = false) {
+  脱下(entity, 换装备 = false, 换装备到 = null) {
     const typeEquipments = entity.装备[this.slot];
     if (!typeEquipments) {
-      console.error('Entity has no equipped items of this type');
+      console.error('不该发生的错误——实体没有存储该类型装备的数组。');
       return;
     }
     const index = typeEquipments.indexOf(this);
@@ -78,11 +85,16 @@ class 装备 extends 物品 {
     // 移除装备（this）
     typeEquipments.splice(index, 1);
     if (换装备) {
-      generalEvents.emit(EventType.脱下装备, { entity, equipment: this, updateUI: false });
+      generalEvents.emit(EventType.脱下装备, {
+        entity,
+        equipment: this,
+        updateUI: false,
+        toIndex: 换装备到,
+      });
       return;
     }
     entity.updateStats();
-    generalEvents.emit(EventType.脱下装备, { entity, equipment: this });
+    generalEvents.emit(EventType.脱下装备, { entity, equipment: this, toIndex: -1 });
   }
 
   /**
