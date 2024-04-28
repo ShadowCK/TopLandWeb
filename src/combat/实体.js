@@ -187,7 +187,7 @@ class 实体 {
     // this.stats/statGrowth没有就是肯定没有）。递归赋值可以---参考updateStats里的processStats的结构。---不，lodash有_.merge非常给力。
     // 总之，必须补全defaultStats，然后两个选择：1.检测defaultStats里是否有该属性，2.递归赋值defaultStats给statGrowth，并检测statGrowth里是否有该属性。
     if (base == null) {
-      // TODO 获取默认值，而不是0
+      // TODO 获取属性的默认值，而不是0
       return 0;
     }
     const result = calcBuffs ? getBuffedStat(this, { value: base, type: statType }) : base;

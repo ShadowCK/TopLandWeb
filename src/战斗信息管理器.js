@@ -1,8 +1,8 @@
 import _ from 'lodash';
-import BounceMessage from './BounceMessage.js';
+import BounceMessage from './ui/BounceMessage.js';
 import { getCombatLayout } from './htmlHelper.js';
 
-/** @type {import('./BounceMessage.js').default[]} */
+/** @type {import('./ui/BounceMessage.js').default[]} */
 const messages = [];
 
 const 生成伤害信息 = ({

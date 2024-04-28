@@ -28,6 +28,7 @@ import { GameSettingName } from '../enums.js';
 import { update as 更新战斗信息, 生成伤害信息, 生成治疗信息 } from '../战斗信息管理器.js';
 import 背包界面 from '../items/背包界面.js';
 import 技能栏界面 from '../skills/技能栏界面.js';
+import * as 区域界面 from '../ui/区域界面.js';
 
 let lastUpdate = performance.now();
 let htmlWorkerId = null;
@@ -276,53 +277,8 @@ const setupHTML = () => {
   }).wrap('<div class="column"></div>');
 
   // 区域面板
-  const 区域面板 = $('#区域面板');
-  _.forEach(战斗管理器.所有战斗区域, (战斗区域) => {
-    const 敌人信息 = Object.values(战斗区域.enemies)
-      .map((areaEnemyConfig) => {
-        const enemyConfig = areaEnemyConfig.config;
-        const label = areaEnemyConfig.isBoss ? labelHTML('BOSS', '', 'yellow', true) : '';
-        const dropsString =
-          enemyConfig.掉落.length > 0
-            ? enemyConfig.掉落
-                .map((drop) => `${drop.chance}%${drop.config.name}X${drop.count}`)
-                .join('，')
-            : '无';
-        return `
-        <div class="column">
-          <div class="ui segment">
-          <div>${enemyConfig.职业.name}${label}</div>
-            <div>金钱: ${enemyConfig.金钱}</div>
-            <div>经验值: ${enemyConfig.经验值}</div>
-            <div>掉落: ${dropsString}</div>
-          </div>
-        </div>
-      `;
-      })
-      .join('');
-    const element = $(`
-      <div class="ui segment">
-        <div class="ui medium header">
-          ${战斗区域.name}
-          <div class="sub header">${战斗区域.description}</div>
-        </div>
-        <div class="ui three column grid">
-          ${敌人信息}
-        </div>
-        <div class="ui divider"></div>
-        <button class="ui right labeled icon button">
-          <i class="right arrow icon"></i>
-          前往
-        </button>
-      </div>
-      `);
-    // 前往按钮
-    element.find('button').on('click', () => {
-      changeTab('战斗面板');
-      战斗管理器.切换战斗区域(战斗区域);
-    });
-    区域面板.append(element);
-  });
+  区域界面.init();
+  区域界面.refresh();
 
   // 战斗面板
   // 游戏初始化后，*如果玩家没有在战斗区域*，隐藏区域信息。（这个判断是为了兼容以后的自动化，比如游戏一开始就自动前往一个区域。）
