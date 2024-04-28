@@ -8,6 +8,7 @@ import { StatType } from './combat/战斗属性.js';
 import 装备 from './items/装备.js';
 import { SemanticUIColor } from './enums.js';
 import { 计算伤害分布 } from './combat/战斗管理器.js';
+import { ItemRequirementChinese } from './localization.js';
 
 const Format = {
   生命条格式: '生命值: {value} / {total}',
@@ -409,7 +410,7 @@ const genItem = (item) => {
         const success = item.穿上(player);
         if (!success) {
           $.toast({
-            message: '装备失败。无装备槽或已经装备了该物品。',
+            message: '装备失败。可能的情况：不满足装备要求，该类型的装备槽数量为0，或已经装备了该物品。',
             displayTime: 2000,
             showProgress: 'bottom',
             class: 'error chinese',
@@ -429,19 +430,31 @@ const genItem = (item) => {
       ? `${labelHTML(item.slot)}${labelHTML(
           '合成次数',
           `<span style="margin-right:0.5em">${item.合成次数}</span>`,
-        )}${labelHTML('合成增益', `X${_.round(item.获取合成增益(), 2)}`)}`
+        )}${labelHTML('合成增益', `X${_.round(item.获取合成增益(), 2)}`)}
+        <div class="装备需求容器" style="margin-top:0.5em"></div>`
       : ''
   }
       <div class="ui message">
         <p>${item.description}</p>
       </div>
-      ${isEquipment ? '<div class="ui horizontal wrapping segments"></div>' : ''}
+      ${isEquipment ? '<div class="ui horizontal wrapping segments 装备属性容器"></div>' : ''}
     </div>
     `);
   if (isEquipment) {
-    const segments = tempParent.find('.ui.segments');
+    const 装备需求容器 = tempParent.find('.装备需求容器');
+    _.forEach(item.requirements, (value, key) => {
+      const mapped = ItemRequirementChinese[key];
+      if (mapped == null) {
+        return;
+      }
+      装备需求容器.append(
+        labelHTML(mapped, `<span style="margin-right:0.5em">${value}</span>`, 'red'),
+      );
+    });
+
+    const 装备属性容器 = tempParent.find('.装备属性容器');
     _.forEach(item.获取实际属性(), (value, key) => {
-      genElementForEquipmentStat(segments, value, key, 'small');
+      genElementForEquipmentStat(装备属性容器, value, key, 'small');
     });
   }
   card.attr('data-variation', 'flowing');

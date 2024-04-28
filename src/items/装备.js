@@ -34,25 +34,56 @@ class 装备 extends 物品 {
     Object.assign(this, _.pick(config, arr));
   }
 
-  // TODO: 穿上和脱下转到实体类中
+  hasMetRequirements = (entity) => {
+    const { level: levelReq, expertiseLevel: expertiseReq } = this.requirements;
+    const { level, expertiseLevel } = entity.职业;
+    if (levelReq != null && levelReq > level) {
+      return false;
+    }
+    if (expertiseReq != null && expertiseReq > expertiseLevel) {
+      return false;
+    }
+    return true;
+  };
+
+  // TODO: 可以穿上，穿上和脱下转到实体类中。或者实体类加一个桥接方法？
   /**
-   * @param {import('../combat/实体.js').default} entity
+   * @param {实体} entity
+   * @param {boolean} canSwap 如果装备槽已满，是否可以脱下一件装备再穿上
    */
-  穿上(entity) {
+  可以穿上(entity, canSwap = true, checkReqs = true) {
     if (!entity.装备[this.slot]) {
       entity.装备[this.slot] = [];
     }
-    const 装备槽数量 = entity.职业.装备槽[this.slot] || 0;
+    const 装备槽数量 = entity.职业.获取装备槽数量(this.slot);
     if (装备槽数量 <= 0) {
       return false;
     }
-    const typeEquipments = entity.装备[this.slot];
     // 如果实体已经装备了这个装备，就不再装备
     if (entity.拥有装备(this)) {
       return false;
     }
-    if (typeEquipments.length >= 装备槽数量 && 装备槽数量 > 0) {
-      // 脱下第一件装备。不用让玩家选择脱哪一件，他们可以手动脱。
+    const hasMetRequirements = checkReqs ? this.hasMetRequirements(entity) : true;
+    if (canSwap) {
+      return hasMetRequirements;
+    }
+    return entity.装备槽未满(this.slot) && hasMetRequirements;
+  }
+
+  /**
+   * 为实体穿上装备。如果装备槽已满，会脱下第一件装备。
+   * @param {实体} entity
+   */
+  穿上(entity, canSwap = true, checkReqs = true) {
+    if (!this.可以穿上(entity, canSwap, checkReqs)) {
+      return false;
+    }
+    const typeEquipments = entity.装备[this.slot];
+    if (!typeEquipments) {
+      throw new Error('不该发生的错误——实体没有存储该类型装备的数组。');
+    }
+    if (!entity.装备槽未满(this.slot)) {
+      // 脱下第一件装备。不需要为玩家提供脱哪一件的选择，玩家可以手动脱。
       const player = getPlayer();
       if (entity === player) {
         const index = player.背包.items.findIndex((item) => item === this);
@@ -69,9 +100,10 @@ class 装备 extends 物品 {
   }
 
   /**
-   * @param {import('../combat/实体.js').default} entity
+   * @param {实体} entity
    */
   脱下(entity, 换装备 = false, 换装备到 = null) {
+    // 有效性检查——是否真的装备了这个装备。
     const typeEquipments = entity.装备[this.slot];
     if (!typeEquipments) {
       console.error('不该发生的错误——实体没有存储该类型装备的数组。');
