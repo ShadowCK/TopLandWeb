@@ -29,7 +29,7 @@ class 背包视图 extends 背包类 {
 
   setFilter(filter, emitEvent = false) {
     this.filter = filter;
-    this.removeAll();
+    this.removeAll(emitEvent);
     this.背包.items.forEach((item) => {
       if (filter(item)) {
         this.items.push(item);

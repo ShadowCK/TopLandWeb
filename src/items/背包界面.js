@@ -63,14 +63,14 @@ class 背包界面 {
       if (!itemElement) {
         itemElement = genItemElement(item);
         this.itemElements.set(item, itemElement);
-      } else if (itemElement.index() !== index) {
+      } else if (itemElement.index('.column') !== index) {
         itemElement.remove();
         itemElement = genItemElement(item);
         this.itemElements.set(item, itemElement);
       } else {
         return;
       }
-      const nextElement = this.getHtml().children().eq(index);
+      const nextElement = this.locElement(index);
       if (nextElement.length !== 0) {
         itemElement.insertBefore(nextElement);
       } else {
@@ -95,9 +95,6 @@ class 背包界面 {
   }
 
   locElement(index) {
-    if (index === -1) {
-      return this.getHtml().children('.column').last();
-    }
     return this.getHtml().children('.column').eq(index);
   }
 
@@ -124,6 +121,7 @@ class 背包界面 {
     }
 
     const newItemElement = genItemElement(item);
+    this.itemElements.set(item, newItemElement);
     if (index === length) {
       this.getHtml().append(newItemElement);
     } else {
@@ -132,7 +130,7 @@ class 背包界面 {
 
     // 超出大小则清理末尾一格
     if (this.getLength() > this.背包物品每页数量) {
-      this.locElement(-1).remove();
+      this.removeItem(this.getLength() - 1);
     }
   }
 
@@ -152,7 +150,12 @@ class 背包界面 {
       throw new Error();
     }
 
-    this.locElement(index).remove();
+    const removedElement = this.locElement(index).remove();
+    this.itemElements.forEach((itemKey, itemElement) => {
+      if (itemElement === removedElement) {
+        this.itemElements.delete(itemKey);
+      }
+    });
   }
 
   resetPaginationNav(activePageIndex) {
@@ -315,7 +318,6 @@ class 背包界面 {
     const filter = (item) => item.name.includes(searchText);
     if (prevSearchText === '') {
       // 全新搜索，创建背包视图
-      this.getHtml().empty();
       this.背包 = new 背包视图(this.主背包备份, filter);
     } else if (searchText !== '') {
       // 搜索变化，设置filter
@@ -325,7 +327,6 @@ class 背包界面 {
       if (this.背包 === this.主背包备份) {
         throw new Error('之前搜索过，怎么能是一样的？？');
       }
-      this.getHtml().empty();
       this.背包.unregisterHandlers();
       this.背包 = this.主背包备份;
     }
