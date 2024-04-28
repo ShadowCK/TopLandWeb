@@ -406,7 +406,15 @@ const genItem = (item) => {
       if (player.拥有装备(item)) {
         item.脱下(player);
       } else if (player.背包.hasItem(item)) {
-        item.穿上(player);
+        const success = item.穿上(player);
+        if (!success) {
+          $.toast({
+            message: '装备失败。无装备槽或已经装备了该物品。',
+            displayTime: 2000,
+            showProgress: 'bottom',
+            class: 'error chinese',
+          });
+        }
       } else {
         console.error('玩家没有这个装备');
       }
@@ -532,7 +540,7 @@ const genItem = (item) => {
           const 可合成装备 = player.背包.获取可合成装备(item);
           if (可合成装备.length === 0) {
             $.toast({
-              class: 'chinese',
+              class: 'error chinese',
               message: '没有可合成的装备。',
             });
             return;
