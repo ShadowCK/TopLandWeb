@@ -392,7 +392,7 @@ class 实体 {
    */
   装备槽未满(slot) {
     const 装备槽数量 = this.职业.获取装备槽数量(slot);
-    const typeEquipments = this.装备[this.slot];
+    const typeEquipments = this.装备[slot];
     return typeEquipments.length < 装备槽数量;
   }
 }
