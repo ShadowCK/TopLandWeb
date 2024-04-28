@@ -106,13 +106,13 @@ const applyStats = (stats, setValueCallback, recurConditional) => {
   return recur(stats);
 };
 
-const sampleWeighted = (array) => {
+const sampleWeighted = (array, baseMult = 0) => {
   const totalWeight = array.reduce((acc, element) => acc + element.weight, 0);
-  const rand = Math.random() * totalWeight;
+  const rand = _.random(Math.min(baseMult, 1) * totalWeight, totalWeight, true);
   let sum = 0;
   return array.find((element) => {
     sum += element.weight;
-    return rand < sum;
+    return rand <= sum;
   });
 };
 

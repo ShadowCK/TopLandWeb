@@ -1,3 +1,4 @@
+import _ from 'lodash';
 import 实体 from './实体.js';
 import 职业 from '../classes/职业.js';
 
@@ -18,7 +19,7 @@ class 敌人 extends 实体 {
 
   constructor(enemyConfig, isBoss = false, statMultiplier = 1) {
     super();
-    const copy = JSON.parse(JSON.stringify(enemyConfig));
+    const copy = _.cloneDeep(enemyConfig);
     Object.assign(this, copy);
     this.isBoss = isBoss;
     this.statMultiplier = statMultiplier;

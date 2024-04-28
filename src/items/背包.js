@@ -27,12 +27,13 @@ class 背包 {
 
   addItemFromConfig(itemConfig, count = 1) {
     if (itemConfig.type === ItemType.装备) {
-      this.addItem(new 装备(itemConfig), count);
-    } else if (itemConfig.type === ItemType.物品) {
-      this.addItem(new 物品(itemConfig), count);
-    } else {
-      console.error('未知物品类型', itemConfig.type);
+      return this.addItem(new 装备(itemConfig), count);
     }
+    if (itemConfig.type === ItemType.物品) {
+      return this.addItem(new 物品(itemConfig), count);
+    }
+    console.error('未知物品类型', itemConfig.type);
+    return [];
   }
 
   /**
@@ -41,6 +42,7 @@ class 背包 {
    * @param {number} atIndex
    */
   addItem(item, count = 1, atIndex = null) {
+    const added = [];
     const config = _.cloneDeep(item.config);
     if (item instanceof 装备) {
       _.merge(config, _.pick(item, 装备存档数据));
@@ -51,6 +53,7 @@ class 背包 {
       _.times(count, () => {
         const newItem = new item.constructor(config);
         this.items.splice(index, 0, newItem);
+        added.push(newItem);
         generalEvents.emit(EventType.获得物品, {
           container: this,
           index,
@@ -60,7 +63,7 @@ class 背包 {
         });
         index += 1;
       });
-      return;
+      return added;
     }
 
     const stacksToAdd = item.stack * count;
@@ -73,6 +76,7 @@ class 背包 {
         newItem.stack = Math.min(stackLeft, newItem.maxStack);
         stackLeft -= newItem.stack;
         this.items.splice(_index, 0, newItem);
+        added.push(newItem);
         generalEvents.emit(EventType.获得物品, {
           container: this,
           index: _index,
@@ -90,20 +94,22 @@ class 背包 {
       }
       const existingItem = this.items[i];
       if (existingItem.name === item.name) {
-        const added = Math.min(stackLeft, existingItem.maxStack - existingItem.stack);
-        existingItem.stack += added;
-        stackLeft -= added;
+        // 堆叠的物品不加到added里，因为不是新物品
+        const usedStacks = Math.min(stackLeft, existingItem.maxStack - existingItem.stack);
+        existingItem.stack += usedStacks;
+        stackLeft -= usedStacks;
         generalEvents.emit(EventType.获得物品, {
           container: this,
           index: i,
           item: existingItem,
-          stack: added,
+          stack: usedStacks,
           prevLength,
         });
       }
     }
     // 放置在指定位置或末尾
     addToIndex(atIndex);
+    return added;
   }
 
   removeItemAt(index) {
