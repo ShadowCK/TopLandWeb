@@ -116,6 +116,21 @@ const sampleWeighted = (array) => {
   });
 };
 
+const findLeaves = (obj, path = '') =>
+  _.reduce(
+    obj,
+    (result, value, key) => {
+      const currentPath = path ? `${path}.${key}` : key;
+      if (_.isObject(value) && !_.isEmpty(value)) {
+        _.extend(result, findLeaves(value, currentPath));
+      } else {
+        result[currentPath] = value;
+      }
+      return result;
+    },
+    {},
+  );
+
 export {
   getDecimalPrecision,
   getMaxLevel,
@@ -126,4 +141,5 @@ export {
   randomCoordinate,
   applyStats,
   sampleWeighted,
+  findLeaves,
 };

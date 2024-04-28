@@ -74,7 +74,7 @@ const wrapHtml = (htmlString, tags) => {
       result = `<${tags[i]}>${result}</${tags[i]}>`;
     } else {
       const { name, settings } = tags[i];
-      result = `<${name} ${settings}}>${result}</${name}>`;
+      result = `<${name} ${settings}>${result}</${name}>`;
     }
   }
   return result;
@@ -416,17 +416,26 @@ const genItem = (item) => {
   const tempParent = $(/* html */ `
     <div>
       <h3 class="ui header">${item.name}<span class="装备等级"></span></h3>
-      ${labelHTML(item.type)}${isEquipment ? labelHTML(item.slot) : ''}
+      ${labelHTML(item.type)}${
+    isEquipment
+      ? `${labelHTML(item.slot)}${labelHTML(
+          '合成次数',
+          `<span style="margin-right:0.5em">${item.合成次数}</span>`,
+        )}${labelHTML('合成增益', `X${_.round(item.获取合成增益(), 2)}`)}`
+      : ''
+  }
       <div class="ui message">
         <p>${item.description}</p>
       </div>
-      <div class="ui horizontal wrapping segments"></div>
+      ${isEquipment ? '<div class="ui horizontal wrapping segments"></div>' : ''}
     </div>
     `);
-  const grid = tempParent.find('.ui.segments');
-  _.forEach(item.stats, (value, key) => {
-    genElementForEquipmentStat(grid, value, key, 'small');
-  });
+  if (isEquipment) {
+    const segments = tempParent.find('.ui.segments');
+    _.forEach(item.获取实际属性(), (value, key) => {
+      genElementForEquipmentStat(segments, value, key, 'small');
+    });
+  }
   card.attr('data-variation', 'flowing');
   card.popup({
     on: 'hover',

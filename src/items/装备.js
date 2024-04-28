@@ -114,13 +114,20 @@ class 装备 extends 物品 {
     return 计算合成等级(this.合成次数);
   }
 
+  获取合成增益() {
+    return 1 + this.获取合成等级() * gameConfig.合成等级加成;
+  }
+
   获取实际属性() {
     // TODO: 品质...
     // TODO: 品阶...
-    const 合成等级 = this.获取合成等级();
+    const 合成增益 = this.获取合成增益();
     const stats = _.cloneDeep(this.stats);
     applyStats(stats, ({ value, currentPath }) => {
-      _.set(stats, currentPath, value * (1 + 合成等级 * gameConfig.合成等级加成));
+      const _currentPath = currentPath.join('.');
+      const 可增益 =
+        gameConfig.可增益属性.findIndex((path) => _currentPath.startsWith(path)) !== -1;
+      _.set(stats, currentPath, 可增益 ? value * 合成增益 : value);
     });
     return stats;
   }
