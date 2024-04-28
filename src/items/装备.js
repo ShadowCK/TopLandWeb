@@ -167,7 +167,7 @@ class 装备 extends 物品 {
   }
 
   获取实际属性() {
-    // TODO: 品质...
+    const 品质倍率 = gameConfig.装备属性品质倍率[this.品质];
     // TODO: 品阶...
     const 合成增益 = this.获取合成增益();
     const stats = _.cloneDeep(this.stats);
@@ -175,7 +175,8 @@ class 装备 extends 物品 {
       const _currentPath = currentPath.join('.');
       const 可增益 =
         gameConfig.可增益属性.findIndex((path) => _currentPath.startsWith(path)) !== -1;
-      _.set(stats, currentPath, 可增益 ? value * 合成增益 : value);
+      const mult = 可增益 ? 合成增益 * 品质倍率 : 品质倍率;
+      _.set(stats, currentPath, value * mult);
     });
     return stats;
   }

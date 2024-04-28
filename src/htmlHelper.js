@@ -6,7 +6,7 @@ import * as 玩家管理器 from './player/玩家管理器.js';
 import { getDecimalPrecision } from './utils.js';
 import { StatType } from './combat/战斗属性.js';
 import 装备 from './items/装备.js';
-import { SemanticUIColor } from './enums.js';
+import { EquipRarityInverted, SemanticUIColor } from './enums.js';
 import { 计算伤害分布 } from './combat/战斗管理器.js';
 import { ItemRequirementChinese } from './localization.js';
 
@@ -410,7 +410,8 @@ const genItem = (item) => {
         const success = item.穿上(player);
         if (!success) {
           $.toast({
-            message: '装备失败。可能的情况：不满足装备要求，该类型的装备槽数量为0，或已经装备了该物品。',
+            message:
+              '装备失败。可能的情况：不满足装备要求，该类型的装备槽数量为0，或已经装备了该物品（异常）。',
             displayTime: 2000,
             showProgress: 'bottom',
             class: 'error chinese',
@@ -424,7 +425,9 @@ const genItem = (item) => {
   // popup content
   const tempParent = $(/* html */ `
     <div>
-      <h3 class="ui header">${item.name}<span class="装备等级"></span></h3>
+      <h3 class="ui header"><span class="装备品质"></span>${
+        item.name
+      }<span class="装备等级"></span></h3>
       ${labelHTML(item.type)}${
     isEquipment
       ? `${labelHTML(item.slot)}${labelHTML(
@@ -472,18 +475,22 @@ const genItem = (item) => {
     html: compressHTML(tempParent.html()),
     onShow: function onShow() {
       if (isEquipment) {
+        this.find('.装备品质').text(`[${EquipRarityInverted[item.品质]}]`);
         this.find('.装备等级').text(` LV.${_.round(item.获取合成等级())}`);
       }
     },
     onCreate: function onCreate() {
+      this.addClass('chinese');
       if (!isEquipment) {
+        this.find('.装备品质').remove();
         this.find('.装备等级').remove();
       }
     },
   });
   // 右键打开物品的context menu
   // 创建一个新的隐藏div绑定到右键菜单的popup，好处是不会影响原来的popup（一个元素只能有一个popup）
-  const hidden = card.append('<div></div>').children().last(); // TODO: 为什么先创建再append就不会有效，上面的明明可以
+   // TODO: 为什么先创建元素并注册popup, 添加css等再append就不会有效，上面的明明可以
+  const hidden = card.append('<div></div>').children().last();
   hidden.css({
     visibility: 'hidden',
     position: 'absolute',
@@ -493,14 +500,14 @@ const genItem = (item) => {
     height: '100%',
   });
   const contextHTML = /* html */ `
-      <div class="ui vertical menu">
+      <div class="ui vertical menu" style="width: 18rem">
         <a class="item" data-use="丢弃">丢弃</a>
         <a class="item" data-use="丢弃同名物品">
           丢弃同名物品
           <div class="ui label">0</div>
         </a>
         <a class="item" data-use="合成">
-        合成（升级）
+        合成（保留最高品质）
         <div class="ui label">0</div>
       </a>
       </div>
@@ -523,6 +530,7 @@ const genItem = (item) => {
       return true;
     },
     onCreate: function onCreate() {
+      this.addClass('chinese');
       this.on('click', (e) => {
         e.stopPropagation();
       });

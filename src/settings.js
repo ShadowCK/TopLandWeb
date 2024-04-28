@@ -1,6 +1,7 @@
 import _ from 'lodash';
 import * as math from 'mathjs';
 import { addToWindow, isProduction } from './debug.js';
+import { EquipRarity } from './enums.js';
 
 // 计算实际属性时，基础值、Buff等加成的应用顺序
 const 默认优先级 = {
@@ -70,6 +71,24 @@ const config = {
     '幸运值',
     '最大魔典数',
   ],
+  装备稀有度分布: {
+    [EquipRarity.粗糙]: 100,
+    [EquipRarity.普通]: 200,
+    [EquipRarity.优良]: 100,
+    [EquipRarity.稀有]: 50,
+    [EquipRarity.史诗]: 20,
+    [EquipRarity.传说]: 5,
+    [EquipRarity.神器]: 1,
+  },
+  装备属性品质倍率: {
+    [EquipRarity.粗糙]: 0.85,
+    [EquipRarity.普通]: 1,
+    [EquipRarity.优良]: 1.1,
+    [EquipRarity.稀有]: 1.2,
+    [EquipRarity.史诗]: 1.3,
+    [EquipRarity.传说]: 1.4,
+    [EquipRarity.神器]: 1.5,
+  },
 };
 
 // 游戏设置，有些影响游戏性，有些影响用户体验。
@@ -111,6 +130,15 @@ const get最高专精等级经验倍率 = (最高专精等级) => {
   return mult;
 };
 
+/**
+ * @param {number} 幸运值
+ * @returns {number} 总点数为100时的基数数值。
+ */
+const 计算品质roll点基数 = (幸运值) => {
+  const formula = '(85 * luck) / (100 + 1 * luck)';
+  return math.evaluate(formula, { luck: 幸运值 });
+};
+
 const setGameSpeed = (speed) => {
   if (isProduction() && (speed < 0 || speed > 10)) {
     console.error('游戏倍速必须在0到10之间');
@@ -128,7 +156,8 @@ export {
   计算合成等级,
   config,
   config as gameConfig,
-  get最高专精等级经验倍率,
   settings,
+  get最高专精等级经验倍率,
+  计算品质roll点基数,
   setGameSpeed,
 };

@@ -3,10 +3,11 @@ import { DamageSource, DamageType, StatType } from './战斗属性.js';
 import { getPlayer } from '../player/玩家管理器.js';
 import { 战斗区域, configs } from './战斗区域.js';
 import { EventType, HTMLEvents, combatEvents } from '../events/事件管理器.js';
-import { gameConfig } from '../settings.js';
-import { calcHealing } from '../utils.js';
+import { gameConfig, 计算品质roll点基数 } from '../settings.js';
+import { calcHealing, sampleWeighted } from '../utils.js';
 import 敌人 from './敌人.js';
 import 队友 from './队友.js';
+import { ItemType } from '../enums.js';
 
 /** @type {import('./战斗区域.js').战斗区域} */
 let 当前战斗区域 = null;
@@ -371,7 +372,20 @@ const registerEvents = () => {
         if (Math.random() * 100 >= dropConfig.chance * 掉落倍率) {
           return;
         }
-        player.背包.addItemFromConfig(dropConfig.config, dropConfig.count);
+        const added = player.背包.addItemFromConfig(dropConfig.config, dropConfig.count);
+        if (dropConfig.config.type === ItemType.装备) {
+          // 决定装备的品质
+          const mapped = _.map(gameConfig.装备稀有度分布, (weight, key) => ({
+            weight,
+            key,
+          }));
+          // 不会掉落比重区间低于基数的品质。
+          const baseMult = 计算品质roll点基数(幸运值) / 100;
+          const rolled = Number(sampleWeighted(mapped, baseMult).key);
+          added.forEach((item) => {
+            item.品质 = rolled;
+          });
+        }
       });
       当前战斗区域.removeEnemy(entity);
     }

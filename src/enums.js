@@ -1,3 +1,5 @@
+import _ from 'lodash';
+
 const ItemType = {
   物品: '物品',
   装备: '装备',
@@ -12,6 +14,8 @@ const EquipRarity = {
   传说: 5,
   神器: 6,
 };
+
+const EquipRarityInverted = _.invert(EquipRarity);
 
 const EquipSlot = {
   武器: '武器',
@@ -67,4 +71,5 @@ export {
   ComponentType,
   SkillAttribute,
   EquipRarity,
+  EquipRarityInverted,
 };
