@@ -219,7 +219,7 @@ class 背包界面 {
       this.resetPaginationNav(activePageIndex);
     }
 
-    if (Object.prototype.hasOwnProperty.call(item, 'length')) {
+    if (Array.isArray(item)) {
       this.refresh();
       return;
     }
@@ -264,8 +264,7 @@ class 背包界面 {
       }
     }
 
-    
-    if (Object.prototype.hasOwnProperty.call(item, 'length')) {
+    if (Array.isArray(item)) {
       this.refresh();
       return;
     }

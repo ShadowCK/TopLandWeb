@@ -10,7 +10,7 @@ class 背包视图 extends 背包类 {
 
   addItemHandle = this.addItemCallback.bind(this);
 
-  removeItemHandle= this.removeItemCallback.bind(this)
+  removeItemHandle = this.removeItemCallback.bind(this);
 
   constructor(背包, filter) {
     super();
@@ -96,15 +96,15 @@ class 背包视图 extends 背包类 {
   }
 
   removeItemCallback({ container, item, prevLength }) {
-    if (container !== this.背包 ) {
+    if (container !== this.背包) {
       return;
     }
 
-    if (Object.prototype.hasOwnProperty.call(item, 'length')) {
-      const toRemoveItems = item.filter(i => this.filter(i));
-      toRemoveItems.forEach(toRemoveItem => {
+    if (Array.isArray(item)) {
+      const toRemoveItems = item.filter((i) => this.filter(i));
+      toRemoveItems.forEach((toRemoveItem) => {
         this.items.splice(this.items.indexOf(toRemoveItem), 1);
-      })
+      });
       generalEvents.emit(EventType.失去物品, {
         container: this,
         index: -1,
