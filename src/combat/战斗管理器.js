@@ -9,7 +9,7 @@ import 敌人 from './敌人.js';
 import 队友 from './队友.js';
 import { ItemType } from '../enums.js';
 
-/** @type {import('./战斗区域.js').战斗区域} */
+/** @type {战斗区域} */
 let 当前战斗区域 = null;
 
 const isPlayerInCombat = () => 当前战斗区域 !== null;
