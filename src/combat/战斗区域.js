@@ -112,6 +112,31 @@ const configs = {
       },
     },
   },
+  name: '永霜要塞',
+  description: '昔日寒霜王朝领下的一所要塞，内部已然腐朽。',
+  enemies: {
+    霜铠剑士: {
+      config: 敌人信息.霜铠剑士,
+      weight: 100,
+    },
+    冰封术士: {
+      config: 敌人信息.冰封术士,
+      weight: 50,
+    },
+    雪花傀儡: {
+      config: 敌人信息.雪花傀儡,
+      weight: 25,
+    },
+    冰晶傀儡: {
+      config: 敌人信息.冰晶傀儡,
+      weight: 25,
+    },
+    要塞领主: {
+      config: 敌人信息.要塞领主,
+      weight: 1,
+      isBoss: true,
+    },
+  },
 };
 
 class 战斗区域 {
