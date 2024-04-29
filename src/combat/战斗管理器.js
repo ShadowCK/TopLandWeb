@@ -38,7 +38,6 @@ const 所有战斗区域 = {};
 
 // 可以放到init? 虽然放这里也能用
 _.forEach(configs, (config) => {
-  debugger;
   所有战斗区域[config.name] = new 战斗区域(config);
 });
 
