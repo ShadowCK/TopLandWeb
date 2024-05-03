@@ -28,16 +28,31 @@ const getMaxLevel = (baseMaxLevel, expertiseLevel) =>
 const template = (str, data) =>
   str.replace(/{{(.*?)}}/gs, (match, key) => (data[key] !== undefined ? data[key] : match));
 
-const templateFromElement = (element, data, apply = true) => {
+const templateFromElement = (element, data, apply = true, isText = true) => {
   // 使用jQuery缓存模板
   const e = $(element);
-  const str = e.data('template') || e.text();
-  if (!e.data('template')) {
-    e.data('template', str);
+
+  if (isText) {
+    if (!e.data('template')) {
+      e.data('template', e.text());
+    }
+    const str = e.data('template');
+    const result = template(str, data);
+    if (apply) {
+      e.text(result);
+    }
+    return result;
   }
-  const result = template(str, data);
+  if (!e.data('template')) {
+    e.data('template', e.html());
+  }
+  const html = e.data('template');
+  if (!e.data('template')) {
+    e.data('template', html);
+  }
+  const result = template(html, data);
   if (apply) {
-    e.text(result);
+    e.html(result);
   }
   return result;
 };

@@ -91,6 +91,13 @@ const config = {
     [EquipRarity.传说]: 1.4,
     [EquipRarity.神器]: 1.5,
   },
+  品质roll点公式: '(85 * luck) / (100 + 1 * luck)',
+  抽奖奖励固定数值公式: '1 + times^1.2',
+  抽奖奖励百分比公式: '1 + times^0.8',
+  抽奖花费基础金钱: 100,
+  抽奖花费基础专精: 1,
+  抽奖花费金钱公式: 'base * (10 * times + 5^times)',
+  抽奖花费专精公式: 'base * (1 + 2 * times)',
 };
 
 // 游戏设置，有些影响游戏性，有些影响用户体验。
@@ -136,9 +143,20 @@ const get最高专精等级经验倍率 = (最高专精等级) => {
  * @param {number} 幸运值
  * @returns {number} 总点数为100时的基数数值。
  */
-const 计算品质roll点基数 = (幸运值) => {
-  const formula = '(85 * luck) / (100 + 1 * luck)';
-  return math.evaluate(formula, { luck: 幸运值 });
+const 计算品质roll点基数 = (幸运值) => math.evaluate(config.品质roll点公式, { luck: 幸运值 });
+
+const 计算抽奖奖励 = (times, 固定数值buff = true) => {
+  if (固定数值buff) {
+    return math.evaluate(config.抽奖奖励固定数值公式, { times });
+  }
+  return math.evaluate(config.抽奖奖励百分比公式, { times });
+};
+
+const 计算抽奖花费 = (times, useExpertise) => {
+  if (useExpertise) {
+    return math.evaluate(config.抽奖花费专精公式, { times, base: config.抽奖花费基础专精 });
+  }
+  return math.evaluate(config.抽奖花费金钱公式, { times, base: config.抽奖花费基础金钱 });
 };
 
 const setGameSpeed = (speed) => {
@@ -161,5 +179,7 @@ export {
   settings,
   get最高专精等级经验倍率,
   计算品质roll点基数,
+  计算抽奖奖励,
+  计算抽奖花费,
   setGameSpeed,
 };

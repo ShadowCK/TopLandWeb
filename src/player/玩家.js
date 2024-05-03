@@ -5,7 +5,7 @@ import { get最高专精等级经验倍率 } from '../settings.js';
 import { 退出战斗区域 } from '../combat/战斗管理器.js';
 
 class 玩家 extends 实体 {
-  /** @type {import('../player/玩家存档.js').default} */
+  /** @type {玩家存档} */
   玩家存档 = null;
 
   背包 = new 背包();
@@ -16,6 +16,12 @@ class 玩家 extends 实体 {
 
   /** @type{{[专精名:string]:number}} */
   专精等级 = {};
+
+  抽奖用专精等级 = 0;
+
+  金钱抽奖次数 = 0;
+
+  专精抽奖次数 = 0;
 
   // 目前不需要额外的构造函数
 
@@ -36,8 +42,11 @@ class 玩家 extends 实体 {
   }
 
   reset() {
-    退出战斗区域();
     super.reset();
+    退出战斗区域();
+    this.抽奖用专精等级 = 0;
+    this.金钱抽奖次数 = 0;
+    this.专精抽奖次数 = 0;
     // TODO: 添加更多...
   }
 }

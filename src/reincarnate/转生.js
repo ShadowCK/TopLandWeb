@@ -48,6 +48,7 @@ const 转生 = (player, 新职业名称) => {
   player.reset();
   const 新职业配置 = classConfigs[新职业名称];
   新职业配置.expertiseLevel = _.get(player, `专精等级.${新职业名称}`, 0);
+  player.抽奖用专精等级 = 新职业配置.expertiseLevel;
   player.设置职业(new 职业(新职业配置));
   player.玩家存档.职业 = player.职业;
   return true;

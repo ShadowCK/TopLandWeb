@@ -15,6 +15,7 @@ class 实体 {
 
   stats = {};
 
+  /** @type {Object<string, Buff[]>} */
   buffs = {};
 
   /** @type {Object<string, 实体技能>} */
@@ -83,6 +84,10 @@ class 实体 {
   }
 
   updateStats(multiplier = 1) {
+    if (this.职业 == null) {
+      return;
+    }
+
     const 原始最大生命值 = this.stats[StatType.最大生命值];
     const 原始最大魔法值 = this.stats[StatType.最大魔法值];
 

@@ -25,7 +25,7 @@
       <a class="item" data-tab="区域面板">区域</a>
       <a class="item" data-tab="战斗面板">战斗</a>
       <a class="item" data-tab="背包面板">背包</a>
-      <a class="item disabled" data-tab="商店面板">商店</a>
+      <a class="item" data-tab="商店面板">商店</a>
       <a class="item disabled" data-tab="魔典面板">魔典</a>
       <a class="item disabled" data-tab="天赋面板">天赋</a>
       <a class="item" data-tab="设置面板">设置</a>
@@ -148,6 +148,67 @@
             <div class="ui nine column grid" id="背包面板-背包">
               <!-- Content is generated here -->
             </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="ui bottom attached segment tab chinese" id="商店面板" data-tab="商店面板">
+      <div class="ui two column centered grid" style="align-items: center">
+        <div class="row">
+          <div class="ten wide column">
+            <div class="ui center aligned message">
+              <div class="header">抽奖须知</div>
+              <ul class="list">
+                <li>抽奖的奖励为当前转生有效的永久BUFF。</li>
+                <li>
+                  专精抽奖消耗的“专精等级”是类似金钱的代币，每次转生会重置为新职业的专精等级。
+                </li>
+                <li>抽奖花费和奖励都会递增，但抽奖花费的上升幅度更高。</li>
+                <li>
+                  固定数值奖池内容：最大生命值、最大魔法值、生命回复、魔法回复、生命回复效率、魔法回复效率、攻击力、防御力、攻击间隔、攻击速度、暴击率、暴击伤害、闪避率、格挡率、格挡伤害、生命偷取、技能急速、幸运值。
+                </li>
+                <li>
+                  百分比奖池内容：最大生命值、最大魔法值、生命回复、魔法回复、攻击力、防御力。
+                </li>
+              </ul>
+            </div>
+          </div>
+        </div>
+        <div class="six wide column">
+          <div class="ui header"></div>
+          <div class="ui center aligned segment" id="商店面板-金钱抽奖">
+            <div class="ui medium header">金钱抽奖</div>
+            <div class="ui message">
+              <p id="商店面板-金钱抽奖信息">
+                抽奖次数：{{抽奖次数}} <br />
+                抽奖花费：{{抽奖花费}} <br />
+                固定数值奖励倍率: {{固定数值奖励倍率}} <br />
+                百分比奖励倍率: {{百分比奖励倍率}} <br />
+                剩余金钱：{{剩余金钱}}
+              </p>
+            </div>
+            <div class="ui divider"></div>
+            <button class="ui button" id="商店面板-金钱抽奖-固定数值">固定数值</button>
+            <button class="ui button" id="商店面板-金钱抽奖-百分比">百分比</button>
+          </div>
+        </div>
+        <div class="six wide column">
+          <div class="ui header"></div>
+          <div class="ui center aligned segment" id="商店面板-专精抽奖">
+            <div class="ui medium header">专精等级抽奖</div>
+            <div class="ui message">
+              <p id="商店面板-专精抽奖信息">
+                抽奖次数：{{抽奖次数}} <br />
+                抽奖花费：{{抽奖花费}} <br />
+                固定数值奖励倍率: {{固定数值奖励倍率}} <br />
+                百分比奖励倍率: {{百分比奖励倍率}} <br />
+                剩余专精等级：{{剩余专精等级}}
+              </p>
+            </div>
+            <div class="ui divider"></div>
+            <button class="ui button" id="商店面板-专精抽奖-固定数值">固定数值</button>
+            <button class="ui button" id="商店面板-专精抽奖-百分比">百分比</button>
           </div>
         </div>
       </div>

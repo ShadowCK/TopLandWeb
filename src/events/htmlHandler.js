@@ -19,7 +19,7 @@ import * as 玩家管理器 from '../player/玩家管理器.js';
 import * as 战斗管理器 from '../combat/战斗管理器.js';
 import classConfigs from '../classes/职业信息.js';
 import { generalEvents, combatEvents, EventType, HTMLEvents } from './事件管理器.js';
-import { get最高专精等级经验倍率, settings } from '../settings.js';
+import { get最高专精等级经验倍率, settings, 计算抽奖奖励, 计算抽奖花费 } from '../settings.js';
 import { StatType } from '../combat/战斗属性.js';
 import { templateFromElement, getMaxLevel } from '../utils.js';
 import { 可以提升专精等级, 可以转生, 转生 } from '../reincarnate/转生.js';
@@ -29,6 +29,7 @@ import { update as 更新战斗信息, 生成伤害信息, 生成治疗信息 } 
 import 背包界面 from '../items/背包界面.js';
 import 技能栏界面 from '../skills/技能栏界面.js';
 import * as 区域界面 from '../ui/区域界面.js';
+import { 抽取Buff } from '../shop/商店.js';
 
 let lastUpdate = performance.now();
 let htmlWorkerId = null;
@@ -108,6 +109,32 @@ const updateHTML = (params, dt) => {
 
   // 更新技能栏
   $('#技能栏').get(0).ui?.update();
+
+  // 更新抽奖面板
+  templateFromElement(
+    $('#商店面板-金钱抽奖信息'),
+    {
+      抽奖次数: player.金钱抽奖次数,
+      抽奖花费: 计算抽奖花费(player.金钱抽奖次数, false),
+      固定数值奖励倍率: _.round(计算抽奖奖励(player.金钱抽奖次数, true), 2),
+      百分比奖励倍率: _.round(计算抽奖奖励(player.金钱抽奖次数, false), 2),
+      剩余金钱: _.round(player.金钱),
+    },
+    true,
+    false,
+  );
+  templateFromElement(
+    $('#商店面板-专精抽奖信息'),
+    {
+      抽奖次数: player.专精抽奖次数,
+      抽奖花费: 计算抽奖花费(player.专精抽奖次数, true),
+      固定数值奖励倍率: _.round(计算抽奖奖励(player.专精抽奖次数, true), 2),
+      百分比奖励倍率: _.round(计算抽奖奖励(player.专精抽奖次数, false), 2),
+      剩余专精等级: player.抽奖用专精等级,
+    },
+    true,
+    false,
+  );
 };
 
 // 可以根据玩家的需求，重置UI更新频率
@@ -302,6 +329,115 @@ const setupHTML = () => {
   });
   genEquipments();
   player.背包.ui = new 背包界面(player.背包);
+
+  // 商店面板
+  // 初始化抽奖信息
+  templateFromElement(
+    $('#商店面板-金钱抽奖信息'),
+    {
+      抽奖次数: player.金钱抽奖次数,
+      抽奖花费: 计算抽奖花费(player.金钱抽奖次数, false),
+      固定数值奖励倍率: _.round(计算抽奖奖励(player.金钱抽奖次数, true), 2),
+      百分比奖励倍率: _.round(计算抽奖奖励(player.金钱抽奖次数, false), 2),
+      剩余金钱: _.round(player.金钱),
+    },
+    true,
+    false,
+  );
+  templateFromElement(
+    $('#商店面板-专精抽奖信息'),
+    {
+      抽奖次数: player.专精抽奖次数,
+      抽奖花费: 计算抽奖花费(player.专精抽奖次数, true),
+      固定数值奖励倍率: _.round(计算抽奖奖励(player.专精抽奖次数, true), 2),
+      百分比奖励倍率: _.round(计算抽奖奖励(player.专精抽奖次数, false), 2),
+      剩余专精等级: player.抽奖用专精等级,
+    },
+    true,
+    false,
+  );
+  // 注册抽奖按钮
+  // TODO: 优化一下下面的结构，可以用一个函数来批量注册
+  const 抽奖失败设置 = {
+    title: '抽奖失败',
+    class: 'error chinese',
+    displayTime: 2000,
+    showProgress: 'bottom',
+  };
+  const 抽奖成功设置 = {
+    title: '抽奖成功',
+    class: 'success chinese',
+    displayTime: 2000,
+    showProgress: 'bottom',
+  };
+  $('#商店面板-金钱抽奖-固定数值').on('click', () => {
+    const result = 抽取Buff(false, true);
+    if (!result) {
+      $.toast({
+        ...抽奖失败设置,
+        message: '金钱不足',
+      });
+    } else {
+      result.value = _.round(result.value, 2);
+      $.toast({
+        ...抽奖成功设置,
+        message: `获得了 ${result.statType} ${
+          result.value > 0 ? `+${result.value}` : result.value
+        }`,
+      });
+    }
+  });
+  $('#商店面板-金钱抽奖-百分比').on('click', () => {
+    const result = 抽取Buff(false, false);
+    if (!result) {
+      $.toast({
+        ...抽奖失败设置,
+        message: '金钱不足',
+      });
+    } else {
+      result.value = _.round(result.value, 2);
+      $.toast({
+        ...抽奖成功设置,
+        message: `获得了 ${result.statType} ${
+          result.value > 0 ? `+${result.value}` : result.value
+        }%`,
+      });
+    }
+  });
+  $('#商店面板-专精抽奖-固定数值').on('click', () => {
+    const result = 抽取Buff(true, true);
+    if (!result) {
+      $.toast({
+        ...抽奖失败设置,
+        message: '专精等级不足',
+      });
+    } else {
+      result.value = _.round(result.value, 2);
+      $.toast({
+        ...抽奖成功设置,
+        message: `获得了 ${result.statType} ${
+          result.value > 0 ? `+${result.value}` : result.value
+        }`,
+      });
+    }
+  });
+  $('#商店面板-专精抽奖-百分比').on('click', () => {
+    const result = 抽取Buff(true, false);
+    if (!result) {
+      $.toast({
+        ...抽奖失败设置,
+        message: '专精等级不足',
+      });
+    } else {
+      result.value = _.round(result.value, 2);
+      $.toast({
+        ...抽奖成功设置,
+        message: `获得了 ${result.statType} ${
+          result.value > 0 ? `+${result.value}` : result.value
+        }%`,
+      });
+    }
+  });
 
   // 设置面板
   // 初始化每个设置标题的内容
