@@ -12,6 +12,7 @@ type TriggerComponent = import('../src/skills/trigger/TriggerComponent').default
 type Trigger = import('../src/skills/trigger/Trigger').default;
 type Settings = import('../src/skills/Settings').default;
 type EventEmitter = import('eventemitter3').EventEmitter;
+type Buff = import('../src/combat/Buff').default;
 
 // globals.d.ts
 declare const WEBPACK_MODE: string;

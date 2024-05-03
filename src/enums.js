@@ -63,6 +63,18 @@ const SkillAttribute = {
   LEVEL: 'level',
 };
 
+const BuffType = {
+  强乘算: 0,
+  弱乘算: 1,
+  固定数值: 2,
+};
+
+const StackType = {
+  无法叠加: 0,
+  单独堆叠: 1,
+  叠加堆叠: 2,
+};
+
 export {
   ItemType,
   EquipSlot,
@@ -72,4 +84,6 @@ export {
   SkillAttribute,
   EquipRarity,
   EquipRarityInverted,
+  BuffType,
+  StackType,
 };
