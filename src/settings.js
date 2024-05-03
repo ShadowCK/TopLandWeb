@@ -16,6 +16,8 @@ const 默认优先级 = {
 const config = {
   extraLevelsPerExpertiseLevel: 5,
   statLimits: {
+    最大生命值: { min: 1, max: Infinity },
+    最大魔法值: { min: 0, max: Infinity },
     攻击间隔: { min: 0.1, max: Infinity },
     攻击速度: { min: 0, max: Infinity },
     闪避率: { min: 0, max: 80 },
