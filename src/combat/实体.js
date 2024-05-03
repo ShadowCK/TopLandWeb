@@ -273,7 +273,7 @@ class 实体 {
     this.魔法值 = this.getStat2(StatType.最大魔法值, true);
 
     // 添加大招
-    if (职业.ultimate != null) {
+    if (职业.ultimate != null && 职业.ultimate !== '') {
       this.addSkill(getSkill(职业.ultimate));
     }
   }
