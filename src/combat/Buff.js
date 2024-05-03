@@ -1,6 +1,6 @@
 import { 默认优先级 } from '../settings.js';
-import buffTypes from './buffTypes.js';
 import { StatType } from './战斗属性.js';
+import { BuffType, StackType } from '../enums.js';
 
 class Buff {
   // Buff的名字/ID
@@ -16,13 +16,12 @@ class Buff {
   value = 1;
 
   // Buff的类型
-  type = buffTypes.固定数值;
+  type = BuffType.固定数值;
 
   // Buff的优先级，数值越低，优先级越高
   priority = 默认优先级.固定数值;
 
-  // 是否可以叠加，如果无法叠加会覆盖之前的Buff
-  canStack = true;
+  stackType = StackType.无法叠加;
 
   // 是否是正面Buff。有些技能净化正面Buff，有些技能净化负面Buff。
   // 不取决于实际效果，即使是增加攻击力的Buff，也可能是负面Buff。
@@ -50,7 +49,7 @@ class Buff {
   }
 
   isMultiplier() {
-    return this.type === buffTypes.强乘算 || this.type === buffTypes.弱乘算;
+    return this.type === BuffType.强乘算 || this.type === BuffType.弱乘算;
   }
 
   apply(value) {
@@ -62,4 +61,4 @@ class Buff {
   }
 }
 
-export default Buff;
+export { StackType, Buff };

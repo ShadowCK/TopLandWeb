@@ -8,6 +8,7 @@ import { applyStats, calcHealing, deepMapObject } from '../utils.js';
 import * as debug from '../debug.js';
 import 实体技能 from '../skills/实体技能.js';
 import { getSkill } from '../skills/技能管理器.js';
+import { StackType } from '../enums.js';
 
 class 实体 {
   uuid = uuidv4();
@@ -211,10 +212,32 @@ class 实体 {
       this.buffs[buff.statType] = [];
     }
     // 如果Buff不可叠加，先清除之前的Buff
-    if (!buff.canStack) {
+    if (buff.stackType === StackType.无法叠加) {
       this.removeBuff(buff);
+      this.buffs[buff.statType].push(buff);
+    } // 单独堆叠，直接添加
+    else if (buff.stackType === StackType.单独堆叠) {
+      this.buffs[buff.statType].push(buff);
+    } // 叠加堆叠比较特殊，只有一个buff实例。叠加数值，重置计时器，但不叠加持续时间。（持续时间应该是一样的）
+    else if (buff.stackType === StackType.叠加堆叠) {
+      const found = this.buffs[buff.statType].find((other) => other.key === buff.key);
+      if (found) {
+        // 比较两个Buff是否相同
+        const compared = ['type', 'priority', 'isPositive', 'canCleanse', 'stackType', 'duration'];
+        const isEqual = compared.every((key) => found[key] === buff[key]);
+        if (!isEqual) {
+          throw new Error('两个叠加堆叠的Buff不相同。');
+        }
+        // 重置计时器
+        found.timer = 0;
+        // 堆叠数值
+        found.value += buff.value;
+      } else {
+        this.buffs[buff.statType].push(buff);
+      }
+    } else {
+      throw new Error('未知的堆叠类型');
     }
-    this.buffs[buff.statType].push(buff);
   }
 
   /**

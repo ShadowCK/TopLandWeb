@@ -1,7 +1,7 @@
 import _ from 'lodash';
-import buffTypes from './buffTypes.js';
-import Buff from './Buff.js';
+import { Buff } from './Buff.js';
 import { 默认优先级 } from '../settings.js';
+import { BuffType } from '../enums.js';
 
 /**
  * @param {import('./实体.js').default} parent
@@ -18,7 +18,7 @@ const getBuffedStat = (parent, statObj) => {
     return statObj.value;
   }
 
-  const [弱乘算buff, 其他buff] = _.partition(typeBuffs, (buff) => buff.type === buffTypes.弱乘算);
+  const [弱乘算buff, 其他buff] = _.partition(typeBuffs, (buff) => buff.type === BuffType.弱乘算);
   const newBuffs = [...其他buff];
   if (弱乘算buff.length > 0) {
     const 弱乘算总和 = 弱乘算buff.reduce((acc, buff) => acc + buff.value, 1);
@@ -27,7 +27,7 @@ const getBuffedStat = (parent, statObj) => {
         key: '弱乘算总和',
         statType: statObj.type,
         value: 弱乘算总和,
-        type: buffTypes.弱乘算,
+        type: BuffType.弱乘算,
         priority: 默认优先级.弱乘算,
       }),
     );
@@ -38,7 +38,7 @@ const getBuffedStat = (parent, statObj) => {
       key: '基础值',
       statType: statObj.type,
       value: statObj.value,
-      type: buffTypes.固定数值,
+      type: BuffType.固定数值,
       priority: 默认优先级.基础值,
     }),
   );
