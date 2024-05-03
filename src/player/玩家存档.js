@@ -6,6 +6,7 @@ import { genEquipments } from '../htmlHelper.js';
 import { equipConfigs } from '../items/装备信息.js';
 import { itemConfigs } from '../items/物品信息.js';
 import { ItemType } from '../enums.js';
+import { Buff } from '../combat/Buff.js';
 
 const 物品存档数据 = ['name', 'type', 'stack'];
 const 装备存档数据 = ['name', 'type', 'stack', '品阶', '品质', '合成次数'];
@@ -24,6 +25,8 @@ class 玩家存档 {
   打包存档数据() {
     const needed = _.pick(
       this.player,
+      // 实体属性
+      'buffs',
       // 玩家属性
       '背包',
       '金钱',
@@ -34,6 +37,9 @@ class 玩家存档 {
       '装备',
       '职业',
       // '技能', // 技能不需要存档
+      '抽奖用专精等级',
+      '金钱抽奖次数',
+      '专精抽奖次数',
     );
     // TODO: 和下面一样，toSaveData只保存名称等必要信息。
     needed.职业 = needed.职业.toSaveData();
@@ -79,8 +85,19 @@ class 玩家存档 {
       return;
     }
     try {
-      const rest = _.omit(this.data, '职业', '背包', '装备');
+      player.reset();
+      const rest = _.omit(this.data, 'buffs', '职业', '背包', '装备');
       Object.assign(player, rest);
+      // 还原存档里的buff信息
+      if (this.data.buffs) {
+        console.log('存档-buffs', this.data.buffs);
+        // 逐个添加 buff
+        _.forEach(this.data.buffs, (typeBuffs) => {
+          typeBuffs.forEach((buffData) => {
+            player.addBuff(new Buff(buffData));
+          });
+        });
+      }
       // 用读取的装备信息为玩家设置装备
       if (this.data.装备) {
         console.log('存档-装备', this.data.装备);
