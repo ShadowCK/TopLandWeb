@@ -375,7 +375,7 @@ const setupHTML = () => {
     if (!result) {
       $.toast({
         ...抽奖失败设置,
-        message: '金钱不足',
+        message: '金钱不足。',
       });
     } else {
       result.value = _.round(result.value, 2);
@@ -392,7 +392,7 @@ const setupHTML = () => {
     if (!result) {
       $.toast({
         ...抽奖失败设置,
-        message: '金钱不足',
+        message: '金钱不足。',
       });
     } else {
       result.value = _.round(result.value, 2);
@@ -409,7 +409,7 @@ const setupHTML = () => {
     if (!result) {
       $.toast({
         ...抽奖失败设置,
-        message: '专精等级不足',
+        message: '专精等级不足。',
       });
     } else {
       result.value = _.round(result.value, 2);
@@ -426,7 +426,7 @@ const setupHTML = () => {
     if (!result) {
       $.toast({
         ...抽奖失败设置,
-        message: '专精等级不足',
+        message: '专精等级不足。',
       });
     } else {
       result.value = _.round(result.value, 2);

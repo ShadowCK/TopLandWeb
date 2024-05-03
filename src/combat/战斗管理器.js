@@ -365,9 +365,10 @@ const registerEvents = () => {
       // 给予金钱和经验
       const enemy = entity;
       player.addExp(enemy.经验值 || 0);
-      player.金钱 += enemy.金钱 || 0;
       const 幸运值 = player.getStat2(StatType.幸运值);
+      const 金钱倍率 = 1 + (gameConfig.每点幸运值增加金钱百分比 * 幸运值) / 100;
       const 掉落倍率 = 1 + (gameConfig.每点幸运值增加掉落率百分比 * 幸运值) / 100;
+      player.金钱 += enemy.金钱 * 金钱倍率 || 0;
       enemy.config.掉落.forEach((dropConfig) => {
         if (Math.random() * 100 >= dropConfig.chance * 掉落倍率) {
           return;
