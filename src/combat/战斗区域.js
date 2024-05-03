@@ -139,6 +139,33 @@ const configs = {
       },
     },
   },
+  燃烧古堡: {
+    name: '燃烧古堡',
+    description: '被永恒火焰覆盖的诅咒城堡，弥漫着烧焦的气味。',
+    enemies: {
+      尸体: {
+        config: 敌人信息.尸体,
+        weight: 100,
+      },
+      岩浆史莱姆: {
+        config: 敌人信息.岩浆史莱姆,
+        weight: 100,
+      },
+      熔岩巨兽: {
+        config: 敌人信息.熔岩巨兽,
+        weight: 15,
+      },
+      尸体发火: {
+        config: 敌人信息.尸体发火,
+        weight: 15,
+      },
+      落魄的大帝: {
+        config: 敌人信息.落魄的大帝,
+        weight: 1,
+        isBoss: true,
+      },
+    },
+  },
 };
 
 class 战斗区域 {
