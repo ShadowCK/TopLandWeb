@@ -449,7 +449,7 @@ const setupHTML = () => {
   $('#设置面板-游戏倍速滑块').slider({
     min: 0,
     max: 10,
-    start: 1,
+    start: settings.游戏倍速,
     step: 0,
     onChange: (value) => {
       $.toast({
@@ -699,7 +699,7 @@ const registerEvents = () => {
           生成伤害信息({
             damaged,
             velocityScale: 1.5,
-            gravityFactor: 1,
+            gravityFactor: 1.8,
             offset: { x: 0, y: -0.3 },
             isDodged,
           });
@@ -715,7 +715,7 @@ const registerEvents = () => {
               damage: roundedDamage,
               damageType: type,
               velocityScale: 1.5,
-              gravityFactor: 1,
+              gravityFactor: 1.8,
               offset: { x: 0, y: -0.3 },
               isBlocked,
               blockRate,
@@ -757,7 +757,7 @@ const registerEvents = () => {
             healed: damager,
             healing: roundedHealing,
             velocityScale: 1.5,
-            gravityFactor: 1,
+            gravityFactor: 1.3,
             offset: { x: 0, y: -0.3 },
           });
         } else if (settings.战斗面板外战斗信息) {

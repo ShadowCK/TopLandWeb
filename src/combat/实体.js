@@ -210,7 +210,7 @@ class 实体 {
   }
 
   /**
-   * @param {import('./Buff.js').default} buff
+   * @param {Buff} buff
    */
   addBuff(buff) {
     if (!this.buffs[buff.statType]) {
@@ -246,7 +246,7 @@ class 实体 {
   }
 
   /**
-   * @param {import('./Buff.js').default} buff
+   * @param {Buff} buff
    */
   removeBuff(buff) {
     this.removeBuffByKey(buff.statType, buff.key);
@@ -288,7 +288,7 @@ class 实体 {
   }
 
   /**
-   * @param {import('../classes/职业.js').default} 职业
+   * @param {职业} 职业
    * @param {number} level
    */
   设置职业(职业) {
@@ -320,7 +320,7 @@ class 实体 {
   }
 
   /**
-   * @param {import('../items/装备.js').default} equipment
+   * @param {装备} equipment
    */
   拥有装备(equipment) {
     const typeEquipments = this.装备[equipment.slot];

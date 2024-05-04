@@ -199,7 +199,7 @@ const update = (dt) => {
 };
 
 /**
- * @param {import('./实体.js').default} entity
+ * @param {实体} entity
  */
 const updateCombat = (entity, dt) => {
   if (entity.isDead) {

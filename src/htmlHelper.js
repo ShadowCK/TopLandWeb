@@ -198,7 +198,7 @@ const updateProgressBar = (
 const getCombatLayout = (parent, entity) => parent.find(`#${entity.uuid}`);
 
 /**
- * @param {import('./combat/实体.js').default} entity
+ * @param {实体} entity
  */
 const updateCombatLayout = (combatLayout, entity, { isPlayer = false, isEnemy = !isPlayer }) => {
   combatLayout.find('.ui.header').text(isPlayer ? '你' : entity.职业.name);
@@ -233,7 +233,7 @@ const updateCombatLayout = (combatLayout, entity, { isPlayer = false, isEnemy = 
 };
 
 /**
- * @param {import('./combat/实体.js').default} entity
+ * @param {实体} entity
  */
 const genCombatLayout = (
   entity,

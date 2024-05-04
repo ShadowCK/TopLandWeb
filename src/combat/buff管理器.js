@@ -4,8 +4,8 @@ import { 默认优先级 } from '../settings.js';
 import { BuffType } from '../enums.js';
 
 /**
- * @param {import('./实体.js').default} parent
- * @param {{type, value}} statObj
+ * @param {实体} parent
+ * @param {{type: string, value: number}} statObj
  * @returns
  */
 const getBuffedStat = (parent, statObj) => {
