@@ -178,6 +178,7 @@ export {
   config,
   config as gameConfig,
   settings,
+  settings as gameSettings,
   get最高专精等级经验倍率,
   计算品质roll点基数,
   计算抽奖奖励,

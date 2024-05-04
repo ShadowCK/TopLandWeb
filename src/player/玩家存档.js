@@ -7,12 +7,14 @@ import { equipConfigs } from '../items/装备信息.js';
 import { itemConfigs } from '../items/物品信息.js';
 import { ItemType } from '../enums.js';
 import { Buff } from '../combat/Buff.js';
+import * as debug from '../debug.js';
+import { settings } from '../settings.js';
 
 const 物品存档数据 = ['name', 'type', 'stack'];
 const 装备存档数据 = ['name', 'type', 'stack', '品阶', '品质', '合成次数'];
 
 class 玩家存档 {
-  /** @type {import('./玩家.js').default} */
+  /** @type {玩家} */
   player = null;
 
   data = null;
@@ -23,6 +25,7 @@ class 玩家存档 {
   }
 
   打包存档数据() {
+    // 打包需要保存的玩家数据
     const needed = _.pick(
       this.player,
       // 实体属性
@@ -49,6 +52,9 @@ class 玩家存档 {
     needed.装备 = _.mapValues(needed.装备, (equipments) =>
       equipments.map((e) => _.pick(e, 装备存档数据)),
     );
+
+    // 打包游戏设置等其他数据
+    needed.游戏设置 = settings;
     return JSON.stringify(needed);
   }
 
@@ -76,21 +82,25 @@ class 玩家存档 {
   应用存档() {
     const { player } = this;
     if (!player) {
-      console.error('没有玩家实例');
+      debug.error('没有玩家实例');
       return;
     }
     player.玩家存档 = this;
     if (!this.data) {
-      console.error('没有存档数据');
+      debug.error('没有存档数据');
       return;
     }
     try {
       player.reset();
-      const rest = _.omit(this.data, 'buffs', '职业', '背包', '装备');
+      const rest = _.omit(this.data, 'buffs', '职业', '背包', '装备', '游戏设置');
       Object.assign(player, rest);
+      // 还原游戏设置
+      if (this.data.游戏设置) {
+        Object.assign(settings, this.data.游戏设置);
+      }
       // 还原存档里的buff信息
       if (this.data.buffs) {
-        console.log('存档-buffs', this.data.buffs);
+        debug.log('存档-buffs', this.data.buffs);
         // 逐个添加 buff
         _.forEach(this.data.buffs, (typeBuffs) => {
           typeBuffs.forEach((buffData) => {
@@ -100,7 +110,7 @@ class 玩家存档 {
       }
       // 用读取的装备信息为玩家设置装备
       if (this.data.装备) {
-        console.log('存档-装备', this.data.装备);
+        debug.log('存档-装备', this.data.装备);
         // 由于只保存了必要信息，需要获取对应装备名的装备配置，而不是像以前一样用将该装备数据作为config
         // 需要注意的是，如果配置文件里没有该装备（比如历史遗留导致的绝版装备，不再在配置列表里），玩家会丢失该装备。
         // TODO：应该给玩家一一装上，而不是假设玩家可以穿存档里的装备
@@ -119,7 +129,7 @@ class 玩家存档 {
       }
       // 将存档里背包的内容添加到玩家背包
       if (this.data.背包) {
-        console.log('存档-背包', this.data.背包);
+        debug.log('存档-背包', this.data.背包);
         // 同理，只保存了必要信息，需要获取对应物品名的物品配置，而不是像以前一样用将该物品数据作为config
         const mappedItems = _.map(this.data.背包, (data) => {
           const configs = data.type === ItemType.装备 ? equipConfigs : itemConfigs;
@@ -136,17 +146,16 @@ class 玩家存档 {
       if (this.data.职业) {
         player.设置职业(new 职业(this.data.职业));
       } else {
-        console.error('玩家存档或默认存档中没有职业信息，无法为玩家设置职业。');
+        debug.error('玩家存档或默认存档中没有职业信息，无法为玩家设置职业。');
         // 设置职业会更新玩家属性，所以只有没有职业信息时才更新。理论上玩家不可能没有职业，因为默认存档里有职业信息，除非传入的默认存档有问题。
         player.updateStats();
       }
 
-      console.log('玩家存档已应用', player);
+      debug.log('玩家存档已应用', player);
     } catch (error) {
-      console.error('应用存档失败', error);
+      debug.error('应用存档失败', error);
     }
   }
 }
 
-export default 玩家存档;
 export { 玩家存档, 物品存档数据, 装备存档数据 };

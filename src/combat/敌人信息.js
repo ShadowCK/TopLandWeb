@@ -1439,7 +1439,7 @@ const enemyConfigs = {
     职业: {
       requirements: {},
       name: '落魄的大帝',
-      description: '痴迷权利宝座而堕入痛苦轮回的大帝。他的灵魂渴望解脱。',
+      description: '痴迷权力宝座而堕入痛苦轮回的大帝。他的灵魂渴望解脱。',
       maxLevel: 1,
       statGrowth: {
         最大生命值: [45000, 0],

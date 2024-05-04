@@ -1,4 +1,4 @@
-import _, { at } from 'lodash';
+import _ from 'lodash';
 import { ItemType } from '../enums.js';
 import { EventType, generalEvents } from '../events/事件管理器.js';
 import 物品 from './物品.js';
@@ -6,7 +6,7 @@ import 装备 from './装备.js';
 import { 装备存档数据 } from '../player/玩家存档.js';
 
 class 背包 {
-  /** @type {import('./物品.js').default[]} */
+  /** @type {物品} */
   items = [];
 
   // a shortcut only for debugging
@@ -124,7 +124,7 @@ class 背包 {
   }
 
   /**
-   * @param {import('./物品.js').default} item
+   * @param {物品} item
    */
   removeItem(item) {
     const index = this.items.indexOf(item);

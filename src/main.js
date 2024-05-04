@@ -79,5 +79,5 @@ window.onbeforeunload = () => {
   }
   // 保存玩家存档
   玩家管理器.存档();
-  // 保存其他游戏信息
+  console.log('游戏存档已保存');
 };

@@ -3,13 +3,13 @@ import 职业 from '../classes/职业.js';
 import classConfigs from '../classes/职业信息.js';
 
 /**
- * @param {import('../player/玩家').default} player
+ * @param {玩家} player
  * @returns
  */
 const 可以提升专精等级 = (player) => player.职业.level === player.职业.getMaxLevel();
 
 /**
- * @param {import('../player/玩家').default} player
+ * @param {玩家} player
  * @param {string} 新职业名称
  * @returns {boolean} 是否可以转生
  */
@@ -27,7 +27,7 @@ const 可以转生 = (player, 新职业名称) => {
 };
 
 /**
- * @param {import('../player/玩家').default} player
+ * @param {玩家} player
  * @param {string} 新职业名称
  * @returns {boolean} 是否成功转生
  */
