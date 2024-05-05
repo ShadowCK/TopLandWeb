@@ -41,6 +41,8 @@ _.forEach(configs, (config) => {
   所有战斗区域[config.name] = new 战斗区域(config);
 });
 
+const get当前战斗区域 = () => 当前战斗区域;
+
 const get战斗区域 = (name) => 所有战斗区域[name];
 
 const isInCombat = (实体) => getEntitiesInCombat().includes(实体);
@@ -173,8 +175,8 @@ const 退出战斗区域 = () => {
     return;
   }
   combatEvents.emit(EventType.退出战斗区域, 当前战斗区域);
-  // 移除敌人
-  当前战斗区域.clearEnemies();
+  // 重置战斗区域
+  当前战斗区域.reset();
   当前战斗区域 = null;
   // 清除玩家的攻击计时器
   const player = getPlayer();
@@ -411,6 +413,7 @@ export {
   所有战斗区域,
   退出战斗区域,
   切换战斗区域,
+  get当前战斗区域,
   get战斗区域,
   update,
   getEnemiesInCombat,

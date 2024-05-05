@@ -15,6 +15,8 @@ const Format = {
   魔法条格式: '魔法值: {value} / {total}',
   经验条格式: '经验值: {value} / {total}',
   攻击条格式: '下次攻击: {value} / {total}',
+  刷怪计时进度条格式: '新敌人出现: {value} / {total}',
+  必刷BOSS进度条格式: 'BOSS必定出现: {value} / {total}',
   默认进度条格式: '{value} / {total}',
 };
 
@@ -175,7 +177,9 @@ const genProgressBar = ({
   const bar = $(progressBarHTML({ id, className, color, label, value, maxValue, centered }));
   // 初始化进度条
   bar.progress(format ? { text: { active: format } } : {});
-  parent.append(bar);
+  if (parent != null) {
+    parent.append(bar);
+  }
   return bar;
 };
 
@@ -186,8 +190,15 @@ const updateProgressBar = (
   format = '{value} / {total}',
   precision = 0,
   useRatio = false,
+  step = null, // 较大的step可以减少进度条动画频繁刷新导致的视觉顿挫感
 ) => {
   const element = _.isString(bar) ? $(bar) : bar;
+  if (step != null) {
+    /* eslint-disable no-param-reassign */
+    value = _.round(value / step) * step;
+    maxValue = _.round(maxValue / step) * step;
+    /* eslint-enable no-param-reassign */
+  }
   let percent = (value / maxValue) * 100;
   // 边缘情况： 0/0 或 Infinity/Infinity显示100%
   if (value === maxValue && (value === 0 || value === Infinity)) {
@@ -245,13 +256,13 @@ const updateCombatLayout = (combatLayout, entity, { isPlayer = false, isEnemy = 
     combatLayout.find('.health-bar'),
     entity.生命值,
     entity.getStat2(StatType.最大生命值),
-    '生命值: {value} / {total}',
+    Format.生命条格式,
   );
   updateProgressBar(
     combatLayout.find('.mana-bar'),
     entity.魔法值,
     entity.getStat2(StatType.最大魔法值),
-    '魔法值: {value} / {total}',
+    Format.魔法条格式,
   );
   updateProgressBar(
     combatLayout.find('.attack-bar'),
