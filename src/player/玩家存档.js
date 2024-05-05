@@ -9,6 +9,7 @@ import { ItemType } from '../enums.js';
 import { Buff } from '../combat/Buff.js';
 import * as debug from '../debug.js';
 import { settings } from '../settings.js';
+import { 所有战斗区域 } from '../combat/战斗管理器.js';
 
 const 物品存档数据 = ['name', 'type', 'stack'];
 const 装备存档数据 = ['name', 'type', 'stack', '品阶', '品质', '合成次数'];
@@ -55,6 +56,7 @@ class 玩家存档 {
 
     // 打包游戏设置等其他数据
     needed.游戏设置 = settings;
+    needed.战斗区域 = _.mapValues(所有战斗区域, (area) => _.pick(area, ['level']));
     return JSON.stringify(needed);
   }
 
@@ -92,11 +94,20 @@ class 玩家存档 {
     }
     try {
       player.reset();
-      const rest = _.omit(this.data, 'buffs', '职业', '背包', '装备', '游戏设置');
+      const rest = _.omit(this.data, 'buffs', '职业', '背包', '装备', '游戏设置', '战斗区域');
       Object.assign(player, rest);
       // 还原游戏设置
       if (this.data.游戏设置) {
         Object.assign(settings, this.data.游戏设置);
+      }
+      // 还原战斗区域信息
+      if (this.data.战斗区域) {
+        _.forEach(this.data.战斗区域, (areaData, key) => {
+          const area = 所有战斗区域[key];
+          if (area) {
+            area.setLevel(areaData.level);
+          }
+        });
       }
       // 还原存档里的buff信息
       if (this.data.buffs) {

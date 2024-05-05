@@ -4,7 +4,7 @@ import { getBuffedStat } from './buff管理器.js';
 import { StatType } from './战斗属性.js';
 import * as settings from '../settings.js';
 import { EventType, combatEvents } from '../events/事件管理器.js';
-import { applyStats, calcHealing, deepMapObject } from '../utils.js';
+import { applyStats, calcHealing, deepMapObject, 属性可增益 } from '../utils.js';
 import * as debug from '../debug.js';
 import 实体技能 from '../skills/实体技能.js';
 import { getSkill } from '../skills/技能管理器.js';
@@ -103,7 +103,12 @@ class 实体 {
           return;
         }
         const [base, scale] = value;
-        _.set(this.stats, currentPath, base + scale * (level - 1) * multiplier);
+        const v = base + scale * (level - 1);
+        _.set(
+          this.stats,
+          currentPath,
+          v * (属性可增益(v, currentPath) ? multiplier : 1),
+        );
       },
       (value) => _.isObject(value) && !Array.isArray(value),
     );

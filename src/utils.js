@@ -97,6 +97,27 @@ const randomCoordinate = (min, max) => {
   return magnitude * sign;
 };
 
+const 属性可增益 = (value, fullPath, 不作用于负值 = true) => {
+  // 不浪费时间在乘0上。
+  if (value === 0) {
+    return false;
+  }
+  const _fullPath = fullPath.join('.');
+  // 如果path是"伤害分布"，那么fullPath "伤害分布.物理"，"伤害分布.奥术"等都是可增益的
+  const 可增益 = config.可增益属性.findIndex((path) => _fullPath.startsWith(path)) !== -1;
+  if (!可增益) {
+    return false;
+  }
+  if (不作用于负值) {
+    // 特例，攻击间隔为正的时候不倍乘，其他数值为负的时候不倍乘（否则变减益）
+    if (_fullPath === StatType.攻击间隔 && value > 0) {
+      return false;
+    }
+    return value > 0;
+  }
+  return true;
+};
+
 const applyStats = (stats, setValueCallback, recurConditional) => {
   let callback = setValueCallback;
   if (callback == null || !(callback instanceof Function)) {
@@ -121,6 +142,11 @@ const applyStats = (stats, setValueCallback, recurConditional) => {
   return recur(stats);
 };
 
+/**
+ * @param {any[]} array 数组
+ * @param {number} baseMult 从数组的X处开始抽取（0-1之间）
+ * @returns {any} 抽到的元素
+ */
 const sampleWeighted = (array, baseMult = 0) => {
   const totalWeight = array.reduce((acc, element) => acc + element.weight, 0);
   const rand = _.random(Math.min(baseMult, 1) * totalWeight, totalWeight, true);
@@ -154,6 +180,7 @@ export {
   deepMapObject,
   calcHealing,
   randomCoordinate,
+  属性可增益,
   applyStats,
   sampleWeighted,
   findLeaves,
