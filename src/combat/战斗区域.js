@@ -1,4 +1,4 @@
-import * as math from 'mathjs';
+import _ from 'lodash';
 import 敌人信息 from './敌人信息.js';
 import * as settings from '../settings.js';
 import 敌人 from './敌人.js';
@@ -9,6 +9,7 @@ const configs = {
   训练场: {
     name: '训练场',
     description: '可以测试自己的实力。',
+    必刷BOSS刷怪数量: -1,
     enemies: {
       训练木桩: {
         config: 敌人信息.训练木桩,
@@ -19,6 +20,7 @@ const configs = {
   下水道: {
     name: '下水道',
     description: '下水道里面有很多老鼠，还有一些其他的东西。',
+    必刷BOSS刷怪数量: 50,
     enemies: {
       老鼠: {
         config: 敌人信息.老鼠,
@@ -42,6 +44,7 @@ const configs = {
   新大陆: {
     name: '新大陆',
     description: '魔能大陆重建前魔能使们停留的地方。昔日的荣光已经不再，只剩下愚蠢的后世文明。',
+    必刷BOSS刷怪数量: 25,
     enemies: {
       菜鸡魔能使: {
         config: 敌人信息.菜鸡魔能使,
@@ -61,6 +64,7 @@ const configs = {
   科科猪场: {
     name: '科科猪场',
     description: '新大陆传奇人物李科养育的无性繁殖猪的牧场。他一直不擅长管理猪的数量。',
+    必刷BOSS刷怪数量: 25,
     enemies: {
       小猪: {
         config: 敌人信息.小猪,
@@ -80,6 +84,7 @@ const configs = {
   蜘蛛洞穴: {
     name: '蜘蛛洞穴',
     description: '新大陆一处被魔物占据的废弃矿坑，有很多神奇的生物。',
+    必刷BOSS刷怪数量: 40,
     enemies: {
       蜘蛛宝宝: {
         config: 敌人信息.蜘蛛宝宝,
@@ -115,6 +120,7 @@ const configs = {
   永霜要塞: {
     name: '永霜要塞',
     description: '昔日寒霜王朝领下的一所要塞，内部已然腐朽。',
+    必刷BOSS刷怪数量: 50,
     enemies: {
       霜铠剑士: {
         config: 敌人信息.霜铠剑士,
@@ -142,6 +148,7 @@ const configs = {
   燃烧古堡: {
     name: '燃烧古堡',
     description: '被永恒火焰覆盖的诅咒城堡，弥漫着烧焦的气味。',
+    必刷BOSS刷怪数量: 50,
     enemies: {
       尸体: {
         config: 敌人信息.尸体,
@@ -181,22 +188,28 @@ class 战斗区域 {
     },
   };
 
-  // 非配置数据
-  level = 1;
-
-  maxLevel = 1;
-
-  levelCap = settings.config.最大区域等级;
-
-  敌人 = [];
-
-  队友 = [];
-
+  // 可选配置数据，通常情况下不需要修改
   最大敌人数 = settings.config.最大敌人数;
 
   最大队友数 = settings.config.最大队友数;
 
   刷怪间隔 = settings.config.刷怪间隔;
+
+  无敌人刷怪倍速 = settings.config.无敌人刷怪倍速;
+
+  必刷BOSS刷怪数量 = settings.config.必刷BOSS刷怪数量;
+
+  levelCap = settings.config.最大区域等级; // 最大等级的上限，即最大最大等级
+
+  // 非配置数据
+  level = 0;
+
+  // TODO: 实装击杀BOSS提升区域最大等级
+  maxLevel = 0;
+
+  敌人 = [];
+
+  队友 = [];
 
   刷怪计时器 = 0;
 
@@ -212,7 +225,19 @@ class 战斗区域 {
 
   reset() {
     this.刷怪数量 = 0;
-    this.statMultiplier = this.calcStatMultiplier();
+    this.updateStatMultiplier();
+  }
+
+  updateStatMultiplier() {
+    this.statMultiplier = settings.计算区域难度属性倍率(this.level);
+  }
+
+  /**
+   * 无敌人时刷怪速度加快
+   * @returns {number} 刷怪倍速
+   */
+  get刷怪倍速() {
+    return this.敌人.length === 0 ? this.无敌人刷怪倍速 : 1;
   }
 
   update(dt) {
@@ -221,9 +246,7 @@ class 战斗区域 {
       this.刷怪计时器 = 0;
       return;
     }
-    // 无敌人时刷怪速度加快
-    const 刷怪倍速 = this.敌人.length === 0 ? settings.config.无敌人刷怪倍速 : 1;
-    this.刷怪计时器 = Math.min(this.刷怪计时器 + dt * 刷怪倍速, this.刷怪间隔);
+    this.刷怪计时器 += dt * this.get刷怪倍速();
     if (this.刷怪计时器 < this.刷怪间隔) {
       return;
     }
@@ -260,28 +283,56 @@ class 战斗区域 {
     }
   }
 
+  determineEnemyToGen() {
+    const enemies = Object.values(this.enemies);
+    // 不会通过达成一定击杀数量刷新BOSS，只能靠运气
+    if (this.必刷BOSS刷怪数量 < 0) {
+      return sampleWeighted(enemies);
+    }
+    // 如果刷怪数量达到必刷BOSS刷怪数量，刷出BOSS
+    const boss = enemies.find((enemy) => enemy.isBoss);
+    if (boss && this.刷怪数量 > this.必刷BOSS刷怪数量) {
+      return boss;
+    }
+    return sampleWeighted(enemies);
+  }
+
   /**
    * 强制生成敌人。调用该方法前请手动判断是否可以生成敌人
    */
   genEnemy() {
-    const enemies = Object.values(this.enemies);
     this.刷怪数量 += 1;
-    let enemyLiteral;
-    const boss = enemies.find((enemy) => enemy.isBoss);
-    if (boss && this.刷怪数量 > settings.config.必定刷新BOSS刷怪数量) {
+    const enemyLiteral = this.determineEnemyToGen();
+    if (enemyLiteral.isBoss) {
       this.刷怪数量 = 0;
       this.clearEnemies();
-      enemyLiteral = boss;
-    } else {
-      enemyLiteral = sampleWeighted(enemies);
     }
     return {
       instance: new 敌人(enemyLiteral.config, !!enemyLiteral.isBoss, this.statMultiplier),
     };
   }
 
-  calcStatMultiplier = () =>
-    math.evaluate('(maxLevel - level)^1.5', { level: this.level, maxLevel: this.maxLevel });
+  /**
+   * @param {number} value
+   * @returns {boolean} 是否改变了区域等级
+   */
+  addLevel(value) {
+    return this.setLevel(this.level + value);
+  }
+
+  /**
+   * @param {number} newLevel
+   * @returns {boolean} 是否改变了区域等级
+   */
+  setLevel(newLevel) {
+    const prevLevel = this.level;
+    this.level = _.clamp(newLevel, 0, this.levelCap);
+    const changed = prevLevel !== this.level;
+    if (changed) {
+      this.updateStatMultiplier();
+    }
+    return changed;
+  }
 }
 
-export { 战斗区域, configs };
+export { 战斗区域, configs, configs as areaConfigs };

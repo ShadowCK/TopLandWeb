@@ -74,11 +74,24 @@ const wrapHtml = (htmlString, tags) => {
     if (_.isString(tags[i])) {
       result = `<${tags[i]}>${result}</${tags[i]}>`;
     } else {
-      const { name, settings } = tags[i];
+      const { name, settings = '' } = tags[i];
       result = `<${name} ${settings}>${result}</${name}>`;
     }
   }
   return result;
+};
+
+/**
+ * @param {string[]} htmlStrings Array of HTML strings
+ * @param {{name: string, settings: string}} tags
+ * @returns {string[]} Array of wrapped HTML strings
+ */
+const wrapHtmls = (htmlStrings, tags, join = false) => {
+  const result = htmlStrings.reduce((acc, cur) => {
+    acc.push(wrapHtml(cur, tags));
+    return acc;
+  }, []);
+  return join ? result.join('') : result;
 };
 
 // Clean up HTML string
@@ -96,6 +109,23 @@ const changeTab = (tabPath) => {
   $(`a[data-tab="${tabPath}"]`).siblings().filter('[data-tab]').removeClass('active');
 };
 
+const labelHTML2 = ({ title, detail, content, className, isHorizontal = true }) => {
+  const classStr = className != null ? ` ${className}` : '';
+  const horizontalStr = isHorizontal ? ' horizontal' : '';
+  const settings = `class="ui${classStr}${horizontalStr} label"`;
+  return /* html */ `
+    <div ${settings}>
+      ${title != null ? title : ''}
+      ${detail != null ? `<div class="detail">${detail}</div>` : ''}
+    </div>
+    ${content != null ? content : ''}
+    `;
+};
+
+/**
+ * @param {boolean} inline 实际上没有作用，因为fomantic-ui的.ui.label就是inline-block。
+ * @deprecated
+ */
 const labelHTML = (title, content, className = '', inline = false) => {
   const settings = className
     ? `class="ui ${className} horizontal label"`
@@ -427,16 +457,22 @@ const genItem = (item) => {
     <div>
       <h3 class="ui header"><span class="装备品质"></span>${
         item.name
-      }<span class="装备等级"></span></h3>
-      ${labelHTML(item.type)}${
-    isEquipment
-      ? `${labelHTML(item.slot)}${labelHTML(
-          '合成次数',
-          `<span style="margin-right:0.5em">${item.合成次数}</span>`,
-        )}${labelHTML('合成增益', `X${_.round(item.获取合成增益(), 2)}`)}
-        <div class="装备需求容器" style="margin-top:0.5em"></div>`
-      : ''
-  }
+      }<span class="装备等级"></span><span class="装备品阶"></span></h3>
+      <div class="ui horizontal list">
+      ${labelHTML(item.type)}
+      ${
+        isEquipment
+          ? `
+            ${labelHTML(item.slot)},
+            ${labelHTML2({ title: '合成次数', detail: `${item.合成次数}` })}
+            ${labelHTML2({ title: '品质倍率', detail: `X${_.round(item.获取品质倍率(), 2)}` })}
+            ${labelHTML2({ title: '合成增益', detail: `X${_.round(item.获取合成增益(), 2)}` })}
+            ${labelHTML2({ title: '品阶增益', detail: `X${_.round(item.获取品阶增益(), 2)}` })}
+            `
+          : ''
+      }
+      </div>
+      ${isEquipment ? '<div class="装备需求容器"></div>' : ''}
       <div class="ui message">
         <p>${item.description}</p>
       </div>
@@ -477,6 +513,7 @@ const genItem = (item) => {
       if (isEquipment) {
         this.find('.装备品质').text(`[${EquipRarityInverted[item.品质]}]`);
         this.find('.装备等级').text(` LV.${_.round(item.获取合成等级())}`);
+        this.find('.装备品阶').text(` +${item.品阶}`);
       }
     },
     onCreate: function onCreate() {
@@ -489,7 +526,7 @@ const genItem = (item) => {
   });
   // 右键打开物品的context menu
   // 创建一个新的隐藏div绑定到右键菜单的popup，好处是不会影响原来的popup（一个元素只能有一个popup）
-   // TODO: 为什么先创建元素并注册popup, 添加css等再append就不会有效，上面的明明可以
+  // TODO: 为什么先创建元素并注册popup, 添加css等再append就不会有效，上面的明明可以
   const hidden = card.append('<div></div>').children().last();
   hidden.css({
     visibility: 'hidden',
@@ -682,6 +719,7 @@ const getPositionData = (element) => {
 export {
   Format,
   changeTab,
+  labelHTML2,
   labelHTML,
   genLabel,
   genProgressBar,
@@ -697,4 +735,6 @@ export {
   randomColor,
   getPositionData,
   paginationHTML,
+  wrapHtml,
+  wrapHtmls,
 };

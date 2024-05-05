@@ -1,6 +1,6 @@
 {
   "name": "top-land-web",
-  "version": "0.0.6",
+  "version": "0.0.7",
   "description": "Web-based RPG&Idle game",
   "main": "./src/main.js",
   "type": "module",

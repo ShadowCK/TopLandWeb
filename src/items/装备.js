@@ -2,8 +2,8 @@ import _ from 'lodash';
 import 物品 from './物品.js';
 import { EquipRarity, EquipSlot, ItemType } from '../enums.js';
 import { EventType, generalEvents } from '../events/事件管理器.js';
-import { config as gameConfig, 计算合成等级 } from '../settings.js';
-import { applyStats } from '../utils.js';
+import { config as gameConfig, 计算合成等级, 计算装备品阶属性倍率 } from '../settings.js';
+import { applyStats, 属性可增益 } from '../utils.js';
 import { getPlayer } from '../player/玩家管理器.js';
 
 class 装备 extends 物品 {
@@ -158,6 +158,14 @@ class 装备 extends 物品 {
     return true;
   }
 
+  获取品质倍率() {
+    return gameConfig.装备属性品质倍率[this.品质];
+  }
+
+  获取品阶增益() {
+    return 计算装备品阶属性倍率(this.品阶);
+  }
+
   获取合成等级() {
     return 计算合成等级(this.合成次数);
   }
@@ -167,15 +175,12 @@ class 装备 extends 物品 {
   }
 
   获取实际属性() {
-    const 品质倍率 = gameConfig.装备属性品质倍率[this.品质];
-    // TODO: 品阶...
+    const 品阶倍率 = this.获取品阶增益();
     const 合成增益 = this.获取合成增益();
+    const 品质倍率 = this.获取品质倍率();
     const stats = _.cloneDeep(this.stats);
     applyStats(stats, ({ value, currentPath }) => {
-      const _currentPath = currentPath.join('.');
-      const 可增益 =
-        gameConfig.可增益属性.findIndex((path) => _currentPath.startsWith(path)) !== -1;
-      const mult = 可增益 ? 合成增益 * 品质倍率 : 品质倍率;
+      const mult = 属性可增益(value, currentPath) ? 合成增益 * 品阶倍率 * 品质倍率 : 品质倍率;
       _.set(stats, currentPath, value * mult);
     });
     return stats;

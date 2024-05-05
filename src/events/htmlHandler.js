@@ -649,7 +649,7 @@ const registerEvents = () => {
 
   combatEvents.on(EventType.进入战斗区域, (combatArea) => {
     $('#战斗面板-区域信息').show();
-    $('#战斗面板-区域名称').text(combatArea.name);
+    $('#战斗面板-区域名称').text(`${combatArea.name} +${combatArea.level}`);
     $('#战斗面板-区域描述').text(combatArea.description);
   });
 

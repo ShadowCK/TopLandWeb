@@ -29,7 +29,7 @@ const config = {
   最大队友数: 2,
   刷怪间隔: 5,
   无敌人刷怪倍速: 10,
-  必定刷新BOSS刷怪数量: 20,
+  必刷BOSS刷怪数量: 100,
   最大区域等级: 100,
   每点幸运值增加金钱百分比: 1,
   每点幸运值增加掉落率百分比: 1,
@@ -41,7 +41,7 @@ const config = {
   合成等级软上限: 100,
   合成等级加成: 0.01,
   /**
-   * 装备合成以及区域难度会影响的实体属性。
+   * 装备的合成等级、品阶以及区域难度会影响的实体属性。
    */
   可增益属性: [
     '最大生命值',
@@ -99,6 +99,9 @@ const config = {
   抽奖花费基础专精: 1,
   抽奖花费金钱公式: 'base * (5 * times + 3^times)',
   抽奖花费专精公式: 'base * (1 + 2 * times)',
+  区域难度属性倍率公式: '1.5^level',
+  区域难度奖励倍率公式: '1.25^level', // 经验值，金钱。不影响掉率。
+  装备品阶属性倍率公式: '1.18^level',
 };
 
 // 游戏设置，有些影响游戏性，有些影响用户体验。
@@ -168,8 +171,31 @@ const setGameSpeed = (speed) => {
     settings.游戏倍速 = speed;
   }
 };
-
 addToWindow('setGameSpeed', setGameSpeed);
+
+const 计算区域难度属性倍率 = (level) => math.evaluate(config.区域难度属性倍率公式, { level });
+
+const 计算区域难度奖励倍率 = (level) => math.evaluate(config.区域难度奖励倍率公式, { level });
+
+const 计算装备品阶属性倍率 = (level) => math.evaluate(config.装备品阶属性倍率公式, { level });
+
+/**
+ * 如果在点击的时候按下了Ctrl、Shift或Alt键，返回对应倍率的数值。
+ * @param {JQuery.ClickEvent} e
+ * @param {number} value 需要乘以倍率的数值，默认为1。可以不传入以获取倍率本身。
+ */
+const 获取点击倍率 = (e, value = 1) => {
+  if (e.ctrlKey) {
+    return value * 10;
+  }
+  if (e.shiftKey) {
+    return value * 25;
+  }
+  if (e.altKey) {
+    return value * 100;
+  }
+  return value;
+};
 
 export {
   默认优先级,
@@ -179,9 +205,13 @@ export {
   config as gameConfig,
   settings,
   settings as gameSettings,
+  setGameSpeed,
   get最高专精等级经验倍率,
   计算品质roll点基数,
   计算抽奖奖励,
   计算抽奖花费,
-  setGameSpeed,
+  计算区域难度属性倍率,
+  计算区域难度奖励倍率,
+  计算装备品阶属性倍率,
+  获取点击倍率,
 };

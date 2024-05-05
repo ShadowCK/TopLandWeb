@@ -3,7 +3,7 @@ import { DamageSource, DamageType, StatType } from './战斗属性.js';
 import { getPlayer } from '../player/玩家管理器.js';
 import { 战斗区域, configs } from './战斗区域.js';
 import { EventType, HTMLEvents, combatEvents } from '../events/事件管理器.js';
-import { gameConfig, 计算品质roll点基数 } from '../settings.js';
+import { gameConfig, 计算区域难度奖励倍率, 计算品质roll点基数 } from '../settings.js';
 import { calcHealing, sampleWeighted } from '../utils.js';
 import 敌人 from './敌人.js';
 import 队友 from './队友.js';
@@ -36,7 +36,7 @@ const getEntitiesInCombat = (includePlayer = true) => {
 /** @type {Object<string, 战斗区域>} */
 const 所有战斗区域 = {};
 
-// 可以放到init? 虽然放这里也能用
+// TODO: 可以放到init? 虽然放这里也能用
 _.forEach(configs, (config) => {
   所有战斗区域[config.name] = new 战斗区域(config);
 });
@@ -362,18 +362,24 @@ const registerEvents = () => {
       return;
     }
     if (entity instanceof 敌人) {
-      // 给予金钱和经验
-      const enemy = entity;
-      player.addExp(enemy.经验值 || 0);
+      const 区域难度奖励倍率 = 计算区域难度奖励倍率(当前战斗区域.level);
       const 幸运值 = player.getStat2(StatType.幸运值);
-      const 金钱倍率 = 1 + (gameConfig.每点幸运值增加金钱百分比 * 幸运值) / 100;
+      const 经验值倍率 = 区域难度奖励倍率;
+      const 金钱倍率 =
+        (1 + (gameConfig.每点幸运值增加金钱百分比 * 幸运值) / 100) * 区域难度奖励倍率;
       const 掉落倍率 = 1 + (gameConfig.每点幸运值增加掉落率百分比 * 幸运值) / 100;
-      player.金钱 += enemy.金钱 * 金钱倍率 || 0;
-      enemy.config.掉落.forEach((dropConfig) => {
+      const 装备品阶 = 当前战斗区域.level;
+
+      // 给予金钱和经验
+      player.addExp(entity.经验值 * 经验值倍率 || 0);
+      player.金钱 += entity.金钱 * 金钱倍率 || 0;
+      // 掉落物品
+      entity.config.掉落.forEach((dropConfig) => {
         if (Math.random() * 100 >= dropConfig.chance * 掉落倍率) {
           return;
         }
         const added = player.背包.addItemFromConfig(dropConfig.config, dropConfig.count);
+        // * 掉落装备的场合
         if (dropConfig.config.type === ItemType.装备) {
           // 决定装备的品质
           const mapped = _.map(gameConfig.装备稀有度分布, (weight, key) => ({
@@ -383,11 +389,19 @@ const registerEvents = () => {
           // 不会掉落比重区间低于基数的品质。
           const baseMult = 计算品质roll点基数(幸运值) / 100;
           const rolled = Number(sampleWeighted(mapped, baseMult).key);
-          added.forEach((item) => {
-            item.品质 = rolled;
-          });
+          // 重写装备的品质和阶级
+          added.forEach(
+            /**
+             * @param {装备} item
+             */
+            (item) => {
+              item.品质 = rolled;
+              item.品阶 = 装备品阶;
+            },
+          );
         }
       });
+      // 移除敌人
       当前战斗区域.removeEnemy(entity);
     }
   });
