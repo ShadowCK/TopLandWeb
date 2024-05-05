@@ -97,6 +97,30 @@ const updateHTML = (params, dt) => {
     genElementForStats(player, 属性成长, value, key);
   });
 
+  // 更新战斗面板
+  const 当前战斗区域 = 战斗管理器.get当前战斗区域();
+  if (当前战斗区域 != null) {
+    if (当前战斗区域.必刷BOSS刷怪数量 < 0) {
+      $('#战斗面板-必刷BOSS进度条').parent().hide();
+    } else {
+      $('#战斗面板-必刷BOSS进度条').parent().show();
+      updateProgressBar(
+        $('#战斗面板-必刷BOSS进度条'),
+        当前战斗区域.刷怪数量,
+        当前战斗区域.必刷BOSS刷怪数量,
+        Format.必刷BOSS进度条格式,
+      );
+    }
+    updateProgressBar(
+      $('#战斗面板-刷怪计时进度条'),
+      当前战斗区域.get刷怪计时去掉倍速(),
+      当前战斗区域.get实际刷怪间隔(),
+      Format.刷怪计时进度条格式,
+      2,
+      false,
+      0.1,
+    );
+  }
   const 战斗面板实体列表 = $('#战斗面板-实体列表');
   // 即使不在战斗，也更新玩家的生命条等信息。
   updateCombatLayout(getCombatLayout(战斗面板实体列表, player), player, { isPlayer: true });
@@ -318,6 +342,21 @@ const setupHTML = () => {
     changeTab('区域面板');
     战斗管理器.退出战斗区域();
   });
+  // 生成刷怪计时进度条
+  genProgressBar({
+    id: '战斗面板-刷怪计时进度条',
+    parent: $('#战斗面板-进度条容器'),
+    color: 'grey',
+    format: Format.刷怪计时进度条格式,
+  }).wrap('<div class="column"></div>');
+  // 生成必刷BOSS进度条
+  genProgressBar({
+    id: '战斗面板-必刷BOSS进度条',
+    parent: $('#战斗面板-进度条容器'),
+    color: 'yellow',
+    format: Format.必刷BOSS进度条格式,
+  }).wrap('<div class="column"></div>');
+  // 创建玩家的战斗UI
   const 战斗面板实体列表 = $('#战斗面板-实体列表');
   const player = 玩家管理器.getPlayer();
   战斗面板实体列表.append(genCombatLayout(player, { isPlayer: true }));

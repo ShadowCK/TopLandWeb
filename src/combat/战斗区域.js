@@ -225,6 +225,8 @@ class 战斗区域 {
 
   reset() {
     this.刷怪数量 = 0;
+    this.刷怪计时器 = 0;
+    this.clearEnemies();
     this.updateStatMultiplier();
   }
 
@@ -332,6 +334,14 @@ class 战斗区域 {
       this.updateStatMultiplier();
     }
     return changed;
+  }
+
+  get刷怪计时去掉倍速() {
+    return this.刷怪计时器 / this.get刷怪倍速();
+  }
+
+  get实际刷怪间隔() {
+    return this.刷怪间隔 / this.get刷怪倍速();
   }
 }
 
