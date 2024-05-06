@@ -56,7 +56,7 @@ class 玩家存档 {
 
     // 打包游戏设置等其他数据
     needed.游戏设置 = settings;
-    needed.战斗区域 = _.mapValues(所有战斗区域, (area) => _.pick(area, ['level']));
+    needed.战斗区域 = _.mapValues(所有战斗区域, (area) => _.pick(area, ['level', 'maxLevel']));
     return JSON.stringify(needed);
   }
 
@@ -105,6 +105,8 @@ class 玩家存档 {
         _.forEach(this.data.战斗区域, (areaData, key) => {
           const area = 所有战斗区域[key];
           if (area) {
+            // 先设置最大等级再设置等级，因为等级不会超过最大等级。
+            area.setMaxLevel(areaData.maxLevel);
             area.setLevel(areaData.level);
           }
         });

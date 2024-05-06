@@ -404,6 +404,12 @@ const registerEvents = () => {
           );
         }
       });
+      if (entity.isBoss && 当前战斗区域.isAtMaxLevel()) {
+        const success = 当前战斗区域.addMaxLevel(1);
+        if (success) {
+          HTMLEvents.emit(EventType.区域最大等级提升, 当前战斗区域);
+        }
+      }
       // 移除敌人
       当前战斗区域.removeEnemy(entity);
     }
