@@ -17,6 +17,7 @@ const EventType = {
   // HTML events
   更改设置: '更改设置',
   渲染战斗信息: '渲染战斗信息',
+  区域最大等级提升: '区域最大等级提升',
 };
 
 const combatEvents = new EventEmitter();

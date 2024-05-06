@@ -8,6 +8,7 @@ import {
   计算区域难度属性倍率,
   计算装备品阶属性倍率,
 } from '../settings.js';
+import { EventType, HTMLEvents } from '../events/事件管理器.js';
 
 /** @type {JQuery<HTMLElement>} */
 let 区域面板;
@@ -16,23 +17,26 @@ let 区域列表;
 /** @type {JQuery<HTMLElement>} */
 let 区域信息;
 
-const init = () => {
-  区域面板 = $('#区域面板');
-  区域列表 = 区域面板.find('#区域面板-区域列表');
-  区域信息 = 区域面板.find('#区域面板-区域信息');
-};
-
 /**
  * @param {JQuery<HTMLElement>} areaButton
  * @param {JQuery<HTMLElement>} areaTab
  * @param {战斗区域} 战斗区域
  */
 const 更新区域等级显示 = (areaButton, areaTab, 战斗区域) => {
-  const 区域详情 = areaTab.find('.区域详情');
+  const 区域按钮 = areaButton == null ? $(`#区域按钮-${战斗区域.name}`) : areaButton;
+  const 区域分页 = areaTab == null ? $(`#区域分页-${战斗区域.name}`) : areaTab;
+  const 区域详情 = 区域分页.find('.区域详情');
   区域详情.empty();
   区域详情.append(/* html */ `
     <div class="ui horizontal list">
-      ${labelHTML2({ title: '区域等级', detail: `${战斗区域.level}/${战斗区域.levelCap}` })}
+      ${labelHTML2({
+        title: '区域等级',
+        detail: `${战斗区域.level}/${战斗区域.maxLevel}`,
+      })}
+      ${labelHTML2({
+        title: '区域最大等级上限',
+        detail: 战斗区域.levelCap,
+      })}
       ${labelHTML2({
         title: '敌人属性倍率',
         detail: _.round(计算区域难度属性倍率(战斗区域.level), 2),
@@ -54,7 +58,7 @@ const 更新区域等级显示 = (areaButton, areaTab, 战斗区域) => {
       })}
     </div>
   `);
-  areaButton.text(`${战斗区域.name} +${战斗区域.level}`);
+  区域按钮.text(`${战斗区域.name} +${战斗区域.level}`);
 };
 
 /**
@@ -62,7 +66,9 @@ const 更新区域等级显示 = (areaButton, areaTab, 战斗区域) => {
  * @param {战斗区域} 战斗区域
  */
 const genArea = (区域按钮, 战斗区域) => {
-  const areaTab = $(`<div class="ui tab" data-tab="区域-${战斗区域.name}"></div>`);
+  const areaTab = $(
+    `<div id="区域分页-${战斗区域.name}" class="ui tab" data-tab="区域-${战斗区域.name}"></div>`,
+  );
   // 为每个区域生成介绍和前往按钮
   $(`
     <div class="ui message">
@@ -96,6 +102,18 @@ const genArea = (区域按钮, 战斗区域) => {
     const added = 获取点击倍率(e, 1);
     if (战斗区域.addLevel(added)) {
       更新区域等级显示(区域按钮, areaTab, 战斗区域);
+    } else {
+      const message =
+        战斗区域.maxLevel < 战斗区域.levelCap
+          ? `当前等级已达最大等级（${战斗区域.maxLevel}）`
+          : '当前等级已达最大等级上限';
+      $.toast({
+        title: '无法提升区域等级',
+        message,
+        displayTime: 2000,
+        showProgress: 'bottom',
+        class: 'warning chinese',
+      });
     }
   });
   buttons.find('[data-use="降低区域等级"]').on('click', (e) => {
@@ -145,7 +163,9 @@ const refresh = () => {
   区域信息.empty();
   _.forEach(战斗管理器.所有战斗区域, (战斗区域) => {
     // 为每个区域生成一个按钮
-    const 区域按钮 = $(`<a class="item" data-tab="区域-${战斗区域.name}">${战斗区域.name}</a>`);
+    const 区域按钮 = $(
+      `<a class="item" id="区域按钮-${战斗区域.name}" data-tab="区域-${战斗区域.name}">${战斗区域.name}</a>`,
+    );
     区域列表.append(区域按钮);
     // 生成区域按钮对应的分页
     const areaTab = genArea(区域按钮, 战斗区域);
@@ -153,6 +173,23 @@ const refresh = () => {
     areaTab.find('a.item').tab();
   });
   区域列表.find('a.item').tab();
+};
+
+const init = () => {
+  区域面板 = $('#区域面板');
+  区域列表 = 区域面板.find('#区域面板-区域列表');
+  区域信息 = 区域面板.find('#区域面板-区域信息');
+
+  HTMLEvents.on(EventType.区域最大等级提升, (战斗区域) => {
+    更新区域等级显示(null, null, 战斗区域);
+    $.toast({
+      title: '你击败了区域BOSS！',
+      message: `${战斗区域.name}的最大等级提升至${战斗区域.maxLevel}`,
+      displayTime: 5000,
+      showProgress: 'bottom',
+      class: 'black chinese',
+    });
+  });
 };
 
 export { init, refresh };

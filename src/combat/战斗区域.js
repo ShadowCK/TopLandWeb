@@ -188,7 +188,7 @@ class 战斗区域 {
     },
   };
 
-  // 可选配置数据，通常情况下不需要修改
+  // 可选配置数据，通常情况下默认值就足矣
   最大敌人数 = settings.config.最大敌人数;
 
   最大队友数 = settings.config.最大队友数;
@@ -199,13 +199,12 @@ class 战斗区域 {
 
   必刷BOSS刷怪数量 = settings.config.必刷BOSS刷怪数量;
 
-  levelCap = settings.config.最大区域等级; // 最大等级的上限，即最大最大等级
+  levelCap = settings.config.最大区域等级上限; // 最大等级的上限，即最大最大等级
 
   // 非配置数据
-  level = 0;
+  level = 0; // 会被保存
 
-  // TODO: 实装击杀BOSS提升区域最大等级
-  maxLevel = 0;
+  maxLevel = 0; // 会被保存
 
   敌人 = [];
 
@@ -328,12 +327,35 @@ class 战斗区域 {
    */
   setLevel(newLevel) {
     const prevLevel = this.level;
-    this.level = _.clamp(newLevel, 0, this.levelCap);
+    this.level = _.clamp(newLevel, 0, this.maxLevel);
     const changed = prevLevel !== this.level;
     if (changed) {
       this.updateStatMultiplier();
     }
     return changed;
+  }
+
+  isAtMaxLevel() {
+    return this.level === this.maxLevel;
+  }
+
+  /**
+   * @param {number} value
+   * @returns {boolean} 是否改变了区域最大等级
+   */
+  addMaxLevel(value) {
+    return this.setMaxLevel(this.maxLevel + value);
+  }
+
+  /**
+   *
+   * @param {number} newLevel
+   * @returns {boolean} 是否改变了区域最大等级
+   */
+  setMaxLevel(newLevel) {
+    const prevMaxLevel = this.maxLevel;
+    this.maxLevel = _.clamp(newLevel, 0, this.levelCap);
+    return prevMaxLevel !== this.maxLevel;
   }
 
   get刷怪计时去掉倍速() {
