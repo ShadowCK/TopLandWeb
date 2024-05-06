@@ -103,9 +103,16 @@ const 属性可增益 = (value, fullPath, 不作用于负值 = true) => {
     return false;
   }
   const _fullPath = fullPath.join('.');
-  // 如果path是"伤害分布"，那么fullPath "伤害分布.物理"，"伤害分布.奥术"等都是可增益的
-  const 可增益 = config.可增益属性.findIndex((path) => _fullPath.startsWith(path)) !== -1;
-  if (!可增益) {
+  // 如果path是"伤害分布"，那么fullPath "伤害分布.物理"，"伤害分布.奥术"等也可以被增益
+  const 可增益 = config.可增益属性.findIndex((path) => {
+    // 如果就是这个属性，那么是可增益的
+    if (_fullPath === path) {
+      return true;
+    }
+    // 如果是次级属性，那么也是可增益的；否则不可增益
+    return _fullPath.startsWith(`${path}.`);
+  });
+  if (可增益 === -1) {
     return false;
   }
   if (不作用于负值) {

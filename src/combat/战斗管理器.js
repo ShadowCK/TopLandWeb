@@ -8,6 +8,7 @@ import { calcHealing, sampleWeighted } from '../utils.js';
 import 敌人 from './敌人.js';
 import 队友 from './队友.js';
 import { ItemType } from '../enums.js';
+import { addToWindow } from '../debug.js';
 
 /** @type {战斗区域} */
 let 当前战斗区域 = null;
@@ -408,6 +409,8 @@ const registerEvents = () => {
     }
   });
 };
+
+addToWindow('get当前战斗区域', get当前战斗区域);
 
 export {
   所有战斗区域,
