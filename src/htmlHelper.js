@@ -423,34 +423,38 @@ const genElementForEquipmentStat = (parent, value, key, labelClass = '', path = 
  * @returns {string} HTML string
  */
 const genItemHTML = (item) => {
-  // 悬浮在图片上的名字
-  const nameHTML = item.name
-    ? `<div class="背包-物品名悬浮文字" style="display:flex; text-align: center; align-items: center; justify-content: center; position: absolute; width: 100%; height: 100%; top: 50%; left: 50%; transform: translate(-50%, -50%)"><span class="ui black text" style="font-size: max(1em, 15cqw)">${item.name}</span></div>`
-    : '';
-  // 物品背景颜色
-  let bgColor;
-  // 其他CSS
-  let others = '';
-  if (item instanceof 装备) {
-    const { 品阶, 品质, 合成次数 } = item;
-    const 合成等级 = 计算合成等级(合成次数);
-    bgColor = getEquipColor(品质, ([r, g, b, a]) => {
+  const isEquipment = item instanceof 装备;
+  let cardStyle = '';
+  let nameStyle = '';
+  let imageStyle = '';
+  let nameStr = item.name;
+  if (isEquipment) {
+    const { 品阶, 品质 } = item;
+    const 合成等级 = item.获取合成等级();
+    const dropShadowBlur = _.clamp(品阶 * 0.5, 0, 20);
+    const dropShadowColor = getEquipColor(品质, ([r, g, b, a]) => {
       const newAlpha = _.clamp(a * (合成等级 / 100), a, 1);
       return [r, g, b, newAlpha];
     });
-    const boxShadowSpread = _.clamp(品阶 * 0.2, 0, 8);
-    const boxShadowBlur = _.clamp(品阶 * 0.5, 0, 20);
-    others += `box-shadow: 0 0 ${boxShadowBlur}px ${boxShadowSpread}px ${bgColor};`;
+    const textColor = getEquipColor(品质, ([r, g, b]) =>
+      品质 === EquipRarity.普通 ? [255, 255, 255, 1] : [r, g, b, 1],
+    );
+    cardStyle += `filter: drop-shadow(0 0 ${dropShadowBlur}px ${dropShadowColor});`;
+    nameStyle += `color: ${textColor};`;
+    imageStyle +=
+      'clip-path: polygon(10% 0%, 90% 0%, 100% 10%, 100% 90%, 90% 100%, 10% 100%, 0% 90%, 0% 10%);';
+    nameStr = `${item.name} +${item.品阶}`;
   } else {
-    bgColor = getEquipColor(EquipRarity.普通);
+    nameStyle += `color: white;`;
   }
+  // 悬浮在图片上的名字
+  const nameHTML = /* html */ `<div class="背包物品-悬浮文字" style="display:flex; text-align: center; align-items: center; justify-content: center; position: absolute; width: 100%; height: 100%; top: 50%; left: 50%; transform: translate(-50%, -50%)"><span class="ui text" style="font-size: max(1em, 15cqw); ${nameStyle}">${nameStr}</span></div>`;
   return /* html */ `
   <div class="column">
-    <div class="ui card" style="container-type: inline-size;">
-      <div class="ui image placeholder 背包-物品图片" style="animation:none; overflow: visible; background-color:${bgColor}; ${others}">
+    <div class="ui card 背包物品" style="container-type: inline-size; box-shadow: none; background: none; ${cardStyle}">
+      <div class="ui image placeholder 背包物品-图片" style="animation:none; overflow: visible; background: url(/images/tooltip.png) center/cover; ${imageStyle}">
         <div class="square icon image"></div>
         ${nameHTML}
-        </div>
       </div>
     </div>
   </div>
