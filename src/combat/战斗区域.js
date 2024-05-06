@@ -56,7 +56,7 @@ const configs = {
       },
       装逼的骑士: {
         config: 敌人信息.装逼的骑士,
-        weight: 1,
+        weight: 2,
         isBoss: true,
       },
     },
@@ -140,7 +140,7 @@ const configs = {
       },
       要塞领主: {
         config: 敌人信息.要塞领主,
-        weight: 1,
+        weight: 2,
         isBoss: true,
       },
     },
@@ -168,7 +168,7 @@ const configs = {
       },
       落魄的大帝: {
         config: 敌人信息.落魄的大帝,
-        weight: 1,
+        weight: 2,
         isBoss: true,
       },
     },

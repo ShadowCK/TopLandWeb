@@ -15,6 +15,6 @@ type Settings = import('../src/skills/Settings').default;
 type EventEmitter = import('eventemitter3').EventEmitter;
 type Buff = import('../src/combat/Buff').Buff;
 
-// globals.d.ts
+// 和ESLint一样，得让它们认识这些Webpack注入的全局变量
 declare const WEBPACK_MODE: string;
 declare const VERSION: string;

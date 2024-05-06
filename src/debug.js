@@ -74,9 +74,35 @@ const printMessages = () => {
   });
 };
 
+/**
+ * 类似于Java的Objects.requireNonNull，检查targets是否包含null或undefined。
+ * 只是简单的null check，不支持深度递归。
+ * @param {Object<string, any>} targets key value pairs of variables to check.
+ * @param {boolean} throwError
+ * @returns Whether all targets are not null or undefined.
+ */
+const checkNotNull = (targets, throwError = true) => {
+  const nullValues = {};
+  _.forEach(targets, (value, key) => {
+    if (value == null) {
+      nullValues[key] = value;
+    }
+  });
+  const success = _.isEmpty(nullValues);
+  if (!success) {
+    _.forEach(nullValues, (value, key) => {
+      error(`"${key}" is ${value}`);
+    });
+    if (throwError) {
+      throw new Error(`Null values found in notNull check.`);
+    }
+  }
+  return success;
+};
+
 addToWindow('printMessages', printMessages, true);
 addToWindow('messages', messages, true);
 // 不用addToWindow，不然exposed会存自己。
 window.exposed = exposed;
 
-export { addToWindow, isDevelopment, isProduction, log, error };
+export { addToWindow, isDevelopment, isProduction, log, error, checkNotNull };
