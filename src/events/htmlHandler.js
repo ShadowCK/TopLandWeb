@@ -23,18 +23,48 @@ import { get最高专精等级经验倍率, settings, 计算抽奖奖励, 计算
 import { StatType } from '../combat/战斗属性.js';
 import { templateFromElement, getMaxLevel } from '../utils.js';
 import { 可以提升专精等级, 可以转生, 转生 } from '../reincarnate/转生.js';
-import { addToWindow } from '../debug.js';
+import { addToWindow, checkNotNull } from '../debug.js';
 import { GameSettingName } from '../enums.js';
 import { update as 更新战斗信息, 生成伤害信息, 生成治疗信息 } from '../战斗信息管理器.js';
 import 背包界面 from '../items/背包界面.js';
 import 技能栏界面 from '../skills/技能栏界面.js';
 import * as 区域界面 from '../ui/区域界面.js';
-import { 抽取Buff } from '../shop/商店.js';
+import { 获取抽奖信息, 试抽Buff, 施加Buff, 扣除抽奖花费 } from '../shop/商店.js';
 
 let lastUpdate = performance.now();
 let htmlWorkerId = null;
 
 const isUpdatingHTML = () => htmlWorkerId != null;
+
+// #region 多次复用的函数
+const 更新商店面板 = (player) => {
+  templateFromElement(
+    $('#商店面板-金钱抽奖信息'),
+    {
+      抽奖次数: player.金钱抽奖次数,
+      抽奖花费: 计算抽奖花费(player.金钱抽奖次数, false),
+      固定数值奖励倍率: _.round(计算抽奖奖励(player.金钱抽奖次数, true).base, 2),
+      百分比奖励倍率: _.round(计算抽奖奖励(player.金钱抽奖次数, false).base, 2),
+      剩余金钱: _.round(player.金钱),
+    },
+    true,
+    false,
+  );
+  templateFromElement(
+    $('#商店面板-专精抽奖信息'),
+    {
+      抽奖次数: player.专精抽奖次数,
+      抽奖花费: 计算抽奖花费(player.专精抽奖次数, true),
+      固定数值奖励倍率: _.round(计算抽奖奖励(player.专精抽奖次数, true).base, 2),
+      百分比奖励倍率: _.round(计算抽奖奖励(player.专精抽奖次数, false).base, 2),
+      剩余专精等级: player.抽奖用专精等级,
+    },
+    true,
+    false,
+  );
+};
+
+// #endregion
 
 /**
  * @param {{player:玩家}} params
@@ -128,37 +158,13 @@ const updateHTML = (params, dt) => {
   enemies.forEach((enemy) =>
     updateCombatLayout(getCombatLayout(战斗面板实体列表, enemy), enemy, { isEnemy: true }),
   );
-
   更新战斗信息(dt);
 
   // 更新技能栏
   $('#技能栏').get(0).ui?.update();
 
-  // 更新抽奖面板
-  templateFromElement(
-    $('#商店面板-金钱抽奖信息'),
-    {
-      抽奖次数: player.金钱抽奖次数,
-      抽奖花费: 计算抽奖花费(player.金钱抽奖次数, false),
-      固定数值奖励倍率: _.round(计算抽奖奖励(player.金钱抽奖次数, true), 2),
-      百分比奖励倍率: _.round(计算抽奖奖励(player.金钱抽奖次数, false), 2),
-      剩余金钱: _.round(player.金钱),
-    },
-    true,
-    false,
-  );
-  templateFromElement(
-    $('#商店面板-专精抽奖信息'),
-    {
-      抽奖次数: player.专精抽奖次数,
-      抽奖花费: 计算抽奖花费(player.专精抽奖次数, true),
-      固定数值奖励倍率: _.round(计算抽奖奖励(player.专精抽奖次数, true), 2),
-      百分比奖励倍率: _.round(计算抽奖奖励(player.专精抽奖次数, false), 2),
-      剩余专精等级: player.抽奖用专精等级,
-    },
-    true,
-    false,
-  );
+  // 更新商店面板
+  更新商店面板(player);
 };
 
 // 可以根据玩家的需求，重置UI更新频率
@@ -239,6 +245,7 @@ const setupHTML = () => {
     }
   };
 
+  // 设置确认转生模态框模板
   $.fn.modal.settings.templates.确认转生 = function f(classConfig) {
     const player = 玩家管理器.getPlayer();
     const 当前职业名 = player.职业.name;
@@ -300,6 +307,121 @@ const setupHTML = () => {
       ],
     };
   };
+
+  // 设置抽奖模态框模板
+  $.fn.modal.settings.templates.抽奖三选一 =
+    /**
+     * @param {抽奖信息} 抽奖信息
+     * @param {抽奖奖励[]} 抽奖奖励s
+     */
+    function f(抽奖信息, 抽奖奖励s) {
+      let 奖励已领取 = false;
+      const 给予奖励 = (抽奖奖励, successMsg) => {
+        施加Buff(抽奖信息, 抽奖奖励);
+        // 避免多次给予奖励
+        if (奖励已领取) {
+          return;
+        }
+        奖励已领取 = true;
+        $.toast({
+          displayTime: 2000,
+          class: 'success chinese',
+          showProgress: 'bottom',
+          title: '领取奖励成功',
+          message: successMsg,
+        });
+      };
+      const 奖励按钮s = 抽奖奖励s.map((抽奖奖励) => {
+        const { isFlatBuff } = 抽奖信息;
+        const { statType, value } = 抽奖奖励;
+        const rewardStr = `${statType} ${value >= 0 ? '+' : ''}${_.round(value, 2)}${
+          isFlatBuff ? '' : '%'
+        }`;
+        return {
+          text: rewardStr,
+          抽奖奖励, // 保留对奖励信息的引用
+          click: () => 给予奖励(抽奖奖励, `你获得了 ${rewardStr}`),
+        };
+      });
+      return {
+        title: `选择你的奖励`,
+        closable: false,
+        class: 'chinese',
+        className: {
+          modal: 'ui standard modal',
+        },
+        content: /* html */ `
+        <div class="ui divided selection list">
+          ${奖励按钮s
+            .map((奖励按钮) => {
+              const { base, baseMult, qualityMult } = 奖励按钮.抽奖奖励;
+              const desc = `= ${_.round(base, 2)} X ${_.round(baseMult, 2)} X ${_.round(
+                qualityMult,
+                2,
+              )}`;
+              return /* html */ `
+              <div class="item">
+                <div class="content">
+                  <div class="header">${奖励按钮.text} (${_.round(qualityMult * 100)}%)</div>
+                  <div class="description">${desc}</div>
+                </div>
+              </div>
+            `;
+            })
+            .join('')}
+        </div>
+        `,
+        // 模态框显示时绑定事件
+        onShow: () => {
+          /** @type {JQuery<HTMLElement>} */
+          const $modalElement = this.get.element();
+          $modalElement.find('.content .item').each((index, e) => {
+            $(e).on('click', () => {
+              奖励按钮s[index].click();
+              // 不是模态框的action按钮，需要手动关闭
+              this.hide();
+            });
+          });
+        },
+        actions: [
+          {
+            text: '随机选择',
+            class: 'grey',
+            click: () => _.sample(奖励按钮s).click(),
+          },
+          {
+            text: '重新抽取',
+            class: 'teal',
+            click: () => {
+              const 新抽奖信息 = 获取抽奖信息(抽奖信息.useExpertise, 抽奖信息.isFlatBuff);
+              if (!新抽奖信息.success) {
+                $.toast({
+                  title: '无法重新抽取',
+                  class: 'error chinese',
+                  displayTime: 2000,
+                  showProgress: 'bottom',
+                  message: 抽奖信息.useExpertise ? '专精等级不足。' : '金钱不足。',
+                });
+                return false;
+              }
+              扣除抽奖花费(新抽奖信息);
+              $.toast({
+                title: '已重新抽取奖品',
+                class: 'grey chinese',
+                displayTime: 2000,
+                showProgress: 'bottom',
+                message: `你失去了 ${新抽奖信息.cost} ${
+                  新抽奖信息.useExpertise ? '专精等级' : '金钱'
+                }。`,
+              });
+              // 开启新的抽奖并关闭当前模态框
+              $.modal('抽奖三选一', 新抽奖信息, 试抽Buff(3, 新抽奖信息));
+              return true;
+            },
+          },
+        ],
+      };
+    };
 
   // 启用 Semantic UI 的标签页功能
   $('.menu .item').tab({
@@ -370,113 +492,43 @@ const setupHTML = () => {
   player.背包.ui = new 背包界面(player.背包);
 
   // 商店面板
-  // 初始化抽奖信息
-  templateFromElement(
-    $('#商店面板-金钱抽奖信息'),
-    {
-      抽奖次数: player.金钱抽奖次数,
-      抽奖花费: 计算抽奖花费(player.金钱抽奖次数, false),
-      固定数值奖励倍率: _.round(计算抽奖奖励(player.金钱抽奖次数, true), 2),
-      百分比奖励倍率: _.round(计算抽奖奖励(player.金钱抽奖次数, false), 2),
-      剩余金钱: _.round(player.金钱),
-    },
-    true,
-    false,
-  );
-  templateFromElement(
-    $('#商店面板-专精抽奖信息'),
-    {
-      抽奖次数: player.专精抽奖次数,
-      抽奖花费: 计算抽奖花费(player.专精抽奖次数, true),
-      固定数值奖励倍率: _.round(计算抽奖奖励(player.专精抽奖次数, true), 2),
-      百分比奖励倍率: _.round(计算抽奖奖励(player.专精抽奖次数, false), 2),
-      剩余专精等级: player.抽奖用专精等级,
-    },
-    true,
-    false,
-  );
+  // 初始化页面内容
+  更新商店面板(player);
   // 注册抽奖按钮
-  // TODO: 优化一下下面的结构，可以用一个函数来批量注册
-  const 抽奖失败设置 = {
-    title: '抽奖失败',
-    class: 'error chinese',
-    displayTime: 2000,
-    showProgress: 'bottom',
+  const 注册抽奖按钮 = (按钮id, useExpertise, isFlatBuff) => {
+    checkNotNull({ 按钮id, useExpertise, isFlatBuff });
+    const $按钮 = $(`#${按钮id}`);
+    $按钮.on('click', () => {
+      const 抽奖信息 = 获取抽奖信息(useExpertise, isFlatBuff);
+      if (!抽奖信息.success) {
+        $.toast({
+          title: '抽奖失败',
+          class: 'error chinese',
+          displayTime: 2000,
+          showProgress: 'bottom',
+          message: useExpertise ? '专精等级不足。' : '金钱不足。',
+        });
+      } else {
+        // 在选择奖励前就扣除花费，防止玩家刷新页面来免费重随
+        扣除抽奖花费(抽奖信息);
+        $.toast({
+          title: '已抽取奖品',
+          class: 'grey chinese',
+          displayTime: 2000,
+          showProgress: 'bottom',
+          message: `你失去了 ${抽奖信息.cost} ${抽奖信息.useExpertise ? '专精等级' : '金钱'}。`,
+        });
+        // 抽取三个buff，让玩家选择一个
+        const 抽奖奖励s = 试抽Buff(3, 抽奖信息);
+        // 打开模态框，让玩家选择奖励
+        $.modal('抽奖三选一', 抽奖信息, 抽奖奖励s);
+      }
+    });
   };
-  const 抽奖成功设置 = {
-    title: '抽奖成功',
-    class: 'success chinese',
-    displayTime: 2000,
-    showProgress: 'bottom',
-  };
-  $('#商店面板-金钱抽奖-固定数值').on('click', () => {
-    const result = 抽取Buff(false, true);
-    if (!result) {
-      $.toast({
-        ...抽奖失败设置,
-        message: '金钱不足。',
-      });
-    } else {
-      result.value = _.round(result.value, 2);
-      $.toast({
-        ...抽奖成功设置,
-        message: `获得了 ${result.statType} ${
-          result.value > 0 ? `+${result.value}` : result.value
-        }`,
-      });
-    }
-  });
-  $('#商店面板-金钱抽奖-百分比').on('click', () => {
-    const result = 抽取Buff(false, false);
-    if (!result) {
-      $.toast({
-        ...抽奖失败设置,
-        message: '金钱不足。',
-      });
-    } else {
-      result.value = _.round(result.value, 2);
-      $.toast({
-        ...抽奖成功设置,
-        message: `获得了 ${result.statType} ${
-          result.value > 0 ? `+${result.value}` : result.value
-        }%`,
-      });
-    }
-  });
-  $('#商店面板-专精抽奖-固定数值').on('click', () => {
-    const result = 抽取Buff(true, true);
-    if (!result) {
-      $.toast({
-        ...抽奖失败设置,
-        message: '专精等级不足。',
-      });
-    } else {
-      result.value = _.round(result.value, 2);
-      $.toast({
-        ...抽奖成功设置,
-        message: `获得了 ${result.statType} ${
-          result.value > 0 ? `+${result.value}` : result.value
-        }`,
-      });
-    }
-  });
-  $('#商店面板-专精抽奖-百分比').on('click', () => {
-    const result = 抽取Buff(true, false);
-    if (!result) {
-      $.toast({
-        ...抽奖失败设置,
-        message: '专精等级不足。',
-      });
-    } else {
-      result.value = _.round(result.value, 2);
-      $.toast({
-        ...抽奖成功设置,
-        message: `获得了 ${result.statType} ${
-          result.value > 0 ? `+${result.value}` : result.value
-        }%`,
-      });
-    }
-  });
+  注册抽奖按钮('商店面板-金钱抽奖-固定数值', false, true);
+  注册抽奖按钮('商店面板-金钱抽奖-百分比', false, false);
+  注册抽奖按钮('商店面板-专精抽奖-固定数值', true, true);
+  注册抽奖按钮('商店面板-专精抽奖-百分比', true, false);
 
   // 设置面板
   // 初始化每个设置标题的内容

@@ -95,6 +95,7 @@ const config = {
   品质roll点公式: '(85 * luck) / (100 + 1 * luck)',
   抽奖奖励固定数值公式: '1 + times^1.2',
   抽奖奖励百分比公式: '1 + times^0.8',
+  抽奖奖励品质公式: 'random(1, 2)',
   抽奖花费基础金钱: 100,
   抽奖花费基础专精: 1,
   抽奖花费金钱公式: 'base * (5 * times + 3^times)',
@@ -149,12 +150,12 @@ const get最高专精等级经验倍率 = (最高专精等级) => {
  */
 const 计算品质roll点基数 = (幸运值) => math.evaluate(config.品质roll点公式, { luck: 幸运值 });
 
-const 计算抽奖奖励 = (times, 固定数值buff = true) => {
-  if (固定数值buff) {
-    return math.evaluate(config.抽奖奖励固定数值公式, { times });
-  }
-  return math.evaluate(config.抽奖奖励百分比公式, { times });
-};
+const 计算抽奖奖励 = (times, isFlatBuff = true) => ({
+  base: isFlatBuff
+    ? math.evaluate(config.抽奖奖励固定数值公式, { times })
+    : math.evaluate(config.抽奖奖励百分比公式, { times }),
+  quality: math.evaluate(config.抽奖奖励品质公式),
+});
 
 const 计算抽奖花费 = (times, useExpertise) => {
   if (useExpertise) {
