@@ -92,6 +92,16 @@ const config = {
     [EquipRarity.传说]: 1.4,
     [EquipRarity.神器]: 1.5,
   },
+  装备稀有度颜色: {
+    // 除了神器，其他颜色都是参考魔兽的
+    [EquipRarity.粗糙]: [157, 157, 157, 0.2], // 灰色
+    [EquipRarity.普通]: [0, 0, 0, 0.02], // 浅灰色（因为是很透明的黑色，会随合成等级逐渐变黑）
+    [EquipRarity.优良]: [30, 255, 0, 0.2], // 绿色
+    [EquipRarity.稀有]: [0, 204, 255, 0.2], // 青色
+    [EquipRarity.史诗]: [163, 53, 238, 0.2], // 紫色
+    [EquipRarity.传说]: [255, 128, 0, 0.2], // 橙色
+    [EquipRarity.神器]: [255, 0, 0, 0.2], // 红色
+  },
   品质roll点公式: '(85 * luck) / (100 + 1 * luck)',
   抽奖奖励固定数值公式: '1 + times^1.2',
   抽奖奖励百分比公式: '1 + times^0.8',
@@ -113,6 +123,17 @@ const settings = {
   背包页面最大数量: 10,
   战斗面板外战斗信息: false,
   技能栏每行技能数量: 5,
+};
+
+/**
+ * @param {string} rarity 品质名称
+ * @param {Function} handler 处理rgba的函数
+ * @returns
+ */
+const getEquipColor = (rarity, handler) => {
+  const rgba = config.装备稀有度颜色[rarity];
+  const color = handler != null && handler instanceof Function ? handler(rgba) : rgba;
+  return `rgba(${color[0]}, ${color[1]}, ${color[2]}, ${color[3]})`;
 };
 
 const getRequiredExp = (level) => {
@@ -201,6 +222,7 @@ const 获取点击倍率 = (e, value = 1) => {
 export {
   默认优先级,
   getRequiredExp,
+  getEquipColor,
   计算合成等级,
   config,
   config as gameConfig,

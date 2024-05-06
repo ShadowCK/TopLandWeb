@@ -6,9 +6,10 @@ import * as 玩家管理器 from './player/玩家管理器.js';
 import { getDecimalPrecision } from './utils.js';
 import { StatType } from './combat/战斗属性.js';
 import 装备 from './items/装备.js';
-import { EquipRarityInverted, SemanticUIColor } from './enums.js';
+import { EquipRarity, EquipRarityInverted, SemanticUIColor } from './enums.js';
 import { 计算伤害分布 } from './combat/战斗管理器.js';
 import { ItemRequirementChinese } from './localization.js';
+import { config, getEquipColor, 计算合成等级 } from './settings.js';
 
 const Format = {
   生命条格式: '生命值: {value} / {total}',
@@ -417,14 +418,36 @@ const genElementForEquipmentStat = (parent, value, key, labelClass = '', path = 
   parent.append(html);
 };
 
-const genItemHTML = (name) => {
-  const nameHTML = name
-    ? `<div style="display:flex; text-align: center; align-items: center; justify-content: center; position: absolute; width: 100%; height: 100%; top: 50%; left: 50%; transform: translate(-50%, -50%)"><span class="ui black text" style="font-size: max(1em, 15cqw)">${name}</span></div>`
+/**
+ * @param {物品} item
+ * @returns {string} HTML string
+ */
+const genItemHTML = (item) => {
+  // 悬浮在图片上的名字
+  const nameHTML = item.name
+    ? `<div class="背包-物品名悬浮文字" style="display:flex; text-align: center; align-items: center; justify-content: center; position: absolute; width: 100%; height: 100%; top: 50%; left: 50%; transform: translate(-50%, -50%)"><span class="ui black text" style="font-size: max(1em, 15cqw)">${item.name}</span></div>`
     : '';
+  // 物品背景颜色
+  let bgColor;
+  // 其他CSS
+  let others = '';
+  if (item instanceof 装备) {
+    const { 品阶, 品质, 合成次数 } = item;
+    const 合成等级 = 计算合成等级(合成次数);
+    bgColor = getEquipColor(品质, ([r, g, b, a]) => {
+      const newAlpha = _.clamp(a * (合成等级 / 100), a, 1);
+      return [r, g, b, newAlpha];
+    });
+    const boxShadowSpread = _.clamp(品阶 * 0.2, 0, 8);
+    const boxShadowBlur = _.clamp(品阶 * 0.5, 0, 20);
+    others += `box-shadow: 0 0 ${boxShadowBlur}px ${boxShadowSpread}px ${bgColor};`;
+  } else {
+    bgColor = getEquipColor(EquipRarity.普通);
+  }
   return /* html */ `
   <div class="column">
     <div class="ui card" style="container-type: inline-size;">
-      <div class="ui image placeholder" style="animation:none; overflow: visible;">
+      <div class="ui image placeholder 背包-物品图片" style="animation:none; overflow: visible; background-color:${bgColor}; ${others}">
         <div class="square icon image"></div>
         ${nameHTML}
         </div>
@@ -439,7 +462,7 @@ const genItemHTML = (name) => {
  */
 const genItem = (item) => {
   const isEquipment = item instanceof 装备;
-  const wrapper = $(genItemHTML(item.name));
+  const wrapper = $(genItemHTML(item));
   const card = wrapper.find('.ui.card');
   if (isEquipment) {
     card.css('cursor', 'pointer');
