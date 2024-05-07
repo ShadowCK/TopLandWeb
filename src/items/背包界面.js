@@ -315,14 +315,7 @@ class 背包界面 {
       return;
     }
 
-    const filter = (item) => item.name.includes(searchText);
-    if (prevSearchText === '') {
-      // 全新搜索，创建背包视图
-      this.背包 = new 背包视图(this.主背包备份, filter);
-    } else if (searchText !== '') {
-      // 搜索变化，设置filter
-      this.背包.setFilter(filter);
-    } else {
+    if (prevSearchText !== '' && searchText === '') {
       // 搜索变为空，回到主背包
       if (this.背包 === this.主背包备份) {
         throw new Error('之前搜索过，怎么能是一样的？？');
@@ -330,10 +323,34 @@ class 背包界面 {
       this.背包.unregisterHandlers();
       this.背包 = this.主背包备份;
     }
+
+    const filter = (item) => item.name.includes(searchText);
+    if (this.背包 instanceof 背包视图) {
+      // 搜索变化，设置filter
+      this.背包.setFilter(filter);
+    } else {
+      // 全新搜索，创建背包视图
+      this.背包 = new 背包视图(this.主背包备份, filter);
+    }
+
     this.resetPaginationNav(1);
     this.setActivePageIndex(1);
-
     this.getSearchInputElement().data('prev-input', searchText);
+  }
+
+  setMainBackpack(主背包) {
+    this.主背包备份 = 主背包;
+    if (this.背包 instanceof 背包视图) {
+      const prevSearchText = this.getSearchInputElement().data('prev-input');
+      const filter = (item) => item.name.includes(prevSearchText);
+      this.背包.unregisterHandlers();
+      this.背包 = new 背包视图(主背包, filter);
+    } else {
+      this.背包 = 主背包;
+    }
+
+    this.resetPaginationNav(1);
+    this.setActivePageIndex(1);
   }
 }
 
