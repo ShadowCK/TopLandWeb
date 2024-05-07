@@ -1,6 +1,6 @@
 import _ from 'lodash';
 import { paginationHTML, genItem as genItemElement } from '../htmlHelper.js';
-import { EventType, generalEvents } from '../events/事件管理器.js';
+import { EventType, HTMLEvents, generalEvents } from '../events/事件管理器.js';
 import { settings } from '../settings.js';
 import 背包视图 from './背包视图.js';
 
@@ -17,6 +17,8 @@ class 背包界面 {
   addItemHandle = this.addItemCallback.bind(this);
 
   removeItemHandle = this.removeItemCallback.bind(this);
+
+  updateItemHandle = this.updateItemCallback.bind(this);
 
   itemElements = new Map();
 
@@ -42,6 +44,7 @@ class 背包界面 {
 
     generalEvents.on(EventType.获得物品, this.addItemHandle);
     generalEvents.on(EventType.失去物品, this.removeItemHandle);
+    HTMLEvents.on(EventType.更新背包物品, this.updateItemHandle);
   }
 
   refresh() {
@@ -83,6 +86,7 @@ class 背包界面 {
   unregisterHandlers() {
     generalEvents.off(EventType.获得物品, this.addItemHandle);
     generalEvents.off(EventType.失去物品, this.removeItemHandle);
+    HTMLEvents.off(EventType.更新背包物品, this.updateItemHandle);
   }
 
   // eslint-disable-next-line class-methods-use-this
@@ -134,12 +138,13 @@ class 背包界面 {
     }
   }
 
-  updateItem(item, inventoryIndex) {
+  updateItem(inventoryIndex) {
+    // TODO: 优化成不重新生成元素并替换，而是更新元素已有的内容
     const index = this.getContainerIndex(inventoryIndex);
     if (index >= this.getLength() || index < 0) {
       throw new Error();
     }
-
+    const item = this.背包.items[inventoryIndex];
     const newItemElement = genItemElement(item);
     this.locElement(index).replaceWith(newItemElement);
   }
@@ -279,15 +284,23 @@ class 背包界面 {
         // 前/中
         this.removeItem(Math.max(start, inventoryIndex));
         const lastIndex = this.getInventoryIndex(this.背包物品每页数量 - 1);
+        // 让下一页的第一个物品补到最后一格
         if (this.背包.items.length > lastIndex) {
-          const item = this.背包.items[lastIndex];
-          this.addItem(item, lastIndex);
+          const firstItemOnNextPage = this.背包.items[lastIndex];
+          this.addItem(firstItemOnNextPage, lastIndex);
         }
       }
     } else if (_.inRange(inventoryIndex, start, end)) {
       // 减少stack
       this.updateItem(inventoryIndex);
     }
+  }
+
+  updateItemCallback({ container, index: inventoryIndex }) {
+    if (this.背包 !== container) {
+      return;
+    }
+    this.updateItem(inventoryIndex);
   }
 
   setActivePageIndex(index) {
@@ -341,7 +354,7 @@ class 背包界面 {
   setMainBackpack(主背包) {
     this.主背包备份 = 主背包;
     if (this.背包 instanceof 背包视图) {
-      const {filter} =  this.背包;
+      const { filter } = this.背包;
       this.背包.unregisterHandlers();
       this.背包 = new 背包视图(主背包, filter);
     } else {

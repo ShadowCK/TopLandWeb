@@ -504,17 +504,7 @@ const genItem = (item) => {
       }<span class="装备等级"></span><span class="装备品阶"></span></h3>
       <div class="ui horizontal list">
       ${labelHTML(item.type)}
-      ${
-        isEquipment
-          ? `
-            ${labelHTML(item.slot)},
-            ${labelHTML2({ title: '合成次数', detail: `${item.合成次数}` })}
-            ${labelHTML2({ title: '品质倍率', detail: `X${_.round(item.获取品质倍率(), 2)}` })}
-            ${labelHTML2({ title: '合成增益', detail: `X${_.round(item.获取合成增益(), 2)}` })}
-            ${labelHTML2({ title: '品阶增益', detail: `X${_.round(item.获取品阶增益(), 2)}` })}
-            `
-          : ''
-      }
+      <div class="装备标签">这个元素的outerHTML会被替换</div>
       </div>
       ${isEquipment ? '<div class="装备需求容器"></div>' : ''}
       <div class="ui message">
@@ -553,16 +543,28 @@ const genItem = (item) => {
       hide: 0,
     },
     html: compressHTML(tempParent.html()),
-    onShow: function onShow() {
-      if (isEquipment) {
-        this.find('.装备品质').text(`[${EquipRarityInverted[item.品质]}]`);
-        this.find('.装备等级').text(` LV.${_.round(item.获取合成等级())}`);
-        this.find('.装备品阶').text(` +${item.品阶}`);
-      }
-    },
+    onShow:
+      /**
+       * @this {JQuery<HTMLElement>}
+       */
+      function onShow() {
+        if (isEquipment) {
+          this.find('.装备品质').text(`[${EquipRarityInverted[item.品质]}]`);
+          this.find('.装备等级').text(` LV.${_.round(item.获取合成等级())}`);
+          this.find('.装备品阶').text(` +${item.品阶}`);
+          this.find('.装备标签').get(0).outerHTML = /* html */ `
+              ${labelHTML(item.slot)}
+              ${labelHTML2({ title: '合成次数', detail: `${item.合成次数}` })}
+              ${labelHTML2({ title: '品质倍率', detail: `X${_.round(item.获取品质倍率(), 2)}` })}
+              ${labelHTML2({ title: '合成增益', detail: `X${_.round(item.获取合成增益(), 2)}` })}
+              ${labelHTML2({ title: '品阶增益', detail: `X${_.round(item.获取品阶增益(), 2)}` })}
+              `;
+        }
+      },
     onCreate: function onCreate() {
       this.addClass('chinese');
       if (!isEquipment) {
+        this.find('.装备标签').remove();
         this.find('.装备品质').remove();
         this.find('.装备等级').remove();
       }
