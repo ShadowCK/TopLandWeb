@@ -110,6 +110,8 @@ const config = {
   抽奖花费基础专精: 1,
   抽奖花费金钱公式: 'base * (5 * times + 3^times)',
   抽奖花费专精公式: 'base * (1 + 2 * times)',
+  重新抽奖花费金钱公式: 'base * (5 * times + 3^times) / 5',
+  重新抽奖花费专精公式: 'base * (1 + 2 * times) / 5',
   区域难度属性倍率公式: '1.5^level',
   区域难度奖励倍率公式: '1.25^level', // 经验值，金钱。不影响掉率。
   装备品阶属性倍率公式: '1.18^level',
@@ -185,6 +187,13 @@ const 计算抽奖花费 = (times, useExpertise) => {
   return math.evaluate(config.抽奖花费金钱公式, { times, base: config.抽奖花费基础金钱 });
 };
 
+const 计算重新抽奖花费 = (times, useExpertise) => {
+  if (useExpertise) {
+    return math.evaluate(config.重新抽奖花费专精公式, { times, base: config.抽奖花费基础专精 });
+  }
+  return math.evaluate(config.重新抽奖花费金钱公式, { times, base: config.抽奖花费基础金钱 });
+};
+
 const setGameSpeed = (speed) => {
   if (isProduction() && (speed < 0 || speed > 10)) {
     console.error('游戏倍速必须在0到10之间');
@@ -233,6 +242,7 @@ export {
   计算品质roll点基数,
   计算抽奖奖励,
   计算抽奖花费,
+  计算重新抽奖花费,
   计算区域难度属性倍率,
   计算区域难度奖励倍率,
   计算装备品阶属性倍率,
