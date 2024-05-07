@@ -341,8 +341,7 @@ class 背包界面 {
   setMainBackpack(主背包) {
     this.主背包备份 = 主背包;
     if (this.背包 instanceof 背包视图) {
-      const prevSearchText = this.getSearchInputElement().data('prev-input');
-      const filter = (item) => item.name.includes(prevSearchText);
+      const {filter} =  this.背包;
       this.背包.unregisterHandlers();
       this.背包 = new 背包视图(主背包, filter);
     } else {
