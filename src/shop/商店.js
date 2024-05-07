@@ -1,7 +1,7 @@
 import _ from 'lodash';
 import { Buff } from '../combat/Buff.js';
 import { getPlayer } from '../player/玩家管理器.js';
-import { 计算抽奖奖励, 计算抽奖花费, 默认优先级 } from '../settings.js';
+import { 计算抽奖奖励, 计算抽奖花费, 计算重新抽奖花费, 默认优先级 } from '../settings.js';
 import { BuffType, StackType } from '../enums.js';
 import { addToWindow, checkNotNull } from '../debug.js';
 
@@ -38,14 +38,18 @@ const 百分比奖品信息 = {
 /**
  * @param {boolean} useExpertise 使用专精还是金钱抽奖
  * @param {number} isFlatBuff 抽取的buff是固定数值还是百分比
+ * @param {boolean} 是重抽 如果是重抽，抽奖花费不一样
  * @returns {抽奖信息}
  */
-const 获取抽奖信息 = (useExpertise, isFlatBuff) => {
+const 获取抽奖信息 = (useExpertise, isFlatBuff, 是重抽 = false) => {
   checkNotNull({ useExpertise, isFlatBuff });
   const player = getPlayer();
-  const times = useExpertise ? player.专精抽奖次数 : player.金钱抽奖次数;
+  let times = useExpertise ? player.专精抽奖次数 : player.金钱抽奖次数;
+  if (是重抽) {
+    times -= 1; // 在开启抽奖时增加了次数，重抽时需要减去
+  }
   const resource = useExpertise ? player.抽奖用专精等级 : player.金钱;
-  const cost = 计算抽奖花费(times, useExpertise);
+  const cost = !是重抽 ? 计算抽奖花费(times, useExpertise) : 计算重新抽奖花费(times, useExpertise);
   return {
     success: resource >= cost,
     useExpertise,
@@ -90,17 +94,22 @@ const 试抽Buff = (count, 抽奖信息) => {
 
 /**
  * @param {抽奖信息} 抽奖信息
+ * @param {boolean} 是重抽 如果是重抽，不增加抽奖次数（并且抽奖信息里的cost不一样）
  */
-const 扣除抽奖花费 = (抽奖信息) => {
+const 扣除抽奖花费 = (抽奖信息, 是重抽 = false) => {
   checkNotNull({ 抽奖信息 });
   const { useExpertise, player, cost } = 抽奖信息;
   // 扣除抽奖消耗，增加抽奖次数
   if (useExpertise) {
     player.抽奖用专精等级 -= cost;
-    player.专精抽奖次数 += 1;
+    if (!是重抽) {
+      player.专精抽奖次数 += 1;
+    }
   } else {
     player.金钱 -= cost;
-    player.金钱抽奖次数 += 1;
+    if (!是重抽) {
+      player.金钱抽奖次数 += 1;
+    }
   }
 };
 

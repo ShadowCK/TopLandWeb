@@ -393,7 +393,7 @@ const setupHTML = () => {
             text: '重新抽取',
             class: 'teal',
             click: () => {
-              const 新抽奖信息 = 获取抽奖信息(抽奖信息.useExpertise, 抽奖信息.isFlatBuff);
+              const 新抽奖信息 = 获取抽奖信息(抽奖信息.useExpertise, 抽奖信息.isFlatBuff, true);
               if (!新抽奖信息.success) {
                 $.toast({
                   title: '无法重新抽取',
@@ -404,7 +404,7 @@ const setupHTML = () => {
                 });
                 return false;
               }
-              扣除抽奖花费(新抽奖信息);
+              扣除抽奖花费(新抽奖信息, true);
               $.toast({
                 title: '已重新抽取奖品',
                 class: 'grey chinese',
@@ -499,7 +499,7 @@ const setupHTML = () => {
     checkNotNull({ 按钮id, useExpertise, isFlatBuff });
     const $按钮 = $(`#${按钮id}`);
     $按钮.on('click', () => {
-      const 抽奖信息 = 获取抽奖信息(useExpertise, isFlatBuff);
+      const 抽奖信息 = 获取抽奖信息(useExpertise, isFlatBuff, false);
       if (!抽奖信息.success) {
         $.toast({
           title: '抽奖失败',
@@ -510,7 +510,7 @@ const setupHTML = () => {
         });
       } else {
         // 在选择奖励前就扣除花费，防止玩家刷新页面来免费重随
-        扣除抽奖花费(抽奖信息);
+        扣除抽奖花费(抽奖信息, false);
         $.toast({
           title: '已抽取奖品',
           class: 'grey chinese',
