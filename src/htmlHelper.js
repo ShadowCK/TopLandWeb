@@ -9,7 +9,7 @@ import 装备 from './items/装备.js';
 import { EquipRarity, EquipRarityInverted, SemanticUIColor } from './enums.js';
 import { 计算伤害分布 } from './combat/战斗管理器.js';
 import { ItemRequirementChinese } from './localization.js';
-import { config, getEquipColor, 计算合成等级 } from './settings.js';
+import { getEquipColor } from './settings.js';
 
 const Format = {
   生命条格式: '生命值: {value} / {total}',
@@ -428,6 +428,7 @@ const genItemHTML = (item) => {
   let nameStyle = '';
   let imageStyle = '';
   let nameStr = item.name;
+  let 装备炫光 = '';
   if (isEquipment) {
     const { 品阶, 品质 } = item;
     const 合成等级 = item.获取合成等级();
@@ -444,6 +445,9 @@ const genItemHTML = (item) => {
     imageStyle +=
       'clip-path: polygon(10% 0%, 90% 0%, 100% 10%, 100% 90%, 90% 100%, 10% 100%, 0% 90%, 0% 10%);';
     nameStr = `${item.name} +${item.品阶}`;
+    if (品质 === EquipRarity.传说 || 品质 === EquipRarity.神器) {
+      装备炫光 = ' 炫光';
+    }
   } else {
     nameStyle += `color: white;`;
   }
@@ -452,7 +456,9 @@ const genItemHTML = (item) => {
   return /* html */ `
   <div class="column">
     <div class="ui card 背包物品" style="container-type: inline-size; box-shadow: none; background: none; ${cardStyle}">
-      <div class="ui image placeholder 背包物品-图片" style="animation:none; overflow: visible; background: url(/images/tooltip.png) center/cover; ${imageStyle}">
+      <div class="ui image placeholder 背包物品-图片${装备炫光}"${
+    isEquipment ? ` data-品质="${EquipRarityInverted[item.品质]}"` : ''
+  } style="${imageStyle}">
         <div class="square icon image"></div>
         ${nameHTML}
       </div>
