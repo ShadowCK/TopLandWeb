@@ -291,6 +291,7 @@ const registerEvents = () => {
       // 真实伤害不受抗性和防御力影响
       if (type === DamageType.真实) {
         totalDamage += damagePartition;
+        eventData.damages[type] = damagePartition;
         return;
       }
       // 先计算抗性对伤害的影响（先乘算）
