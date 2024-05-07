@@ -6,7 +6,7 @@ import 装备 from './装备.js';
 import { 装备存档数据 } from '../player/玩家存档.js';
 
 class 背包 {
-  /** @type {物品} */
+  /** @type {物品[]} */
   items = [];
 
   // a shortcut only for debugging
@@ -175,6 +175,14 @@ class 背包 {
    */
   countItem(name) {
     return this.items.reduce((acc, item) => (item.name === name ? acc + item.stack : acc), 0);
+  }
+
+  /**
+   * @param {物品} item
+   * @returns {number} index of the item in the inventory, -1 if not found
+   */
+  findItemIndex(item) {
+    return this.items.indexOf(item);
   }
 
   /**

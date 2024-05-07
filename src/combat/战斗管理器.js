@@ -401,6 +401,10 @@ const registerEvents = () => {
             (item) => {
               item.品质 = rolled;
               item.品阶 = 装备品阶;
+              /** @type {更新背包物品事件信息} */
+              const eventData = { container: player.背包, index: player.背包.findItemIndex(item) };
+              // 重新渲染背包中的装备
+              HTMLEvents.emit(EventType.更新背包物品, eventData);
             },
           );
         }

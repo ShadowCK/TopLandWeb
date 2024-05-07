@@ -7,6 +7,7 @@ type 技能 = import('../src/skills/技能').default;
 type 实体技能 = import('../src/skills/实体技能').default;
 type 职业 = import('../src/classes/职业').default;
 type 战斗区域 = import('../src/combat/战斗区域').战斗区域;
+type 背包 = import('../src/items/背包').default;
 type EffectComponent = import('../src/skills/EffectComponent').default;
 type TriggerHandler = import('../src/skills/triggerHandler').default;
 type TriggerComponent = import('../src/skills/trigger/TriggerComponent').default;

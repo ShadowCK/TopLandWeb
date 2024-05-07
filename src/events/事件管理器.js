@@ -18,6 +18,7 @@ const EventType = {
   更改设置: '更改设置',
   渲染战斗信息: '渲染战斗信息',
   区域最大等级提升: '区域最大等级提升',
+  更新背包物品: '更新背包物品',
 };
 
 const combatEvents = new EventEmitter();

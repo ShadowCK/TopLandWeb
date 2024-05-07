@@ -1,4 +1,4 @@
-import { EventType, generalEvents } from '../events/事件管理器.js';
+import { EventType, HTMLEvents, generalEvents } from '../events/事件管理器.js';
 import 背包类 from './背包.js';
 
 // 不支持filter by stack
@@ -12,6 +12,8 @@ class 背包视图 extends 背包类 {
 
   removeItemHandle = this.removeItemCallback.bind(this);
 
+  updateItemHandle = this.updateItemCallback.bind(this);
+
   constructor(背包, filter) {
     super();
     this.背包 = 背包;
@@ -19,12 +21,14 @@ class 背包视图 extends 背包类 {
 
     generalEvents.on(EventType.获得物品, this.addItemHandle);
     generalEvents.on(EventType.失去物品, this.removeItemHandle);
+    HTMLEvents.on(EventType.更新背包物品, this.updateItemHandle);
   }
 
   // 不注销handler的话object永远被EventEmitter引用着，object就gc不掉
   unregisterHandlers() {
     generalEvents.off(EventType.获得物品, this.addItemHandle);
     generalEvents.off(EventType.失去物品, this.removeItemHandle);
+    HTMLEvents.off(EventType.更新背包物品, this.updateItemHandle);
   }
 
   setFilter(filter, emitEvent = false) {
@@ -76,7 +80,7 @@ class 背包视图 extends 背包类 {
   }
 
   addItemCallback({ container, item, stack, prevLength }) {
-    if (container !== this.背包 || !this.filter(item)) {
+    if (this.背包 !== container || !this.filter(item)) {
       return;
     }
 
@@ -96,7 +100,7 @@ class 背包视图 extends 背包类 {
   }
 
   removeItemCallback({ container, item, prevLength }) {
-    if (container !== this.背包) {
+    if (this.背包 !== container) {
       return;
     }
 
@@ -129,6 +133,24 @@ class 背包视图 extends 背包类 {
         prevLength: this.items.length,
       });
     }
+  }
+
+  updateItemCallback({ container, index: inventoryIndex }) {
+    if (this.背包 !== container) {
+      return;
+    }
+    const item = this.背包.items[inventoryIndex];
+    if (!this.filter(item)) {
+      return;
+    }
+    const index = this.items.indexOf(item);
+    if (index === -1) {
+      throw new Error();
+    }
+    generalEvents.emit(EventType.更新背包物品, {
+      container: this,
+      index,
+    });
   }
 }
 
