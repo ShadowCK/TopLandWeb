@@ -102,23 +102,23 @@ class 背包界面 {
     return this.getHtml().children('.column').eq(index);
   }
 
-  getInventoryIndex(containerIndex) {
-    return (this.activePageIndex - 1) * this.背包物品每页数量 + containerIndex;
+  toInventoryIndex(interfaceIndex) {
+    return (this.activePageIndex - 1) * this.背包物品每页数量 + interfaceIndex;
   }
 
-  getContainerIndex(inventoryIndex) {
+  toInterfaceIndex(inventoryIndex) {
     return inventoryIndex - (this.activePageIndex - 1) * this.背包物品每页数量;
   }
 
   // Display items in [start, end)
   getStartEnd() {
-    const start = this.getInventoryIndex(0);
-    const end = Math.min(this.getInventoryIndex(this.背包物品每页数量), this.背包.items.length);
+    const start = this.toInventoryIndex(0);
+    const end = Math.min(this.toInventoryIndex(this.背包物品每页数量), this.背包.items.length);
     return [start, end];
   }
 
   addItem(item, inventoryIndex) {
-    const index = this.getContainerIndex(inventoryIndex);
+    const index = this.toInterfaceIndex(inventoryIndex);
     const length = this.getLength();
     if (index > length || index < 0) {
       throw new Error();
@@ -134,23 +134,24 @@ class 背包界面 {
 
     // 超出大小则清理末尾一格
     if (this.getLength() > this.背包物品每页数量) {
-      this.removeItem(this.getInventoryIndex(this.getLength() - 1));
+      this.removeItem(this.toInventoryIndex(this.getLength() - 1));
     }
   }
 
   updateItem(inventoryIndex) {
     // TODO: 优化成不重新生成元素并替换，而是更新元素已有的内容
-    const index = this.getContainerIndex(inventoryIndex);
+    const index = this.toInterfaceIndex(inventoryIndex);
     if (index >= this.getLength() || index < 0) {
       throw new Error();
     }
     const item = this.背包.items[inventoryIndex];
     const newItemElement = genItemElement(item);
+    this.itemElements.set(item, newItemElement);
     this.locElement(index).replaceWith(newItemElement);
   }
 
   removeItem(inventoryIndex) {
-    const index = this.getContainerIndex(inventoryIndex);
+    const index = this.toInterfaceIndex(inventoryIndex);
     if (index >= this.getLength() || index < 0) {
       throw new Error();
     }
@@ -283,7 +284,7 @@ class 背包界面 {
       if (inventoryIndex < start + this.getLength()) {
         // 前/中
         this.removeItem(Math.max(start, inventoryIndex));
-        const lastIndex = this.getInventoryIndex(this.背包物品每页数量 - 1);
+        const lastIndex = this.toInventoryIndex(this.背包物品每页数量 - 1);
         // 让下一页的第一个物品补到最后一格
         if (this.背包.items.length > lastIndex) {
           const firstItemOnNextPage = this.背包.items[lastIndex];
@@ -300,7 +301,10 @@ class 背包界面 {
     if (this.背包 !== container) {
       return;
     }
-    this.updateItem(inventoryIndex);
+    const [start, end] = this.getStartEnd();
+    if (_.inRange(inventoryIndex, start, end)) {
+      this.updateItem(inventoryIndex);
+    }
   }
 
   setActivePageIndex(index) {
