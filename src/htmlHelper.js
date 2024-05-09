@@ -772,7 +772,7 @@ const genItem = (item) => {
       if (!hoveredContextMenu) {
         hidden.popup('hide');
       }
-    }, 10000000);
+    }, 100);
   });
   return wrapper;
 };
