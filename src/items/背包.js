@@ -171,10 +171,19 @@ class 背包 {
 
   /**
    * @param {string} name
+   * @param {Function} [filter] 如果提供，只计算filter返回true的物品
    * @returns {number}
    */
-  countItem(name) {
-    return this.items.reduce((acc, item) => (item.name === name ? acc + item.stack : acc), 0);
+  countItem(name, filter) {
+    return this.items.reduce((acc, item) => {
+      if (item.name !== name) {
+        return acc;
+      }
+      if (typeof filter === 'function' && !filter(item)) {
+        return acc;
+      }
+      return acc + item.stack;
+    }, 0);
   }
 
   /**
@@ -187,11 +196,15 @@ class 背包 {
 
   /**
    * @param {装备} equipment
+   * @param {Function} [filter] 如果提供，只返回filter返回true的装备
    * @returns {装备[]}
    */
-  获取可合成装备(equipment) {
+  获取可合成装备(equipment, filter) {
     const 可合成装备 = this.items.filter((other) => equipment.可以合成(other));
     _.remove(可合成装备, (other) => other === equipment);
+    if (typeof filter === 'function') {
+      _.remove(可合成装备, (other) => !filter(other));
+    }
     return 可合成装备;
   }
 }

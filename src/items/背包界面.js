@@ -121,7 +121,7 @@ class 背包界面 {
     const index = this.toInterfaceIndex(inventoryIndex);
     const length = this.getLength();
     if (index > length || index < 0) {
-      throw new Error();
+      throw new Error('要添加的元素不在当前页');
     }
 
     const newItemElement = genItemElement(item);
@@ -142,7 +142,7 @@ class 背包界面 {
     // TODO: 优化成不重新生成元素并替换，而是更新元素已有的内容
     const index = this.toInterfaceIndex(inventoryIndex);
     if (index >= this.getLength() || index < 0) {
-      throw new Error();
+      throw new Error('要更新的元素不在当前页');
     }
     const item = this.背包.items[inventoryIndex];
     const newItemElement = genItemElement(item);
@@ -153,7 +153,7 @@ class 背包界面 {
   removeItem(inventoryIndex) {
     const index = this.toInterfaceIndex(inventoryIndex);
     if (index >= this.getLength() || index < 0) {
-      throw new Error();
+      throw new Error('要删除的元素不在当前页');
     }
 
     const removedElement = this.locElement(index).remove();

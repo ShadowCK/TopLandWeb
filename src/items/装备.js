@@ -154,7 +154,7 @@ class 装备 extends 物品 {
     }
     // 品质为合成物品中的最高者
     this.品质 = Math.max(this.品质, other.品质);
-    this.合成次数 += other.合成次数 > 0 ? other.合成次数 : 1;
+    this.合成次数 += other.合成次数 + 1; // 物品本身提供1合成次数
     return true;
   }
 

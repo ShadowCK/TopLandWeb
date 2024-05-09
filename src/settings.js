@@ -134,7 +134,7 @@ const settings = {
  */
 const getEquipColor = (rarity, handler) => {
   const rgba = config.装备稀有度颜色[rarity];
-  const color = handler != null && handler instanceof Function ? handler(rgba) : rgba;
+  const color = typeof handler === 'function' ? handler(rgba) : rgba;
   return `rgba(${color[0]}, ${color[1]}, ${color[2]}, ${color[3]})`;
 };
 

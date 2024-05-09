@@ -450,6 +450,7 @@ const genItemHTML = (item) => {
     }
   } else {
     nameStyle += `color: white;`;
+    imageStyle += 'border-radius: .28571429rem !important;';
   }
   // 悬浮在图片上的名字
   const nameHTML = /* html */ `<div class="背包物品-悬浮文字" style="display:flex; text-align: center; align-items: center; justify-content: center; position: absolute; width: 100%; height: 100%; top: 50%; left: 50%; transform: translate(-50%, -50%)"><span class="ui text" style="font-size: max(1em, 15cqw); ${nameStyle}">${nameStr}</span></div>`;
@@ -583,15 +584,39 @@ const genItem = (item) => {
     height: '100%',
   });
   const contextHTML = /* html */ `
-      <div class="ui vertical menu" style="width: 18rem">
-        <a class="item" data-use="丢弃">丢弃</a>
-        <a class="item" data-use="丢弃同名物品">
-          丢弃同名物品
-          <div class="ui label">0</div>
-        </a>
-        <a class="item" data-use="合成">
-        合成（保留最高品质）
-        <div class="ui label">0</div>
+      <div class="ui huge vertical menu" style="width: 20rem">
+        <div class="item 丢弃菜单">
+          <div class="header">丢弃</div>
+          <div class="menu">
+            <a class="item" data-use="丢弃当前物品">当前物品</a>
+            <a class="item" data-use="丢弃同名物品">
+              同名物品
+              <div class="ui label">0</div>
+            </a>
+            <a class="item" data-use="丢弃全部物品">
+              全部物品
+              <div class="ui label">0</div>
+            </a>
+            <a class="item" data-use="丢弃非最高阶物品">
+              非最高阶物品（< <span class="最高品阶">0</span>）
+            <div class="ui label">0</div>
+          </a>
+          </div>
+        </div>
+        <div class="item 合成菜单">
+          <div class="header">合成</div>
+          <span class="ui small text">保留最高品质。只能和同阶或高阶合成。</span>
+          <div class="menu">
+            <a class="item" data-use="合成全部物品">
+              全部物品
+              <div class="ui label">0</div>
+            </a>
+            <a class="item" data-use="合成同阶物品">
+              同阶物品
+              <div class="ui label">0</div>
+            </a>
+          </div>
+        </div>
       </a>
       </div>
       `;
@@ -604,13 +629,34 @@ const genItem = (item) => {
     lastResort: true,
     exclusive: true,
     onShow: function onShow() {
+      card.css('z-index', 1000); // 防止popup被其他card遮挡
       const 同名物品数量 = player.背包.countItem(item.name);
-      this.find('[data-use="丢弃同名物品"] .ui.label').text(同名物品数量);
+      this.find('[data-use="丢弃同名物品"] .ui.label').text(同名物品数量 - 1); // 去掉当前物品
+      this.find('[data-use="丢弃全部物品"] .ui.label').text(同名物品数量);
       if (isEquipment) {
+        const 最高品阶 = player.背包.items.reduce(
+          (acc, cur) => (cur.name === item.name && cur.品阶 > acc ? cur.品阶 : acc),
+          item.品阶,
+        );
+        this.find('.最高品阶').text(最高品阶);
+        const 同名非最高阶物品数量 = player.背包.countItem(
+          item.name,
+          (other) => other.品阶 < 最高品阶,
+        );
+        this.find('[data-use="丢弃非最高阶物品"] .ui.label').text(同名非最高阶物品数量);
+
         const 可合成装备数量 = player.背包.获取可合成装备(item).length;
-        this.find('[data-use="合成"] .ui.label').text(可合成装备数量);
+        const 可合成同阶装备数量 = player.背包.获取可合成装备(
+          item,
+          (other) => other.品阶 === item.品阶,
+        ).length;
+        this.find('[data-use="合成全部物品"] .ui.label').text(可合成装备数量);
+        this.find('[data-use="合成同阶物品"] .ui.label').text(可合成同阶装备数量);
       }
       return true;
+    },
+    onHide: function onHide() {
+      card.css('z-index', '');
     },
     onCreate: function onCreate() {
       this.addClass('chinese');
@@ -621,7 +667,7 @@ const genItem = (item) => {
         e.stopPropagation();
       });
       this.addClass('context-menu');
-      this.find('[data-use="丢弃"]').on('click', () => {
+      this.find('[data-use="丢弃当前物品"]').on('click', () => {
         player.dropItem(item);
         $.toast({
           class: 'chinese',
@@ -638,9 +684,24 @@ const genItem = (item) => {
         });
       });
       if (!isEquipment) {
-        this.find('[data-use="合成"]').remove();
+        this.find('[data-use="丢弃非最高阶物品"]').remove();
+        this.find('.合成菜单').remove();
       } else {
-        this.find('[data-use="合成"]').on('click', () => {
+        this.find('[data-use="丢弃非最高阶物品"]').on('click', () => {
+          const 最高品阶 = player.背包.items.reduce(
+            (acc, cur) => (cur.name === item.name && cur.品阶 > acc ? cur.品阶 : acc),
+            item.品阶,
+          );
+          const 同名非最高阶物品 = player.背包.items.filter(
+            (other) => other.name === item.name && other.品阶 < 最高品阶,
+          );
+          player.dropItems(同名非最高阶物品);
+          $.toast({
+            class: 'chinese',
+            message: `你丢掉了${item.name} X${同名非最高阶物品.length}。`,
+          });
+        });
+        this.find('[data-use="合成全部物品"]').on('click', () => {
           const 可合成装备 = player.背包.获取可合成装备(item);
           if (可合成装备.length === 0) {
             $.toast({
@@ -659,6 +720,30 @@ const genItem = (item) => {
             message: `吸收了${可合成装备.length}件装备。装备等级: ${原装备等级} => ${_.round(
               item.获取合成等级(),
             )}`,
+          });
+        });
+        this.find('[data-use="合成同阶物品"]').on('click', () => {
+          const 可合成同阶装备 = player.背包.获取可合成装备(
+            item,
+            (other) => other.品阶 === item.品阶,
+          );
+          if (可合成同阶装备.length === 0) {
+            $.toast({
+              class: 'error chinese',
+              message: '没有可合成的同阶装备。',
+            });
+            return;
+          }
+          const 原装备等级 = _.round(item.获取合成等级());
+          可合成同阶装备.forEach((other) => {
+            item.合成(other);
+          });
+          player.dropItems(可合成同阶装备);
+          $.toast({
+            class: 'chinese',
+            message: `吸收了${
+              可合成同阶装备.length
+            }件同阶装备。装备等级: ${原装备等级} => ${_.round(item.获取合成等级())}`,
           });
         });
       }
@@ -687,7 +772,7 @@ const genItem = (item) => {
       if (!hoveredContextMenu) {
         hidden.popup('hide');
       }
-    }, 100);
+    }, 10000000);
   });
   return wrapper;
 };
