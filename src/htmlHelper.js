@@ -675,12 +675,28 @@ const genItem = (item) => {
         });
       });
       this.find('[data-use="丢弃同名物品"]').on('click', () => {
-        const 同名物品数量 = player.背包.countItem(item.name);
-        const 同名物品 = player.背包.items.filter((i) => i.name === item.name);
+        const 同名物品数量 = player.背包.countItem(item.name, (i) => i !== item);
+        if (同名物品数量 === 0) {
+          $.toast({
+            class: 'error chinese',
+            message: '没有同名物品。',
+          });
+          return;
+        }
+        const 同名物品 = player.背包.items.filter((i) => i.name === item.name && i !== item);
         player.dropItems(同名物品);
         $.toast({
           class: 'chinese',
           message: `你丢掉了${item.name} X${同名物品数量}。`,
+        });
+      });
+      this.find('[data-use="丢弃全部物品"]').on('click', () => {
+        const 全部物品数量 = player.背包.countItem(item.name);
+        const 全部物品 = player.背包.items.filter((i) => i.name === item.name);
+        player.dropItems(全部物品);
+        $.toast({
+          class: 'chinese',
+          message: `你丢掉了${item.name} X${全部物品数量}。`,
         });
       });
       if (!isEquipment) {
