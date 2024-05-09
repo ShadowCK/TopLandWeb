@@ -1,8 +1,9 @@
 import _ from 'lodash';
 
 const ItemType = {
-  物品: '物品',
-  装备: '装备',
+  物品: '物品', // 通用的分类
+  材料: '材料', // 用于升级药水等的材料
+  装备: '装备', // 装备类
 };
 
 const EquipRarity = {
