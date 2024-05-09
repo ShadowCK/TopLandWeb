@@ -75,12 +75,12 @@ const config = {
     '最大魔典数',
   ],
   装备稀有度分布: {
-    [EquipRarity.粗糙]: 100,
-    [EquipRarity.普通]: 200,
-    [EquipRarity.优良]: 100,
-    [EquipRarity.稀有]: 50,
-    [EquipRarity.史诗]: 20,
-    [EquipRarity.传说]: 5,
+    [EquipRarity.粗糙]: 100000,
+    [EquipRarity.普通]: 20000,
+    [EquipRarity.优良]: 4000,
+    [EquipRarity.稀有]: 800,
+    [EquipRarity.史诗]: 160,
+    [EquipRarity.传说]: 32,
     [EquipRarity.神器]: 1,
   },
   装备属性品质倍率: {

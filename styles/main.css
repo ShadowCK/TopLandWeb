@@ -37,6 +37,12 @@ body:has(#背包面板.active) {
   background-position: center;
 }
 
+.炫光.炫光.炫光.炫光.炫光[data-品质='史诗'] {
+  background-image: linear-gradient(-45deg, #38113b, #48194a, #752b75, #2c0c22, #240d20);
+  background-size: 400% 400%;
+  animation: 炫光 5s ease infinite;
+}
+
 .炫光.炫光.炫光.炫光.炫光[data-品质='传说'] {
   background-image: linear-gradient(-45deg, #3f190b, #461606, #7f681a, #324206, #281a08);
   background-size: 400% 400%;
