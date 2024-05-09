@@ -445,7 +445,7 @@ const genItemHTML = (item) => {
     imageStyle +=
       'clip-path: polygon(10% 0%, 90% 0%, 100% 10%, 100% 90%, 90% 100%, 10% 100%, 0% 90%, 0% 10%);';
     nameStr = `${item.name} +${item.品阶}`;
-    if (品质 === EquipRarity.传说 || 品质 === EquipRarity.神器) {
+    if (品质 >= EquipRarity.史诗) {
       装备炫光 = ' 炫光';
     }
   } else {
