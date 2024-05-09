@@ -9,7 +9,7 @@ class 背包 {
   /** @type {物品[]} */
   items = [];
 
-  // a shortcut only for debugging
+  /** @type {null | 背包界面} */
   ui = null;
 
   hasItem(item) {

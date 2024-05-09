@@ -144,6 +144,37 @@
               <div style="flex-grow: 1">
                 <div class="ui medium header">背包</div>
               </div>
+              <div class="ui top right pointing dropdown labeled icon button" id="背包面板-排序">
+                <i class="sort icon"></i>
+                <span class="text">排序</span>
+                <div class="menu">
+                  <div class="header">排序规则针对装备。其他物品将被放到最后。</div>
+                  <div class="item" data-value="品质由高到低">
+                    <div class="ui red empty circular label"></div>
+                    品质由高到低
+                  </div>
+                  <div class="item" data-value="品阶由高到低">
+                    <div class="ui blue empty circular label"></div>
+                    品阶由高到低
+                  </div>
+                  <div class="item" data-value="合成等级由高到低">
+                    <div class="ui yellow empty circular label"></div>
+                    合成等级由高到低
+                  </div>
+                  <div class="item" data-value="品质由低到高">
+                    <div class="ui inverted red empty circular label"></div>
+                    品质由低到高
+                  </div>
+                  <div class="item" data-value="品阶由低到高">
+                    <div class="ui inverted blue empty circular label"></div>
+                    品阶由低到高
+                  </div>
+                  <div class="item" data-value="合成等级由低到高">
+                    <div class="ui inverted yellow empty circular label"></div>
+                    合成等级由低到高
+                  </div>
+                </div>
+              </div>
               <div style="margin-left: 10px" class="ui icon input">
                 <input type="text" class="搜索输入" placeholder="搜索" data-prev-input="" />
                 <i class="search link icon 搜索按钮"></i>
@@ -176,9 +207,7 @@
                 <li>
                   百分比奖池内容：最大生命值、最大魔法值、生命回复、魔法回复、攻击力、防御力。
                 </li>
-                <li>
-                  奖励Buff的品质在100~200%之间。品质与奖励数值成正比。
-                </li>
+                <li>奖励Buff的品质在100~200%之间。品质与奖励数值成正比。</li>
                 <li>重新抽取的花费是原来的五分之一。</li>
               </ul>
             </div>

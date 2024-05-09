@@ -75,6 +75,15 @@ const StackType = {
   叠加堆叠: 2,
 };
 
+const InvSortType = {
+  品质由高到低: '品质由高到低',
+  品质由低到高: '品质由低到高',
+  品阶由高到低: '品阶由高到低',
+  品阶由低到高: '品阶由低到高',
+  合成等级由高到低: '合成等级由高到低',
+  合成等级由低到高: '合成等级由低到高',
+};
+
 export {
   ItemType,
   EquipSlot,
@@ -86,4 +95,5 @@ export {
   EquipRarityInverted,
   BuffType,
   StackType,
+  InvSortType,
 };
