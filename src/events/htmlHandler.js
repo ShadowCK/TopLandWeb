@@ -491,24 +491,33 @@ const setupHTML = () => {
   });
   $('#背包面板-排序').dropdown({
     action: function f(_text, value) {
-      let sortFn;
+      let primarySort;
+      let primaryOrder;
       if (value === InvSortType.品质由高到低) {
-        sortFn = (a, b) => b.品质 - a.品质;
+        primarySort = '品质';
+        primaryOrder = 'desc';
       } else if (value === InvSortType.品质由低到高) {
-        sortFn = (a, b) => a.品质 - b.品质;
+        primarySort = '品质';
+        primaryOrder = 'asc';
       } else if (value === InvSortType.品阶由高到低) {
-        sortFn = (a, b) => b.品阶 - a.品阶;
+        primarySort = '品阶';
+        primaryOrder = 'desc';
       } else if (value === InvSortType.品阶由低到高) {
-        sortFn = (a, b) => a.品阶 - b.品阶;
+        primarySort = '品阶';
+        primaryOrder = 'asc';
       } else if (value === InvSortType.合成等级由高到低) {
-        sortFn = (a, b) => b.合成次数 - a.合成次数;
+        primarySort = '合成次数';
+        primaryOrder = 'desc';
       } else if (value === InvSortType.合成等级由低到高) {
-        sortFn = (a, b) => a.合成次数 - b.合成次数;
+        primarySort = '合成次数';
+        primaryOrder = 'asc';
       } else {
         throw new Error(`未知的排序类型：${value}`);
       }
       const [背包装备, 背包非装备] = _.partition(player.背包.items, (item) => item instanceof 装备);
-      player.背包.items = 背包装备.sort(sortFn).concat(背包非装备);
+      player.背包.items = _.orderBy(背包装备, [primarySort, 'name'], [primaryOrder, 'asc']).concat(
+        背包非装备,
+      );
       checkNotNull({ 'player.背包.ui': player.背包.ui });
       player.背包.ui.refresh();
     },
