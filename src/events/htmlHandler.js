@@ -24,12 +24,13 @@ import { StatType } from '../combat/战斗属性.js';
 import { templateFromElement, getMaxLevel } from '../utils.js';
 import { 可以提升专精等级, 可以转生, 转生 } from '../reincarnate/转生.js';
 import { addToWindow, checkNotNull } from '../debug.js';
-import { GameSettingName } from '../enums.js';
+import { GameSettingName, InvSortType } from '../enums.js';
 import { update as 更新战斗信息, 生成伤害信息, 生成治疗信息 } from '../战斗信息管理器.js';
 import 背包界面 from '../items/背包界面.js';
 import 技能栏界面 from '../skills/技能栏界面.js';
 import * as 区域界面 from '../ui/区域界面.js';
 import { 获取抽奖信息, 试抽Buff, 施加Buff, 扣除抽奖花费 } from '../shop/商店.js';
+import 装备 from '../items/装备.js';
 
 let lastUpdate = performance.now();
 let htmlWorkerId = null;
@@ -487,6 +488,30 @@ const setupHTML = () => {
   $('#背包面板').on('contextmenu', (e) => {
     // 防止玩家右键丢东西的时候，不小心打开浏览器的右键菜单
     e.preventDefault();
+  });
+  $('#背包面板-排序').dropdown({
+    action: function f(_text, value) {
+      let sortFn;
+      if (value === InvSortType.品质由高到低) {
+        sortFn = (a, b) => b.品质 - a.品质;
+      } else if (value === InvSortType.品质由低到高) {
+        sortFn = (a, b) => a.品质 - b.品质;
+      } else if (value === InvSortType.品阶由高到低) {
+        sortFn = (a, b) => b.品阶 - a.品阶;
+      } else if (value === InvSortType.品阶由低到高) {
+        sortFn = (a, b) => a.品阶 - b.品阶;
+      } else if (value === InvSortType.合成等级由高到低) {
+        sortFn = (a, b) => b.合成次数 - a.合成次数;
+      } else if (value === InvSortType.合成等级由低到高) {
+        sortFn = (a, b) => a.合成次数 - b.合成次数;
+      } else {
+        throw new Error(`未知的排序类型：${value}`);
+      }
+      const [背包装备, 背包非装备] = _.partition(player.背包.items, (item) => item instanceof 装备);
+      player.背包.items = 背包装备.sort(sortFn).concat(背包非装备);
+      checkNotNull({ 'player.背包.ui': player.背包.ui });
+      player.背包.ui.refresh();
+    },
   });
   genEquipments();
   player.背包.ui = new 背包界面(player.背包);
