@@ -23,8 +23,8 @@ class ValueStatMechanic extends MechanicComponent {
     }
     const key = this.settings.getString('key');
     const statPath = this.settings.getString('stat');
-    const calcBuff = this.settings.getBoolean('calc-buff', true) === true;
-    const applyRange = this.settings.getBoolean('apply-range', true) === true;
+    const calcBuff = this.settings.getBoolean('calc-buff', true);
+    const applyRange = this.settings.getBoolean('apply-range', true);
     const formula = this.settings.getString('formula', 'v');
     const casterData = 技能.getCasterData(caster);
     casterData[key] = math.evaluate(formula, {
