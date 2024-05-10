@@ -51,6 +51,10 @@ class 背包视图 extends 背包类 {
     });
   }
 
+  refresh() {
+    this.setFilter(this.filter, false);
+  }
+
   computeItemIndexInView(targetItem) {
     let index = -1;
     this.背包.items.some((item) => {

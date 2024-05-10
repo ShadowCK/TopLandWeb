@@ -48,6 +48,10 @@ class 背包界面 {
   }
 
   refresh() {
+    if (this.背包 instanceof 背包视图) {
+      this.背包.refresh();
+    }
+
     const [start, end] = this.getStartEnd();
     const items = new Set(this.背包.items.slice(start, end));
 
@@ -339,15 +343,15 @@ class 背包界面 {
       }
       this.背包.unregisterHandlers();
       this.背包 = this.主背包备份;
-    }
-
-    const filter = (item) => item.name.includes(searchText);
-    if (this.背包 instanceof 背包视图) {
-      // 搜索变化，设置filter
-      this.背包.setFilter(filter);
     } else {
-      // 全新搜索，创建背包视图
-      this.背包 = new 背包视图(this.主背包备份, filter);
+      const filter = (item) => item.name.includes(searchText);
+      if (this.背包 instanceof 背包视图) {
+        // 搜索变化，设置filter
+        this.背包.setFilter(filter);
+      } else {
+        // 全新搜索，创建背包视图
+        this.背包 = new 背包视图(this.主背包备份, filter);
+      }
     }
 
     this.resetPaginationNav(1);
